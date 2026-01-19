@@ -1119,9 +1119,9 @@ const closeBalanceModal = () => {
 }
 
 const showConfirmInviteDialog = ref(false)
-const confirmingInviteUser = ref<User | null>(null)
+const confirmingInviteUser = ref<AdminUser | null>(null)
 
-const handleConfirmInvite = (user: User) => {
+const handleConfirmInvite = (user: AdminUser) => {
   confirmingInviteUser.value = user
   showConfirmInviteDialog.value = true
 }
