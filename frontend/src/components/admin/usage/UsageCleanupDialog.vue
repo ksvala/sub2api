@@ -316,6 +316,9 @@ const buildPayload = (): CreateUsageCleanupTaskRequest | null => {
   if (localFilters.value.billing_type !== null && localFilters.value.billing_type !== undefined) {
     payload.billing_type = localFilters.value.billing_type
   }
+  if (localFilters.value.ip_address) {
+    payload.ip_address = localFilters.value.ip_address
+  }
 
   return payload
 }

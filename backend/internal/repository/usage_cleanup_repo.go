@@ -370,6 +370,15 @@ func buildUsageCleanupWhere(filters service.UsageCleanupFilters) (string, []any)
 	if filters.BillingType != nil {
 		conditions = append(conditions, fmt.Sprintf("billing_type = $%d", idx))
 		args = append(args, *filters.BillingType)
+		idx++
+	}
+	if filters.IPAddress != nil {
+		ip := strings.TrimSpace(*filters.IPAddress)
+		if ip != "" {
+			conditions = append(conditions, fmt.Sprintf("ip_address = $%d", idx))
+			args = append(args, ip)
+			idx++
+		}
 	}
 	return strings.Join(conditions, " AND "), args
 }

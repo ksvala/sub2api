@@ -95,6 +95,27 @@
           </p>
         </div>
 
+        <!-- Invite Code Input (Optional) -->
+        <div>
+          <label for="invite_code" class="input-label">
+            {{ t('invites.inviteCodeLabel') }}
+            <span class="ml-1 text-xs font-normal text-gray-400 dark:text-dark-500">({{ t('common.optional') }})</span>
+          </label>
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <Icon name="users" size="md" class="text-gray-400 dark:text-dark-500" />
+            </div>
+            <input
+              id="invite_code"
+              v-model="formData.invite_code"
+              type="text"
+              :disabled="isLoading || !!route.query.invite"
+              class="input pl-11"
+              :placeholder="t('invites.inviteCodeLabel')"
+            />
+          </div>
+        </div>
+
         <!-- Promo Code Input (Optional) -->
         <div v-if="promoCodeEnabled">
           <label for="promo_code" class="input-label">
@@ -283,7 +304,8 @@ let promoValidateTimeout: ReturnType<typeof setTimeout> | null = null
 const formData = reactive({
   email: '',
   password: '',
-  promo_code: ''
+  promo_code: '',
+  invite_code: ''
 })
 
 const errors = reactive({
@@ -313,6 +335,11 @@ onMounted(async () => {
         // Validate the promo code from URL
         await validatePromoCodeDebounced(promoParam)
       }
+    }
+
+    const inviteParam = route.query.invite as string
+    if (inviteParam) {
+      formData.invite_code = inviteParam
     }
   } catch (error) {
     console.error('Failed to load public settings:', error)
@@ -496,7 +523,8 @@ async function handleRegister(): Promise<void> {
           email: formData.email,
           password: formData.password,
           turnstile_token: turnstileToken.value,
-          promo_code: formData.promo_code || undefined
+          promo_code: formData.promo_code || undefined,
+          invite_code: formData.invite_code || undefined
         })
       )
 
@@ -510,7 +538,8 @@ async function handleRegister(): Promise<void> {
       email: formData.email,
       password: formData.password,
       turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined,
-      promo_code: formData.promo_code || undefined
+      promo_code: formData.promo_code || undefined,
+      invite_code: formData.invite_code || undefined
     })
 
     // Show success toast

@@ -8,11 +8,18 @@ type User struct {
 	Username      string    `json:"username"`
 	Role          string    `json:"role"`
 	Balance       float64   `json:"balance"`
+	InviteCode    string    `json:"invite_code,omitempty"`
 	Concurrency   int       `json:"concurrency"`
 	Status        string    `json:"status"`
 	AllowedGroups []int64   `json:"allowed_groups"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
+
+	InviterID          *int64     `json:"inviter_id,omitempty"`
+	InviterEmail       string     `json:"inviter_email,omitempty"`
+	InviteStatus       string     `json:"invite_status,omitempty"`
+	InviteConfirmedAt  *time.Time `json:"invite_confirmed_at,omitempty"`
+	InviteRewardAmount *float64   `json:"invite_reward_amount,omitempty"`
 
 	APIKeys       []APIKey           `json:"api_keys,omitempty"`
 	Subscriptions []UserSubscription `json:"subscriptions,omitempty"`
@@ -282,6 +289,7 @@ type UsageCleanupFilters struct {
 	Model       *string   `json:"model,omitempty"`
 	Stream      *bool     `json:"stream,omitempty"`
 	BillingType *int8     `json:"billing_type,omitempty"`
+	IPAddress   *string   `json:"ip_address,omitempty"`
 }
 
 type UsageCleanupTask struct {

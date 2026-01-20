@@ -29,6 +29,8 @@ const (
 	FieldRole = "role"
 	// FieldBalance holds the string denoting the balance field in the database.
 	FieldBalance = "balance"
+	// FieldInviteCode holds the string denoting the invite_code field in the database.
+	FieldInviteCode = "invite_code"
 	// FieldConcurrency holds the string denoting the concurrency field in the database.
 	FieldConcurrency = "concurrency"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -53,6 +55,18 @@ const (
 	EdgeAttributeValues = "attribute_values"
 	// EdgePromoCodeUsages holds the string denoting the promo_code_usages edge name in mutations.
 	EdgePromoCodeUsages = "promo_code_usages"
+	// EdgeSentInvitations holds the string denoting the sent_invitations edge name in mutations.
+	EdgeSentInvitations = "sent_invitations"
+	// EdgeReceivedInvitation holds the string denoting the received_invitation edge name in mutations.
+	EdgeReceivedInvitation = "received_invitation"
+	// EdgeConfirmedInvites holds the string denoting the confirmed_invites edge name in mutations.
+	EdgeConfirmedInvites = "confirmed_invites"
+	// EdgeInviteLogsAsInviter holds the string denoting the invite_logs_as_inviter edge name in mutations.
+	EdgeInviteLogsAsInviter = "invite_logs_as_inviter"
+	// EdgeInviteLogsAsInvitee holds the string denoting the invite_logs_as_invitee edge name in mutations.
+	EdgeInviteLogsAsInvitee = "invite_logs_as_invitee"
+	// EdgeInviteLogsAsAdmin holds the string denoting the invite_logs_as_admin edge name in mutations.
+	EdgeInviteLogsAsAdmin = "invite_logs_as_admin"
 	// EdgeUserAllowedGroups holds the string denoting the user_allowed_groups edge name in mutations.
 	EdgeUserAllowedGroups = "user_allowed_groups"
 	// Table holds the table name of the user in the database.
@@ -111,6 +125,48 @@ const (
 	PromoCodeUsagesInverseTable = "promo_code_usages"
 	// PromoCodeUsagesColumn is the table column denoting the promo_code_usages relation/edge.
 	PromoCodeUsagesColumn = "user_id"
+	// SentInvitationsTable is the table that holds the sent_invitations relation/edge.
+	SentInvitationsTable = "user_invites"
+	// SentInvitationsInverseTable is the table name for the Invitation entity.
+	// It exists in this package in order to avoid circular dependency with the "invitation" package.
+	SentInvitationsInverseTable = "user_invites"
+	// SentInvitationsColumn is the table column denoting the sent_invitations relation/edge.
+	SentInvitationsColumn = "inviter_id"
+	// ReceivedInvitationTable is the table that holds the received_invitation relation/edge.
+	ReceivedInvitationTable = "user_invites"
+	// ReceivedInvitationInverseTable is the table name for the Invitation entity.
+	// It exists in this package in order to avoid circular dependency with the "invitation" package.
+	ReceivedInvitationInverseTable = "user_invites"
+	// ReceivedInvitationColumn is the table column denoting the received_invitation relation/edge.
+	ReceivedInvitationColumn = "invitee_id"
+	// ConfirmedInvitesTable is the table that holds the confirmed_invites relation/edge.
+	ConfirmedInvitesTable = "user_invites"
+	// ConfirmedInvitesInverseTable is the table name for the Invitation entity.
+	// It exists in this package in order to avoid circular dependency with the "invitation" package.
+	ConfirmedInvitesInverseTable = "user_invites"
+	// ConfirmedInvitesColumn is the table column denoting the confirmed_invites relation/edge.
+	ConfirmedInvitesColumn = "confirmed_by"
+	// InviteLogsAsInviterTable is the table that holds the invite_logs_as_inviter relation/edge.
+	InviteLogsAsInviterTable = "invite_logs"
+	// InviteLogsAsInviterInverseTable is the table name for the InviteLog entity.
+	// It exists in this package in order to avoid circular dependency with the "invitelog" package.
+	InviteLogsAsInviterInverseTable = "invite_logs"
+	// InviteLogsAsInviterColumn is the table column denoting the invite_logs_as_inviter relation/edge.
+	InviteLogsAsInviterColumn = "inviter_id"
+	// InviteLogsAsInviteeTable is the table that holds the invite_logs_as_invitee relation/edge.
+	InviteLogsAsInviteeTable = "invite_logs"
+	// InviteLogsAsInviteeInverseTable is the table name for the InviteLog entity.
+	// It exists in this package in order to avoid circular dependency with the "invitelog" package.
+	InviteLogsAsInviteeInverseTable = "invite_logs"
+	// InviteLogsAsInviteeColumn is the table column denoting the invite_logs_as_invitee relation/edge.
+	InviteLogsAsInviteeColumn = "invitee_id"
+	// InviteLogsAsAdminTable is the table that holds the invite_logs_as_admin relation/edge.
+	InviteLogsAsAdminTable = "invite_logs"
+	// InviteLogsAsAdminInverseTable is the table name for the InviteLog entity.
+	// It exists in this package in order to avoid circular dependency with the "invitelog" package.
+	InviteLogsAsAdminInverseTable = "invite_logs"
+	// InviteLogsAsAdminColumn is the table column denoting the invite_logs_as_admin relation/edge.
+	InviteLogsAsAdminColumn = "admin_id"
 	// UserAllowedGroupsTable is the table that holds the user_allowed_groups relation/edge.
 	UserAllowedGroupsTable = "user_allowed_groups"
 	// UserAllowedGroupsInverseTable is the table name for the UserAllowedGroup entity.
@@ -130,6 +186,7 @@ var Columns = []string{
 	FieldPasswordHash,
 	FieldRole,
 	FieldBalance,
+	FieldInviteCode,
 	FieldConcurrency,
 	FieldStatus,
 	FieldUsername,
@@ -176,6 +233,8 @@ var (
 	RoleValidator func(string) error
 	// DefaultBalance holds the default value on creation for the "balance" field.
 	DefaultBalance float64
+	// InviteCodeValidator is a validator for the "invite_code" field. It is called by the builders before save.
+	InviteCodeValidator func(string) error
 	// DefaultConcurrency holds the default value on creation for the "concurrency" field.
 	DefaultConcurrency int
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -231,6 +290,11 @@ func ByRole(opts ...sql.OrderTermOption) OrderOption {
 // ByBalance orders the results by the balance field.
 func ByBalance(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBalance, opts...).ToFunc()
+}
+
+// ByInviteCode orders the results by the invite_code field.
+func ByInviteCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInviteCode, opts...).ToFunc()
 }
 
 // ByConcurrency orders the results by the concurrency field.
@@ -365,6 +429,83 @@ func ByPromoCodeUsages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// BySentInvitationsCount orders the results by sent_invitations count.
+func BySentInvitationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSentInvitationsStep(), opts...)
+	}
+}
+
+// BySentInvitations orders the results by sent_invitations terms.
+func BySentInvitations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSentInvitationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByReceivedInvitationField orders the results by received_invitation field.
+func ByReceivedInvitationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newReceivedInvitationStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByConfirmedInvitesCount orders the results by confirmed_invites count.
+func ByConfirmedInvitesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newConfirmedInvitesStep(), opts...)
+	}
+}
+
+// ByConfirmedInvites orders the results by confirmed_invites terms.
+func ByConfirmedInvites(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newConfirmedInvitesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInviteLogsAsInviterCount orders the results by invite_logs_as_inviter count.
+func ByInviteLogsAsInviterCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInviteLogsAsInviterStep(), opts...)
+	}
+}
+
+// ByInviteLogsAsInviter orders the results by invite_logs_as_inviter terms.
+func ByInviteLogsAsInviter(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInviteLogsAsInviterStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInviteLogsAsInviteeCount orders the results by invite_logs_as_invitee count.
+func ByInviteLogsAsInviteeCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInviteLogsAsInviteeStep(), opts...)
+	}
+}
+
+// ByInviteLogsAsInvitee orders the results by invite_logs_as_invitee terms.
+func ByInviteLogsAsInvitee(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInviteLogsAsInviteeStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByInviteLogsAsAdminCount orders the results by invite_logs_as_admin count.
+func ByInviteLogsAsAdminCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInviteLogsAsAdminStep(), opts...)
+	}
+}
+
+// ByInviteLogsAsAdmin orders the results by invite_logs_as_admin terms.
+func ByInviteLogsAsAdmin(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInviteLogsAsAdminStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByUserAllowedGroupsCount orders the results by user_allowed_groups count.
 func ByUserAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -432,6 +573,48 @@ func newPromoCodeUsagesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PromoCodeUsagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PromoCodeUsagesTable, PromoCodeUsagesColumn),
+	)
+}
+func newSentInvitationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SentInvitationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SentInvitationsTable, SentInvitationsColumn),
+	)
+}
+func newReceivedInvitationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ReceivedInvitationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, ReceivedInvitationTable, ReceivedInvitationColumn),
+	)
+}
+func newConfirmedInvitesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ConfirmedInvitesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ConfirmedInvitesTable, ConfirmedInvitesColumn),
+	)
+}
+func newInviteLogsAsInviterStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InviteLogsAsInviterInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InviteLogsAsInviterTable, InviteLogsAsInviterColumn),
+	)
+}
+func newInviteLogsAsInviteeStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InviteLogsAsInviteeInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InviteLogsAsInviteeTable, InviteLogsAsInviteeColumn),
+	)
+}
+func newInviteLogsAsAdminStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InviteLogsAsAdminInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InviteLogsAsAdminTable, InviteLogsAsAdminColumn),
 	)
 }
 func newUserAllowedGroupsStep() *sqlgraph.Step {

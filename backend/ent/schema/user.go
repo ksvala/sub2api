@@ -47,6 +47,10 @@ func (User) Fields() []ent.Field {
 		field.Float("balance").
 			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
 			Default(0),
+		field.String("invite_code").
+			MaxLen(6).
+			Optional().
+			Nillable(),
 		field.Int("concurrency").
 			Default(5),
 		field.String("status").
@@ -75,6 +79,13 @@ func (User) Edges() []ent.Edge {
 		edge.To("usage_logs", UsageLog.Type),
 		edge.To("attribute_values", UserAttributeValue.Type),
 		edge.To("promo_code_usages", PromoCodeUsage.Type),
+		edge.To("sent_invitations", Invitation.Type),
+		edge.To("received_invitation", Invitation.Type).
+			Unique(),
+		edge.To("confirmed_invites", Invitation.Type),
+		edge.To("invite_logs_as_inviter", InviteLog.Type),
+		edge.To("invite_logs_as_invitee", InviteLog.Type),
+		edge.To("invite_logs_as_admin", InviteLog.Type),
 	}
 }
 

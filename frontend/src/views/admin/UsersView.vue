@@ -253,6 +253,30 @@
             </div>
           </template>
 
+          <template #cell-inviter_email="{ value }">
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ value || '-' }}</span>
+          </template>
+
+          <template #cell-invite_status="{ value }">
+            <span
+              v-if="value"
+              class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium"
+              :class="value === 'confirmed' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'"
+            >
+              {{ value === 'confirmed' ? t('invites.statusConfirmed') : t('invites.statusPending') }}
+            </span>
+            <span v-else class="text-sm text-gray-400">-</span>
+          </template>
+
+          <template #cell-invite_reward_amount="{ value }">
+            <span v-if="value" class="font-medium text-emerald-600 dark:text-emerald-400">${{ value.toFixed(2) }}</span>
+            <span v-else class="text-sm text-gray-400">-</span>
+          </template>
+
+          <template #cell-invite_confirmed_at="{ value }">
+            <span class="text-sm text-gray-500">{{ value ? formatDateTime(value) : '-' }}</span>
+          </template>
+
           <!-- Dynamic attribute columns -->
           <template
             v-for="def in attributeDefinitions.filter(d => d.enabled)"
@@ -456,6 +480,16 @@
                 {{ t('admin.users.withdraw') }}
               </button>
 
+              <!-- Confirm Invite -->
+              <button
+                v-if="user.invite_status === 'pending' && user.inviter_id"
+                @click="handleConfirmInvite(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+              >
+                <Icon name="check" size="sm" class="text-blue-500" :stroke-width="2" />
+                {{ t('invites.admin.confirmInvite') }}
+              </button>
+
               <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
 
               <!-- Delete (not for admin) -->
@@ -480,6 +514,7 @@
     <UserAllowedGroupsModal :show="showAllowedGroupsModal" :user="allowedGroupsUser" @close="closeAllowedGroupsModal" @success="loadUsers" />
     <UserBalanceModal :show="showBalanceModal" :user="balanceUser" :operation="balanceOperation" @close="closeBalanceModal" @success="loadUsers" />
     <UserAttributesConfigModal :show="showAttributesModal" @close="handleAttributesModalClose" />
+    <ConfirmDialog :show="showConfirmInviteDialog" :title="t('invites.admin.confirmInvite')" :message="t('invites.admin.confirmConfirm')" @confirm="confirmInviteAction" @cancel="showConfirmInviteDialog = false" />
   </AppLayout>
 </template>
 
@@ -492,6 +527,7 @@ import Icon from '@/components/icons/Icon.vue'
 
 const { t } = useI18n()
 import { adminAPI } from '@/api/admin'
+import { invitesAdminAPI } from '@/api/admin/invites'
 import type { AdminUser, UserAttributeDefinition } from '@/types'
 import type { BatchUserUsageStats } from '@/api/admin/dashboard'
 import type { Column } from '@/components/common/types'
@@ -564,6 +600,10 @@ const allColumns = computed<Column[]>(() => [
   { key: 'id', label: 'ID', sortable: true },
   { key: 'username', label: t('admin.users.columns.username'), sortable: true },
   { key: 'notes', label: t('admin.users.columns.notes'), sortable: false },
+  { key: 'inviter_email', label: t('invites.admin.inviter'), sortable: false },
+  { key: 'invite_status', label: t('invites.status'), sortable: false },
+  { key: 'invite_reward_amount', label: t('invites.reward'), sortable: false },
+  { key: 'invite_confirmed_at', label: t('invites.confirmedAt'), sortable: false },
   // Dynamic attribute columns
   ...attributeColumns.value,
   { key: 'role', label: t('admin.users.columns.role'), sortable: true },
@@ -586,7 +626,7 @@ const toggleableColumns = computed(() =>
 const hiddenColumns = reactive<Set<string>>(new Set())
 
 // Default hidden columns (columns hidden by default on first load)
-const DEFAULT_HIDDEN_COLUMNS = ['notes', 'subscriptions', 'usage', 'concurrency']
+const DEFAULT_HIDDEN_COLUMNS = ['notes', 'subscriptions', 'usage', 'concurrency', 'inviter_email', 'invite_status', 'invite_reward_amount', 'invite_confirmed_at']
 
 // localStorage key for column settings
 const HIDDEN_COLUMNS_KEY = 'user-hidden-columns'
@@ -1076,6 +1116,28 @@ const handleWithdraw = (user: AdminUser) => {
 const closeBalanceModal = () => {
   showBalanceModal.value = false
   balanceUser.value = null
+}
+
+const showConfirmInviteDialog = ref(false)
+const confirmingInviteUser = ref<User | null>(null)
+
+const handleConfirmInvite = (user: User) => {
+  confirmingInviteUser.value = user
+  showConfirmInviteDialog.value = true
+}
+
+const confirmInviteAction = async () => {
+  if (!confirmingInviteUser.value) return
+  try {
+    await invitesAdminAPI.confirmInvite(confirmingInviteUser.value.id)
+    appStore.showSuccess(t('invites.admin.confirmSuccess'))
+    showConfirmInviteDialog.value = false
+    confirmingInviteUser.value = null
+    loadUsers()
+  } catch (error: any) {
+    appStore.showError(error.response?.data?.detail || t('common.error'))
+    console.error('Error confirming invite:', error)
+  }
 }
 
 // 滚动时关闭菜单

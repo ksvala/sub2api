@@ -10,6 +10,12 @@ const (
 	StatusExpired  = "expired"
 )
 
+// Invite status constants
+const (
+	InviteStatusPending   = "pending"
+	InviteStatusConfirmed = "confirmed"
+)
+
 // Role constants
 const (
 	RoleAdmin = "admin"
@@ -48,6 +54,13 @@ const (
 const (
 	AdjustmentTypeAdminBalance     = "admin_balance"     // 管理员调整余额
 	AdjustmentTypeAdminConcurrency = "admin_concurrency" // 管理员调整并发数
+	AdjustmentTypeInviteReward     = "invite_reward"     // 邀请奖励余额
+)
+
+// Invite log action constants
+const (
+	InviteLogActionBind    = "bind"
+	InviteLogActionConfirm = "confirm"
 )
 
 // Group subscription type constants
@@ -106,6 +119,7 @@ const (
 	// 默认配置
 	SettingKeyDefaultConcurrency = "default_concurrency" // 新用户默认并发量
 	SettingKeyDefaultBalance     = "default_balance"     // 新用户默认余额
+	SettingKeyInviteRewardAmount = "invite_reward_amount" // 邀请奖励固定额度
 
 	// 管理员 API Key
 	SettingKeyAdminAPIKey = "admin_api_key" // 全局管理员 API Key（用于外部系统集成）

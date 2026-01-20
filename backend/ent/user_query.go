@@ -15,6 +15,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/invitation"
+	"github.com/Wei-Shaw/sub2api/ent/invitelog"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
@@ -40,6 +42,12 @@ type UserQuery struct {
 	withUsageLogs             *UsageLogQuery
 	withAttributeValues       *UserAttributeValueQuery
 	withPromoCodeUsages       *PromoCodeUsageQuery
+	withSentInvitations       *InvitationQuery
+	withReceivedInvitation    *InvitationQuery
+	withConfirmedInvites      *InvitationQuery
+	withInviteLogsAsInviter   *InviteLogQuery
+	withInviteLogsAsInvitee   *InviteLogQuery
+	withInviteLogsAsAdmin     *InviteLogQuery
 	withUserAllowedGroups     *UserAllowedGroupQuery
 	modifiers                 []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -247,6 +255,138 @@ func (_q *UserQuery) QueryPromoCodeUsages() *PromoCodeUsageQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(promocodeusage.Table, promocodeusage.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PromoCodeUsagesTable, user.PromoCodeUsagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySentInvitations chains the current query on the "sent_invitations" edge.
+func (_q *UserQuery) QuerySentInvitations() *InvitationQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SentInvitationsTable, user.SentInvitationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryReceivedInvitation chains the current query on the "received_invitation" edge.
+func (_q *UserQuery) QueryReceivedInvitation() *InvitationQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ReceivedInvitationTable, user.ReceivedInvitationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryConfirmedInvites chains the current query on the "confirmed_invites" edge.
+func (_q *UserQuery) QueryConfirmedInvites() *InvitationQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ConfirmedInvitesTable, user.ConfirmedInvitesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInviteLogsAsInviter chains the current query on the "invite_logs_as_inviter" edge.
+func (_q *UserQuery) QueryInviteLogsAsInviter() *InviteLogQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitelog.Table, invitelog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.InviteLogsAsInviterTable, user.InviteLogsAsInviterColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInviteLogsAsInvitee chains the current query on the "invite_logs_as_invitee" edge.
+func (_q *UserQuery) QueryInviteLogsAsInvitee() *InviteLogQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitelog.Table, invitelog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.InviteLogsAsInviteeTable, user.InviteLogsAsInviteeColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInviteLogsAsAdmin chains the current query on the "invite_logs_as_admin" edge.
+func (_q *UserQuery) QueryInviteLogsAsAdmin() *InviteLogQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(invitelog.Table, invitelog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.InviteLogsAsAdminTable, user.InviteLogsAsAdminColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -476,6 +616,12 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withUsageLogs:             _q.withUsageLogs.Clone(),
 		withAttributeValues:       _q.withAttributeValues.Clone(),
 		withPromoCodeUsages:       _q.withPromoCodeUsages.Clone(),
+		withSentInvitations:       _q.withSentInvitations.Clone(),
+		withReceivedInvitation:    _q.withReceivedInvitation.Clone(),
+		withConfirmedInvites:      _q.withConfirmedInvites.Clone(),
+		withInviteLogsAsInviter:   _q.withInviteLogsAsInviter.Clone(),
+		withInviteLogsAsInvitee:   _q.withInviteLogsAsInvitee.Clone(),
+		withInviteLogsAsAdmin:     _q.withInviteLogsAsAdmin.Clone(),
 		withUserAllowedGroups:     _q.withUserAllowedGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -571,6 +717,72 @@ func (_q *UserQuery) WithPromoCodeUsages(opts ...func(*PromoCodeUsageQuery)) *Us
 	return _q
 }
 
+// WithSentInvitations tells the query-builder to eager-load the nodes that are connected to
+// the "sent_invitations" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSentInvitations(opts ...func(*InvitationQuery)) *UserQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSentInvitations = query
+	return _q
+}
+
+// WithReceivedInvitation tells the query-builder to eager-load the nodes that are connected to
+// the "received_invitation" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithReceivedInvitation(opts ...func(*InvitationQuery)) *UserQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withReceivedInvitation = query
+	return _q
+}
+
+// WithConfirmedInvites tells the query-builder to eager-load the nodes that are connected to
+// the "confirmed_invites" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithConfirmedInvites(opts ...func(*InvitationQuery)) *UserQuery {
+	query := (&InvitationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withConfirmedInvites = query
+	return _q
+}
+
+// WithInviteLogsAsInviter tells the query-builder to eager-load the nodes that are connected to
+// the "invite_logs_as_inviter" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithInviteLogsAsInviter(opts ...func(*InviteLogQuery)) *UserQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInviteLogsAsInviter = query
+	return _q
+}
+
+// WithInviteLogsAsInvitee tells the query-builder to eager-load the nodes that are connected to
+// the "invite_logs_as_invitee" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithInviteLogsAsInvitee(opts ...func(*InviteLogQuery)) *UserQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInviteLogsAsInvitee = query
+	return _q
+}
+
+// WithInviteLogsAsAdmin tells the query-builder to eager-load the nodes that are connected to
+// the "invite_logs_as_admin" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithInviteLogsAsAdmin(opts ...func(*InviteLogQuery)) *UserQuery {
+	query := (&InviteLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInviteLogsAsAdmin = query
+	return _q
+}
+
 // WithUserAllowedGroups tells the query-builder to eager-load the nodes that are connected to
 // the "user_allowed_groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithUserAllowedGroups(opts ...func(*UserAllowedGroupQuery)) *UserQuery {
@@ -660,7 +872,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [15]bool{
 			_q.withAPIKeys != nil,
 			_q.withRedeemCodes != nil,
 			_q.withSubscriptions != nil,
@@ -669,6 +881,12 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withUsageLogs != nil,
 			_q.withAttributeValues != nil,
 			_q.withPromoCodeUsages != nil,
+			_q.withSentInvitations != nil,
+			_q.withReceivedInvitation != nil,
+			_q.withConfirmedInvites != nil,
+			_q.withInviteLogsAsInviter != nil,
+			_q.withInviteLogsAsInvitee != nil,
+			_q.withInviteLogsAsAdmin != nil,
 			_q.withUserAllowedGroups != nil,
 		}
 	)
@@ -748,6 +966,47 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadPromoCodeUsages(ctx, query, nodes,
 			func(n *User) { n.Edges.PromoCodeUsages = []*PromoCodeUsage{} },
 			func(n *User, e *PromoCodeUsage) { n.Edges.PromoCodeUsages = append(n.Edges.PromoCodeUsages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSentInvitations; query != nil {
+		if err := _q.loadSentInvitations(ctx, query, nodes,
+			func(n *User) { n.Edges.SentInvitations = []*Invitation{} },
+			func(n *User, e *Invitation) { n.Edges.SentInvitations = append(n.Edges.SentInvitations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withReceivedInvitation; query != nil {
+		if err := _q.loadReceivedInvitation(ctx, query, nodes, nil,
+			func(n *User, e *Invitation) { n.Edges.ReceivedInvitation = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withConfirmedInvites; query != nil {
+		if err := _q.loadConfirmedInvites(ctx, query, nodes,
+			func(n *User) { n.Edges.ConfirmedInvites = []*Invitation{} },
+			func(n *User, e *Invitation) { n.Edges.ConfirmedInvites = append(n.Edges.ConfirmedInvites, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInviteLogsAsInviter; query != nil {
+		if err := _q.loadInviteLogsAsInviter(ctx, query, nodes,
+			func(n *User) { n.Edges.InviteLogsAsInviter = []*InviteLog{} },
+			func(n *User, e *InviteLog) { n.Edges.InviteLogsAsInviter = append(n.Edges.InviteLogsAsInviter, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInviteLogsAsInvitee; query != nil {
+		if err := _q.loadInviteLogsAsInvitee(ctx, query, nodes,
+			func(n *User) { n.Edges.InviteLogsAsInvitee = []*InviteLog{} },
+			func(n *User, e *InviteLog) { n.Edges.InviteLogsAsInvitee = append(n.Edges.InviteLogsAsInvitee, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInviteLogsAsAdmin; query != nil {
+		if err := _q.loadInviteLogsAsAdmin(ctx, query, nodes,
+			func(n *User) { n.Edges.InviteLogsAsAdmin = []*InviteLog{} },
+			func(n *User, e *InviteLog) { n.Edges.InviteLogsAsAdmin = append(n.Edges.InviteLogsAsAdmin, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1033,6 +1292,189 @@ func (_q *UserQuery) loadPromoCodeUsages(ctx context.Context, query *PromoCodeUs
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSentInvitations(ctx context.Context, query *InvitationQuery, nodes []*User, init func(*User), assign func(*User, *Invitation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitation.FieldInviterID)
+	}
+	query.Where(predicate.Invitation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SentInvitationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.InviterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "inviter_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadReceivedInvitation(ctx context.Context, query *InvitationQuery, nodes []*User, init func(*User), assign func(*User, *Invitation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitation.FieldInviteeID)
+	}
+	query.Where(predicate.Invitation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ReceivedInvitationColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.InviteeID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "invitee_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadConfirmedInvites(ctx context.Context, query *InvitationQuery, nodes []*User, init func(*User), assign func(*User, *Invitation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitation.FieldConfirmedBy)
+	}
+	query.Where(predicate.Invitation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ConfirmedInvitesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ConfirmedBy
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "confirmed_by" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "confirmed_by" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadInviteLogsAsInviter(ctx context.Context, query *InviteLogQuery, nodes []*User, init func(*User), assign func(*User, *InviteLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitelog.FieldInviterID)
+	}
+	query.Where(predicate.InviteLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InviteLogsAsInviterColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.InviterID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "inviter_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadInviteLogsAsInvitee(ctx context.Context, query *InviteLogQuery, nodes []*User, init func(*User), assign func(*User, *InviteLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitelog.FieldInviteeID)
+	}
+	query.Where(predicate.InviteLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InviteLogsAsInviteeColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.InviteeID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "invitee_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadInviteLogsAsAdmin(ctx context.Context, query *InviteLogQuery, nodes []*User, init func(*User), assign func(*User, *InviteLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(invitelog.FieldAdminID)
+	}
+	query.Where(predicate.InviteLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InviteLogsAsAdminColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AdminID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "admin_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "admin_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

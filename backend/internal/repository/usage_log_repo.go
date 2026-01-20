@@ -1230,6 +1230,10 @@ func (r *usageLogRepository) ListWithFilters(ctx context.Context, params paginat
 		conditions = append(conditions, fmt.Sprintf("model = $%d", len(args)+1))
 		args = append(args, filters.Model)
 	}
+	if filters.IPAddress != "" {
+		conditions = append(conditions, fmt.Sprintf("ip_address = $%d", len(args)+1))
+		args = append(args, filters.IPAddress)
+	}
 	if filters.Stream != nil {
 		conditions = append(conditions, fmt.Sprintf("stream = $%d", len(args)+1))
 		args = append(args, *filters.Stream)
@@ -1609,6 +1613,10 @@ func (r *usageLogRepository) GetStatsWithFilters(ctx context.Context, filters Us
 	if filters.Model != "" {
 		conditions = append(conditions, fmt.Sprintf("model = $%d", len(args)+1))
 		args = append(args, filters.Model)
+	}
+	if filters.IPAddress != "" {
+		conditions = append(conditions, fmt.Sprintf("ip_address = $%d", len(args)+1))
+		args = append(args, filters.IPAddress)
 	}
 	if filters.Stream != nil {
 		conditions = append(conditions, fmt.Sprintf("stream = $%d", len(args)+1))

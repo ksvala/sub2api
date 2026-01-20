@@ -49,6 +49,10 @@ func (s *userRepoStub) GetByEmail(ctx context.Context, email string) (*User, err
 	panic("unexpected GetByEmail call")
 }
 
+func (s *userRepoStub) GetByInviteCode(ctx context.Context, code string) (*User, error) {
+	return nil, ErrUserNotFound
+}
+
 func (s *userRepoStub) GetFirstAdmin(ctx context.Context) (*User, error) {
 	panic("unexpected GetFirstAdmin call")
 }
@@ -87,6 +91,14 @@ func (s *userRepoStub) ExistsByEmail(ctx context.Context, email string) (bool, e
 		return false, s.existsErr
 	}
 	return s.exists, nil
+}
+
+func (s *userRepoStub) ExistsByInviteCode(ctx context.Context, code string) (bool, error) {
+	return false, nil
+}
+
+func (s *userRepoStub) SetInviteCode(ctx context.Context, id int64, code string) error {
+	return nil
 }
 
 func (s *userRepoStub) RemoveGroupFromAllowedGroups(ctx context.Context, groupID int64) (int64, error) {
@@ -260,6 +272,10 @@ func (s *redeemRepoStub) ListWithFilters(ctx context.Context, params pagination.
 
 func (s *redeemRepoStub) ListByUser(ctx context.Context, userID int64, limit int) ([]RedeemCode, error) {
 	panic("unexpected ListByUser call")
+}
+
+func (s *redeemRepoStub) ListByUserWithFilters(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]RedeemCode, *pagination.PaginationResult, error) {
+	return []RedeemCode{}, &pagination.PaginationResult{Total: 0, Page: params.Page, PageSize: params.PageSize, Pages: 0}, nil
 }
 
 type subscriptionInvalidateCall struct {

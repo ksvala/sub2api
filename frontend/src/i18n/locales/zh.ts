@@ -1,4 +1,42 @@
 export default {
+    invites: {
+    title: '邀请好友',
+    description: '邀请好友注册，获取丰厚奖励',
+    myInviteCode: '我的邀请码',
+    copyLink: '复制链接',
+    totalInvites: '总邀请数',
+    pendingInvites: '待确认',
+    confirmedInvites: '已确认',
+    totalReward: '累计奖励',
+    inviteRecords: '邀请记录',
+    rewardRecords: '奖励记录',
+    invitee: '被邀请人',
+    status: '状态',
+    registeredAt: '注册时间',
+    confirmedAt: '确认时间',
+    reward: '奖励',
+    statusPending: '待确认',
+    statusConfirmed: '已确认',
+    actionBind: '绑定',
+    actionConfirm: '确认',
+    time: '时间',
+    inviteCodeLabel: '邀请码',
+    admin: {
+      settingsTitle: '邀请设置',
+      settingsDesc: '配置邀请奖励参数',
+      rewardAmount: '奖励金额 ($)',
+      rewardAmountHint: '被邀请人确认后，邀请人获得的余额奖励',
+      logsTitle: '邀请日志',
+      logsDesc: '查看邀请系统日志',
+      action: '操作',
+      inviter: '邀请人',
+      invitee: '被邀请人',
+      time: '时间',
+      confirmInvite: '确认邀请',
+      confirmSuccess: '邀请确认成功',
+      confirmConfirm: '确定要确认此邀请吗？这将向邀请人发放奖励。'
+    }
+  },
   // Home Page
   home: {
     viewOnGithub: '在 GitHub 上查看',
@@ -172,6 +210,9 @@ export default {
 
   // Navigation
   nav: {
+    invites: '邀请好友',
+    inviteSettings: '邀请设置',
+    inviteLogs: '邀请日志',
     dashboard: '仪表盘',
     apiKeys: 'API 密钥',
     usage: '使用记录',

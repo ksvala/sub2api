@@ -1,4 +1,42 @@
 export default {
+    invites: {
+    title: 'Invite Friends',
+    description: 'Invite friends to register and earn rewards',
+    myInviteCode: 'My Invite Code',
+    copyLink: 'Copy Link',
+    totalInvites: 'Total Invites',
+    pendingInvites: 'Pending',
+    confirmedInvites: 'Confirmed',
+    totalReward: 'Total Reward',
+    inviteRecords: 'Invite Records',
+    rewardRecords: 'Reward Records',
+    invitee: 'Invitee',
+    status: 'Status',
+    registeredAt: 'Registered At',
+    confirmedAt: 'Confirmed At',
+    reward: 'Reward',
+    statusPending: 'Pending',
+    statusConfirmed: 'Confirmed',
+    actionBind: 'Bind',
+    actionConfirm: 'Confirm',
+    time: 'Time',
+    inviteCodeLabel: 'Invite Code',
+    admin: {
+      settingsTitle: 'Invite Settings',
+      settingsDesc: 'Configure invite reward settings',
+      rewardAmount: 'Reward Amount ($)',
+      rewardAmountHint: 'Balance reward for inviter when invitee is confirmed',
+      logsTitle: 'Invite Logs',
+      logsDesc: 'View invite system logs',
+      action: 'Action',
+      inviter: 'Inviter',
+      invitee: 'Invitee',
+      time: 'Time',
+      confirmInvite: 'Confirm Invite',
+      confirmSuccess: 'Invite confirmed successfully',
+      confirmConfirm: 'Are you sure you want to confirm this invite? This will issue the reward to the inviter.'
+    }
+  },
   // Home Page
   home: {
     viewOnGithub: 'View on GitHub',
@@ -175,6 +213,9 @@ export default {
 
   // Navigation
   nav: {
+    invites: 'Invites',
+    inviteSettings: 'Invite Settings',
+    inviteLogs: 'Invite Logs',
     dashboard: 'Dashboard',
     apiKeys: 'API Keys',
     usage: 'Usage',

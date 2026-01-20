@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/invitation"
+	"github.com/Wei-Shaw/sub2api/ent/invitelog"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
@@ -121,6 +123,26 @@ func (_u *UserUpdate) SetNillableBalance(v *float64) *UserUpdate {
 // AddBalance adds value to the "balance" field.
 func (_u *UserUpdate) AddBalance(v float64) *UserUpdate {
 	_u.mutation.AddBalance(v)
+	return _u
+}
+
+// SetInviteCode sets the "invite_code" field.
+func (_u *UserUpdate) SetInviteCode(v string) *UserUpdate {
+	_u.mutation.SetInviteCode(v)
+	return _u
+}
+
+// SetNillableInviteCode sets the "invite_code" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableInviteCode(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetInviteCode(*v)
+	}
+	return _u
+}
+
+// ClearInviteCode clears the value of the "invite_code" field.
+func (_u *UserUpdate) ClearInviteCode() *UserUpdate {
+	_u.mutation.ClearInviteCode()
 	return _u
 }
 
@@ -307,6 +329,100 @@ func (_u *UserUpdate) AddPromoCodeUsages(v ...*PromoCodeUsage) *UserUpdate {
 	return _u.AddPromoCodeUsageIDs(ids...)
 }
 
+// AddSentInvitationIDs adds the "sent_invitations" edge to the Invitation entity by IDs.
+func (_u *UserUpdate) AddSentInvitationIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddSentInvitationIDs(ids...)
+	return _u
+}
+
+// AddSentInvitations adds the "sent_invitations" edges to the Invitation entity.
+func (_u *UserUpdate) AddSentInvitations(v ...*Invitation) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSentInvitationIDs(ids...)
+}
+
+// SetReceivedInvitationID sets the "received_invitation" edge to the Invitation entity by ID.
+func (_u *UserUpdate) SetReceivedInvitationID(id int64) *UserUpdate {
+	_u.mutation.SetReceivedInvitationID(id)
+	return _u
+}
+
+// SetNillableReceivedInvitationID sets the "received_invitation" edge to the Invitation entity by ID if the given value is not nil.
+func (_u *UserUpdate) SetNillableReceivedInvitationID(id *int64) *UserUpdate {
+	if id != nil {
+		_u = _u.SetReceivedInvitationID(*id)
+	}
+	return _u
+}
+
+// SetReceivedInvitation sets the "received_invitation" edge to the Invitation entity.
+func (_u *UserUpdate) SetReceivedInvitation(v *Invitation) *UserUpdate {
+	return _u.SetReceivedInvitationID(v.ID)
+}
+
+// AddConfirmedInviteIDs adds the "confirmed_invites" edge to the Invitation entity by IDs.
+func (_u *UserUpdate) AddConfirmedInviteIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddConfirmedInviteIDs(ids...)
+	return _u
+}
+
+// AddConfirmedInvites adds the "confirmed_invites" edges to the Invitation entity.
+func (_u *UserUpdate) AddConfirmedInvites(v ...*Invitation) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConfirmedInviteIDs(ids...)
+}
+
+// AddInviteLogsAsInviterIDs adds the "invite_logs_as_inviter" edge to the InviteLog entity by IDs.
+func (_u *UserUpdate) AddInviteLogsAsInviterIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddInviteLogsAsInviterIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsInviter adds the "invite_logs_as_inviter" edges to the InviteLog entity.
+func (_u *UserUpdate) AddInviteLogsAsInviter(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsInviterIDs(ids...)
+}
+
+// AddInviteLogsAsInviteeIDs adds the "invite_logs_as_invitee" edge to the InviteLog entity by IDs.
+func (_u *UserUpdate) AddInviteLogsAsInviteeIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddInviteLogsAsInviteeIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsInvitee adds the "invite_logs_as_invitee" edges to the InviteLog entity.
+func (_u *UserUpdate) AddInviteLogsAsInvitee(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsInviteeIDs(ids...)
+}
+
+// AddInviteLogsAsAdminIDs adds the "invite_logs_as_admin" edge to the InviteLog entity by IDs.
+func (_u *UserUpdate) AddInviteLogsAsAdminIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddInviteLogsAsAdminIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsAdmin adds the "invite_logs_as_admin" edges to the InviteLog entity.
+func (_u *UserUpdate) AddInviteLogsAsAdmin(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsAdminIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -480,6 +596,117 @@ func (_u *UserUpdate) RemovePromoCodeUsages(v ...*PromoCodeUsage) *UserUpdate {
 	return _u.RemovePromoCodeUsageIDs(ids...)
 }
 
+// ClearSentInvitations clears all "sent_invitations" edges to the Invitation entity.
+func (_u *UserUpdate) ClearSentInvitations() *UserUpdate {
+	_u.mutation.ClearSentInvitations()
+	return _u
+}
+
+// RemoveSentInvitationIDs removes the "sent_invitations" edge to Invitation entities by IDs.
+func (_u *UserUpdate) RemoveSentInvitationIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveSentInvitationIDs(ids...)
+	return _u
+}
+
+// RemoveSentInvitations removes "sent_invitations" edges to Invitation entities.
+func (_u *UserUpdate) RemoveSentInvitations(v ...*Invitation) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSentInvitationIDs(ids...)
+}
+
+// ClearReceivedInvitation clears the "received_invitation" edge to the Invitation entity.
+func (_u *UserUpdate) ClearReceivedInvitation() *UserUpdate {
+	_u.mutation.ClearReceivedInvitation()
+	return _u
+}
+
+// ClearConfirmedInvites clears all "confirmed_invites" edges to the Invitation entity.
+func (_u *UserUpdate) ClearConfirmedInvites() *UserUpdate {
+	_u.mutation.ClearConfirmedInvites()
+	return _u
+}
+
+// RemoveConfirmedInviteIDs removes the "confirmed_invites" edge to Invitation entities by IDs.
+func (_u *UserUpdate) RemoveConfirmedInviteIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveConfirmedInviteIDs(ids...)
+	return _u
+}
+
+// RemoveConfirmedInvites removes "confirmed_invites" edges to Invitation entities.
+func (_u *UserUpdate) RemoveConfirmedInvites(v ...*Invitation) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConfirmedInviteIDs(ids...)
+}
+
+// ClearInviteLogsAsInviter clears all "invite_logs_as_inviter" edges to the InviteLog entity.
+func (_u *UserUpdate) ClearInviteLogsAsInviter() *UserUpdate {
+	_u.mutation.ClearInviteLogsAsInviter()
+	return _u
+}
+
+// RemoveInviteLogsAsInviterIDs removes the "invite_logs_as_inviter" edge to InviteLog entities by IDs.
+func (_u *UserUpdate) RemoveInviteLogsAsInviterIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveInviteLogsAsInviterIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsInviter removes "invite_logs_as_inviter" edges to InviteLog entities.
+func (_u *UserUpdate) RemoveInviteLogsAsInviter(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsInviterIDs(ids...)
+}
+
+// ClearInviteLogsAsInvitee clears all "invite_logs_as_invitee" edges to the InviteLog entity.
+func (_u *UserUpdate) ClearInviteLogsAsInvitee() *UserUpdate {
+	_u.mutation.ClearInviteLogsAsInvitee()
+	return _u
+}
+
+// RemoveInviteLogsAsInviteeIDs removes the "invite_logs_as_invitee" edge to InviteLog entities by IDs.
+func (_u *UserUpdate) RemoveInviteLogsAsInviteeIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveInviteLogsAsInviteeIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsInvitee removes "invite_logs_as_invitee" edges to InviteLog entities.
+func (_u *UserUpdate) RemoveInviteLogsAsInvitee(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsInviteeIDs(ids...)
+}
+
+// ClearInviteLogsAsAdmin clears all "invite_logs_as_admin" edges to the InviteLog entity.
+func (_u *UserUpdate) ClearInviteLogsAsAdmin() *UserUpdate {
+	_u.mutation.ClearInviteLogsAsAdmin()
+	return _u
+}
+
+// RemoveInviteLogsAsAdminIDs removes the "invite_logs_as_admin" edge to InviteLog entities by IDs.
+func (_u *UserUpdate) RemoveInviteLogsAsAdminIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveInviteLogsAsAdminIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsAdmin removes "invite_logs_as_admin" edges to InviteLog entities.
+func (_u *UserUpdate) RemoveInviteLogsAsAdmin(v ...*InviteLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsAdminIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 	if err := _u.defaults(); err != nil {
@@ -539,6 +766,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.InviteCode(); ok {
+		if err := user.InviteCodeValidator(v); err != nil {
+			return &ValidationError{Name: "invite_code", err: fmt.Errorf(`ent: validator failed for field "User.invite_code": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
@@ -587,6 +819,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(user.FieldBalance, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.InviteCode(); ok {
+		_spec.SetField(user.FieldInviteCode, field.TypeString, value)
+	}
+	if _u.mutation.InviteCodeCleared() {
+		_spec.ClearField(user.FieldInviteCode, field.TypeString)
 	}
 	if value, ok := _u.mutation.Concurrency(); ok {
 		_spec.SetField(user.FieldConcurrency, field.TypeInt, value)
@@ -975,6 +1213,260 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.SentInvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSentInvitationsIDs(); len(nodes) > 0 && !_u.mutation.SentInvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SentInvitationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReceivedInvitationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ReceivedInvitationTable,
+			Columns: []string{user.ReceivedInvitationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReceivedInvitationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ReceivedInvitationTable,
+			Columns: []string{user.ReceivedInvitationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConfirmedInvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConfirmedInvitesIDs(); len(nodes) > 0 && !_u.mutation.ConfirmedInvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConfirmedInvitesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsInviterCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsInviterIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsInviterCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsInviterIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsInviteeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsInviteeIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsInviteeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsInviteeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsAdminCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsAdminIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsAdminCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsAdminIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1081,6 +1573,26 @@ func (_u *UserUpdateOne) SetNillableBalance(v *float64) *UserUpdateOne {
 // AddBalance adds value to the "balance" field.
 func (_u *UserUpdateOne) AddBalance(v float64) *UserUpdateOne {
 	_u.mutation.AddBalance(v)
+	return _u
+}
+
+// SetInviteCode sets the "invite_code" field.
+func (_u *UserUpdateOne) SetInviteCode(v string) *UserUpdateOne {
+	_u.mutation.SetInviteCode(v)
+	return _u
+}
+
+// SetNillableInviteCode sets the "invite_code" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableInviteCode(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetInviteCode(*v)
+	}
+	return _u
+}
+
+// ClearInviteCode clears the value of the "invite_code" field.
+func (_u *UserUpdateOne) ClearInviteCode() *UserUpdateOne {
+	_u.mutation.ClearInviteCode()
 	return _u
 }
 
@@ -1267,6 +1779,100 @@ func (_u *UserUpdateOne) AddPromoCodeUsages(v ...*PromoCodeUsage) *UserUpdateOne
 	return _u.AddPromoCodeUsageIDs(ids...)
 }
 
+// AddSentInvitationIDs adds the "sent_invitations" edge to the Invitation entity by IDs.
+func (_u *UserUpdateOne) AddSentInvitationIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddSentInvitationIDs(ids...)
+	return _u
+}
+
+// AddSentInvitations adds the "sent_invitations" edges to the Invitation entity.
+func (_u *UserUpdateOne) AddSentInvitations(v ...*Invitation) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSentInvitationIDs(ids...)
+}
+
+// SetReceivedInvitationID sets the "received_invitation" edge to the Invitation entity by ID.
+func (_u *UserUpdateOne) SetReceivedInvitationID(id int64) *UserUpdateOne {
+	_u.mutation.SetReceivedInvitationID(id)
+	return _u
+}
+
+// SetNillableReceivedInvitationID sets the "received_invitation" edge to the Invitation entity by ID if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableReceivedInvitationID(id *int64) *UserUpdateOne {
+	if id != nil {
+		_u = _u.SetReceivedInvitationID(*id)
+	}
+	return _u
+}
+
+// SetReceivedInvitation sets the "received_invitation" edge to the Invitation entity.
+func (_u *UserUpdateOne) SetReceivedInvitation(v *Invitation) *UserUpdateOne {
+	return _u.SetReceivedInvitationID(v.ID)
+}
+
+// AddConfirmedInviteIDs adds the "confirmed_invites" edge to the Invitation entity by IDs.
+func (_u *UserUpdateOne) AddConfirmedInviteIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddConfirmedInviteIDs(ids...)
+	return _u
+}
+
+// AddConfirmedInvites adds the "confirmed_invites" edges to the Invitation entity.
+func (_u *UserUpdateOne) AddConfirmedInvites(v ...*Invitation) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddConfirmedInviteIDs(ids...)
+}
+
+// AddInviteLogsAsInviterIDs adds the "invite_logs_as_inviter" edge to the InviteLog entity by IDs.
+func (_u *UserUpdateOne) AddInviteLogsAsInviterIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddInviteLogsAsInviterIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsInviter adds the "invite_logs_as_inviter" edges to the InviteLog entity.
+func (_u *UserUpdateOne) AddInviteLogsAsInviter(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsInviterIDs(ids...)
+}
+
+// AddInviteLogsAsInviteeIDs adds the "invite_logs_as_invitee" edge to the InviteLog entity by IDs.
+func (_u *UserUpdateOne) AddInviteLogsAsInviteeIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddInviteLogsAsInviteeIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsInvitee adds the "invite_logs_as_invitee" edges to the InviteLog entity.
+func (_u *UserUpdateOne) AddInviteLogsAsInvitee(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsInviteeIDs(ids...)
+}
+
+// AddInviteLogsAsAdminIDs adds the "invite_logs_as_admin" edge to the InviteLog entity by IDs.
+func (_u *UserUpdateOne) AddInviteLogsAsAdminIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddInviteLogsAsAdminIDs(ids...)
+	return _u
+}
+
+// AddInviteLogsAsAdmin adds the "invite_logs_as_admin" edges to the InviteLog entity.
+func (_u *UserUpdateOne) AddInviteLogsAsAdmin(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddInviteLogsAsAdminIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -1440,6 +2046,117 @@ func (_u *UserUpdateOne) RemovePromoCodeUsages(v ...*PromoCodeUsage) *UserUpdate
 	return _u.RemovePromoCodeUsageIDs(ids...)
 }
 
+// ClearSentInvitations clears all "sent_invitations" edges to the Invitation entity.
+func (_u *UserUpdateOne) ClearSentInvitations() *UserUpdateOne {
+	_u.mutation.ClearSentInvitations()
+	return _u
+}
+
+// RemoveSentInvitationIDs removes the "sent_invitations" edge to Invitation entities by IDs.
+func (_u *UserUpdateOne) RemoveSentInvitationIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveSentInvitationIDs(ids...)
+	return _u
+}
+
+// RemoveSentInvitations removes "sent_invitations" edges to Invitation entities.
+func (_u *UserUpdateOne) RemoveSentInvitations(v ...*Invitation) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSentInvitationIDs(ids...)
+}
+
+// ClearReceivedInvitation clears the "received_invitation" edge to the Invitation entity.
+func (_u *UserUpdateOne) ClearReceivedInvitation() *UserUpdateOne {
+	_u.mutation.ClearReceivedInvitation()
+	return _u
+}
+
+// ClearConfirmedInvites clears all "confirmed_invites" edges to the Invitation entity.
+func (_u *UserUpdateOne) ClearConfirmedInvites() *UserUpdateOne {
+	_u.mutation.ClearConfirmedInvites()
+	return _u
+}
+
+// RemoveConfirmedInviteIDs removes the "confirmed_invites" edge to Invitation entities by IDs.
+func (_u *UserUpdateOne) RemoveConfirmedInviteIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveConfirmedInviteIDs(ids...)
+	return _u
+}
+
+// RemoveConfirmedInvites removes "confirmed_invites" edges to Invitation entities.
+func (_u *UserUpdateOne) RemoveConfirmedInvites(v ...*Invitation) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveConfirmedInviteIDs(ids...)
+}
+
+// ClearInviteLogsAsInviter clears all "invite_logs_as_inviter" edges to the InviteLog entity.
+func (_u *UserUpdateOne) ClearInviteLogsAsInviter() *UserUpdateOne {
+	_u.mutation.ClearInviteLogsAsInviter()
+	return _u
+}
+
+// RemoveInviteLogsAsInviterIDs removes the "invite_logs_as_inviter" edge to InviteLog entities by IDs.
+func (_u *UserUpdateOne) RemoveInviteLogsAsInviterIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveInviteLogsAsInviterIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsInviter removes "invite_logs_as_inviter" edges to InviteLog entities.
+func (_u *UserUpdateOne) RemoveInviteLogsAsInviter(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsInviterIDs(ids...)
+}
+
+// ClearInviteLogsAsInvitee clears all "invite_logs_as_invitee" edges to the InviteLog entity.
+func (_u *UserUpdateOne) ClearInviteLogsAsInvitee() *UserUpdateOne {
+	_u.mutation.ClearInviteLogsAsInvitee()
+	return _u
+}
+
+// RemoveInviteLogsAsInviteeIDs removes the "invite_logs_as_invitee" edge to InviteLog entities by IDs.
+func (_u *UserUpdateOne) RemoveInviteLogsAsInviteeIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveInviteLogsAsInviteeIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsInvitee removes "invite_logs_as_invitee" edges to InviteLog entities.
+func (_u *UserUpdateOne) RemoveInviteLogsAsInvitee(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsInviteeIDs(ids...)
+}
+
+// ClearInviteLogsAsAdmin clears all "invite_logs_as_admin" edges to the InviteLog entity.
+func (_u *UserUpdateOne) ClearInviteLogsAsAdmin() *UserUpdateOne {
+	_u.mutation.ClearInviteLogsAsAdmin()
+	return _u
+}
+
+// RemoveInviteLogsAsAdminIDs removes the "invite_logs_as_admin" edge to InviteLog entities by IDs.
+func (_u *UserUpdateOne) RemoveInviteLogsAsAdminIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveInviteLogsAsAdminIDs(ids...)
+	return _u
+}
+
+// RemoveInviteLogsAsAdmin removes "invite_logs_as_admin" edges to InviteLog entities.
+func (_u *UserUpdateOne) RemoveInviteLogsAsAdmin(v ...*InviteLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveInviteLogsAsAdminIDs(ids...)
+}
+
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
 	_u.mutation.Where(ps...)
@@ -1512,6 +2229,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.InviteCode(); ok {
+		if err := user.InviteCodeValidator(v); err != nil {
+			return &ValidationError{Name: "invite_code", err: fmt.Errorf(`ent: validator failed for field "User.invite_code": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
@@ -1577,6 +2299,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(user.FieldBalance, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.InviteCode(); ok {
+		_spec.SetField(user.FieldInviteCode, field.TypeString, value)
+	}
+	if _u.mutation.InviteCodeCleared() {
+		_spec.ClearField(user.FieldInviteCode, field.TypeString)
 	}
 	if value, ok := _u.mutation.Concurrency(); ok {
 		_spec.SetField(user.FieldConcurrency, field.TypeInt, value)
@@ -1958,6 +2686,260 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(promocodeusage.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SentInvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSentInvitationsIDs(); len(nodes) > 0 && !_u.mutation.SentInvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SentInvitationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SentInvitationsTable,
+			Columns: []string{user.SentInvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ReceivedInvitationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ReceivedInvitationTable,
+			Columns: []string{user.ReceivedInvitationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ReceivedInvitationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ReceivedInvitationTable,
+			Columns: []string{user.ReceivedInvitationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ConfirmedInvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedConfirmedInvitesIDs(); len(nodes) > 0 && !_u.mutation.ConfirmedInvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ConfirmedInvitesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ConfirmedInvitesTable,
+			Columns: []string{user.ConfirmedInvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitation.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsInviterCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsInviterIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsInviterCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsInviterIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviterTable,
+			Columns: []string{user.InviteLogsAsInviterColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsInviteeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsInviteeIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsInviteeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsInviteeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsInviteeTable,
+			Columns: []string{user.InviteLogsAsInviteeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InviteLogsAsAdminCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedInviteLogsAsAdminIDs(); len(nodes) > 0 && !_u.mutation.InviteLogsAsAdminCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InviteLogsAsAdminIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.InviteLogsAsAdminTable,
+			Columns: []string{user.InviteLogsAsAdminColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

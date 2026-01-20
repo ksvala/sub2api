@@ -295,6 +295,26 @@ func (s *SettingService) GetDefaultBalance(ctx context.Context) float64 {
 	return s.cfg.Default.UserBalance
 }
 
+// GetInviteRewardAmount 获取邀请奖励额度
+func (s *SettingService) GetInviteRewardAmount(ctx context.Context) float64 {
+	value, err := s.settingRepo.GetValue(ctx, SettingKeyInviteRewardAmount)
+	if err != nil {
+		return 0
+	}
+	if v, err := strconv.ParseFloat(value, 64); err == nil && v >= 0 {
+		return v
+	}
+	return 0
+}
+
+// SetInviteRewardAmount 更新邀请奖励额度
+func (s *SettingService) SetInviteRewardAmount(ctx context.Context, amount float64) error {
+	if amount < 0 {
+		amount = 0
+	}
+	return s.settingRepo.Set(ctx, SettingKeyInviteRewardAmount, strconv.FormatFloat(amount, 'f', 8, 64))
+}
+
 // InitializeDefaultSettings 初始化默认设置
 func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 	// 检查是否已有设置
@@ -316,6 +336,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeySiteLogo:            "",
 		SettingKeyDefaultConcurrency:  strconv.Itoa(s.cfg.Default.UserConcurrency),
 		SettingKeyDefaultBalance:      strconv.FormatFloat(s.cfg.Default.UserBalance, 'f', 8, 64),
+		SettingKeyInviteRewardAmount: "0",
 		SettingKeySMTPPort:            "587",
 		SettingKeySMTPUseTLS:          "false",
 		// Model fallback defaults

@@ -262,6 +262,136 @@ var (
 			},
 		},
 	}
+	// UserInvitesColumns holds the columns for the "user_invites" table.
+	UserInvitesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "invite_code", Type: field.TypeString, Size: 6},
+		{Name: "reward_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "status", Type: field.TypeString, Size: 20, Default: "pending"},
+		{Name: "confirmed_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "inviter_id", Type: field.TypeInt64},
+		{Name: "invitee_id", Type: field.TypeInt64, Unique: true},
+		{Name: "confirmed_by", Type: field.TypeInt64, Nullable: true},
+	}
+	// UserInvitesTable holds the schema information for the "user_invites" table.
+	UserInvitesTable = &schema.Table{
+		Name:       "user_invites",
+		Columns:    UserInvitesColumns,
+		PrimaryKey: []*schema.Column{UserInvitesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_invites_users_sent_invitations",
+				Columns:    []*schema.Column{UserInvitesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "user_invites_users_received_invitation",
+				Columns:    []*schema.Column{UserInvitesColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "user_invites_users_confirmed_invites",
+				Columns:    []*schema.Column{UserInvitesColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "invitation_invitee_id",
+				Unique:  true,
+				Columns: []*schema.Column{UserInvitesColumns[7]},
+			},
+			{
+				Name:    "invitation_inviter_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserInvitesColumns[6]},
+			},
+			{
+				Name:    "invitation_status",
+				Unique:  false,
+				Columns: []*schema.Column{UserInvitesColumns[3]},
+			},
+			{
+				Name:    "invitation_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{UserInvitesColumns[5]},
+			},
+		},
+	}
+	// InviteLogsColumns holds the columns for the "invite_logs" table.
+	InviteLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "action", Type: field.TypeString, Size: 20},
+		{Name: "reward_amount", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "invite_id", Type: field.TypeInt64},
+		{Name: "inviter_id", Type: field.TypeInt64},
+		{Name: "invitee_id", Type: field.TypeInt64},
+		{Name: "admin_id", Type: field.TypeInt64, Nullable: true},
+	}
+	// InviteLogsTable holds the schema information for the "invite_logs" table.
+	InviteLogsTable = &schema.Table{
+		Name:       "invite_logs",
+		Columns:    InviteLogsColumns,
+		PrimaryKey: []*schema.Column{InviteLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invite_logs_user_invites_logs",
+				Columns:    []*schema.Column{InviteLogsColumns[4]},
+				RefColumns: []*schema.Column{UserInvitesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "invite_logs_users_invite_logs_as_inviter",
+				Columns:    []*schema.Column{InviteLogsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "invite_logs_users_invite_logs_as_invitee",
+				Columns:    []*schema.Column{InviteLogsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "invite_logs_users_invite_logs_as_admin",
+				Columns:    []*schema.Column{InviteLogsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "invitelog_action",
+				Unique:  false,
+				Columns: []*schema.Column{InviteLogsColumns[1]},
+			},
+			{
+				Name:    "invitelog_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{InviteLogsColumns[3]},
+			},
+			{
+				Name:    "invitelog_inviter_id",
+				Unique:  false,
+				Columns: []*schema.Column{InviteLogsColumns[5]},
+			},
+			{
+				Name:    "invitelog_invitee_id",
+				Unique:  false,
+				Columns: []*schema.Column{InviteLogsColumns[6]},
+			},
+			{
+				Name:    "invitelog_invite_id",
+				Unique:  false,
+				Columns: []*schema.Column{InviteLogsColumns[4]},
+			},
+		},
+	}
 	// PromoCodesColumns holds the columns for the "promo_codes" table.
 	PromoCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -606,6 +736,7 @@ var (
 		{Name: "password_hash", Type: field.TypeString, Size: 255},
 		{Name: "role", Type: field.TypeString, Size: 20, Default: "user"},
 		{Name: "balance", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "invite_code", Type: field.TypeString, Nullable: true, Size: 6},
 		{Name: "concurrency", Type: field.TypeInt, Default: 5},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
 		{Name: "username", Type: field.TypeString, Size: 100, Default: ""},
@@ -620,7 +751,7 @@ var (
 			{
 				Name:    "user_status",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[9]},
+				Columns: []*schema.Column{UsersColumns[10]},
 			},
 			{
 				Name:    "user_deleted_at",
@@ -838,6 +969,8 @@ var (
 		AccountsTable,
 		AccountGroupsTable,
 		GroupsTable,
+		UserInvitesTable,
+		InviteLogsTable,
 		PromoCodesTable,
 		PromoCodeUsagesTable,
 		ProxiesTable,
@@ -870,6 +1003,19 @@ func init() {
 	}
 	GroupsTable.Annotation = &entsql.Annotation{
 		Table: "groups",
+	}
+	UserInvitesTable.ForeignKeys[0].RefTable = UsersTable
+	UserInvitesTable.ForeignKeys[1].RefTable = UsersTable
+	UserInvitesTable.ForeignKeys[2].RefTable = UsersTable
+	UserInvitesTable.Annotation = &entsql.Annotation{
+		Table: "user_invites",
+	}
+	InviteLogsTable.ForeignKeys[0].RefTable = UserInvitesTable
+	InviteLogsTable.ForeignKeys[1].RefTable = UsersTable
+	InviteLogsTable.ForeignKeys[2].RefTable = UsersTable
+	InviteLogsTable.ForeignKeys[3].RefTable = UsersTable
+	InviteLogsTable.Annotation = &entsql.Annotation{
+		Table: "invite_logs",
 	}
 	PromoCodesTable.Annotation = &entsql.Annotation{
 		Table: "promo_codes",

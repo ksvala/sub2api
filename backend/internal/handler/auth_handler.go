@@ -38,6 +38,7 @@ type RegisterRequest struct {
 	VerifyCode     string `json:"verify_code"`
 	TurnstileToken string `json:"turnstile_token"`
 	PromoCode      string `json:"promo_code"` // 注册优惠码
+	InviteCode     string `json:"invite_code"`
 }
 
 // SendVerifyCodeRequest 发送验证码请求
@@ -83,7 +84,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		}
 	}
 
-	token, user, err := h.authService.RegisterWithVerification(c.Request.Context(), req.Email, req.Password, req.VerifyCode, req.PromoCode)
+	token, user, err := h.authService.RegisterWithVerification(c.Request.Context(), req.Email, req.Password, req.VerifyCode, req.PromoCode, req.InviteCode)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return

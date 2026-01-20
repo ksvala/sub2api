@@ -139,6 +139,27 @@
           <Select v-model="filters.group_id" :options="groupOptions" searchable @change="emitChange" />
         </div>
 
+        <!-- IP Filter -->
+        <div class="relative w-full sm:w-auto sm:min-w-[180px]">
+          <label class="input-label">{{ t('admin.usage.ipAddress') }}</label>
+          <input
+            v-model="filters.ip_address"
+            type="text"
+            class="input w-full pr-8"
+            :placeholder="t('admin.usage.ipAddress')"
+            @change="emitChange"
+          />
+          <button
+            v-if="filters.ip_address"
+            type="button"
+            @click="filters.ip_address = ''; emitChange()"
+            class="absolute right-2 top-9 text-gray-400 hover:text-gray-600"
+            aria-label="Clear IP filter"
+          >
+            ✕
+          </button>
+        </div>
+
         <!-- Date Range Filter -->
         <div class="w-full sm:w-auto [&_.date-picker-trigger]:w-full">
           <label class="input-label">{{ t('usage.timeRange') }}</label>

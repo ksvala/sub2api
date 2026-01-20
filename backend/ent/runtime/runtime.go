@@ -9,6 +9,8 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/accountgroup"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
+	"github.com/Wei-Shaw/sub2api/ent/invitation"
+	"github.com/Wei-Shaw/sub2api/ent/invitelog"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
@@ -285,6 +287,40 @@ func init() {
 	groupDescModelRoutingEnabled := groupFields[17].Descriptor()
 	// group.DefaultModelRoutingEnabled holds the default value on creation for the model_routing_enabled field.
 	group.DefaultModelRoutingEnabled = groupDescModelRoutingEnabled.Default.(bool)
+	invitationFields := schema.Invitation{}.Fields()
+	_ = invitationFields
+	// invitationDescInviteCode is the schema descriptor for invite_code field.
+	invitationDescInviteCode := invitationFields[2].Descriptor()
+	// invitation.InviteCodeValidator is a validator for the "invite_code" field. It is called by the builders before save.
+	invitation.InviteCodeValidator = invitationDescInviteCode.Validators[0].(func(string) error)
+	// invitationDescRewardAmount is the schema descriptor for reward_amount field.
+	invitationDescRewardAmount := invitationFields[3].Descriptor()
+	// invitation.DefaultRewardAmount holds the default value on creation for the reward_amount field.
+	invitation.DefaultRewardAmount = invitationDescRewardAmount.Default.(float64)
+	// invitationDescStatus is the schema descriptor for status field.
+	invitationDescStatus := invitationFields[4].Descriptor()
+	// invitation.DefaultStatus holds the default value on creation for the status field.
+	invitation.DefaultStatus = invitationDescStatus.Default.(string)
+	// invitation.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	invitation.StatusValidator = invitationDescStatus.Validators[0].(func(string) error)
+	// invitationDescCreatedAt is the schema descriptor for created_at field.
+	invitationDescCreatedAt := invitationFields[7].Descriptor()
+	// invitation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	invitation.DefaultCreatedAt = invitationDescCreatedAt.Default.(func() time.Time)
+	invitelogFields := schema.InviteLog{}.Fields()
+	_ = invitelogFields
+	// invitelogDescAction is the schema descriptor for action field.
+	invitelogDescAction := invitelogFields[1].Descriptor()
+	// invitelog.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	invitelog.ActionValidator = invitelogDescAction.Validators[0].(func(string) error)
+	// invitelogDescRewardAmount is the schema descriptor for reward_amount field.
+	invitelogDescRewardAmount := invitelogFields[5].Descriptor()
+	// invitelog.DefaultRewardAmount holds the default value on creation for the reward_amount field.
+	invitelog.DefaultRewardAmount = invitelogDescRewardAmount.Default.(float64)
+	// invitelogDescCreatedAt is the schema descriptor for created_at field.
+	invitelogDescCreatedAt := invitelogFields[6].Descriptor()
+	// invitelog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	invitelog.DefaultCreatedAt = invitelogDescCreatedAt.Default.(func() time.Time)
 	promocodeFields := schema.PromoCode{}.Fields()
 	_ = promocodeFields
 	// promocodeDescCode is the schema descriptor for code field.
@@ -716,24 +752,28 @@ func init() {
 	userDescBalance := userFields[3].Descriptor()
 	// user.DefaultBalance holds the default value on creation for the balance field.
 	user.DefaultBalance = userDescBalance.Default.(float64)
+	// userDescInviteCode is the schema descriptor for invite_code field.
+	userDescInviteCode := userFields[4].Descriptor()
+	// user.InviteCodeValidator is a validator for the "invite_code" field. It is called by the builders before save.
+	user.InviteCodeValidator = userDescInviteCode.Validators[0].(func(string) error)
 	// userDescConcurrency is the schema descriptor for concurrency field.
-	userDescConcurrency := userFields[4].Descriptor()
+	userDescConcurrency := userFields[5].Descriptor()
 	// user.DefaultConcurrency holds the default value on creation for the concurrency field.
 	user.DefaultConcurrency = userDescConcurrency.Default.(int)
 	// userDescStatus is the schema descriptor for status field.
-	userDescStatus := userFields[5].Descriptor()
+	userDescStatus := userFields[6].Descriptor()
 	// user.DefaultStatus holds the default value on creation for the status field.
 	user.DefaultStatus = userDescStatus.Default.(string)
 	// user.StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	user.StatusValidator = userDescStatus.Validators[0].(func(string) error)
 	// userDescUsername is the schema descriptor for username field.
-	userDescUsername := userFields[6].Descriptor()
+	userDescUsername := userFields[7].Descriptor()
 	// user.DefaultUsername holds the default value on creation for the username field.
 	user.DefaultUsername = userDescUsername.Default.(string)
 	// user.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	user.UsernameValidator = userDescUsername.Validators[0].(func(string) error)
 	// userDescNotes is the schema descriptor for notes field.
-	userDescNotes := userFields[7].Descriptor()
+	userDescNotes := userFields[8].Descriptor()
 	// user.DefaultNotes holds the default value on creation for the notes field.
 	user.DefaultNotes = userDescNotes.Default.(string)
 	userallowedgroupFields := schema.UserAllowedGroup{}.Fields()

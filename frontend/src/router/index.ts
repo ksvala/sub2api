@@ -134,6 +134,18 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/invites',
+    name: 'Invites',
+    component: () => import('@/views/user/InviteView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: 'Invites',
+      titleKey: 'invites.title',
+      descriptionKey: 'invites.description'
+    }
+  },
+  {
     path: '/profile',
     name: 'Profile',
     component: () => import('@/views/user/ProfileView.vue'),
@@ -269,6 +281,30 @@ const routes: RouteRecordRaw[] = [
       title: 'Promo Code Management',
       titleKey: 'admin.promo.title',
       descriptionKey: 'admin.promo.description'
+    }
+  },
+  {
+    path: '/admin/invites/settings',
+    name: 'AdminInviteSettings',
+    component: () => import('@/views/admin/InviteSettingsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Invite Settings',
+      titleKey: 'admin.invites.settings.title',
+      descriptionKey: 'admin.invites.settings.description'
+    }
+  },
+  {
+    path: '/admin/invites/logs',
+    name: 'AdminInviteLogs',
+    component: () => import('@/views/admin/InviteLogsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Invite Logs',
+      titleKey: 'admin.invites.logs.title',
+      descriptionKey: 'admin.invites.logs.description'
     }
   },
   {

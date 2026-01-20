@@ -73,6 +73,9 @@ func describeUsageCleanupFilters(filters UsageCleanupFilters) string {
 	if filters.BillingType != nil {
 		parts = append(parts, fmt.Sprintf("billing_type=%d", *filters.BillingType))
 	}
+	if filters.IPAddress != nil {
+		parts = append(parts, "ip_address="+strings.TrimSpace(*filters.IPAddress))
+	}
 	return strings.Join(parts, " ")
 }
 
@@ -360,6 +363,14 @@ func sanitizeUsageCleanupFilters(filters *UsageCleanupFilters) {
 	}
 	if filters.BillingType != nil && *filters.BillingType < 0 {
 		filters.BillingType = nil
+	}
+	if filters.IPAddress != nil {
+		ip := strings.TrimSpace(*filters.IPAddress)
+		if ip == "" {
+			filters.IPAddress = nil
+		} else {
+			filters.IPAddress = &ip
+		}
 	}
 }
 

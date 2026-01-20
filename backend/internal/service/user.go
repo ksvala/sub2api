@@ -14,12 +14,19 @@ type User struct {
 	PasswordHash  string
 	Role          string
 	Balance       float64
+	InviteCode    string
 	Concurrency   int
 	Status        string
 	AllowedGroups []int64
 	TokenVersion  int64 // Incremented on password change to invalidate existing tokens
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+
+	InviterID          *int64
+	InviterEmail       string
+	InviteStatus       string
+	InviteConfirmedAt  *time.Time
+	InviteRewardAmount *float64
 
 	APIKeys       []APIKey
 	Subscriptions []UserSubscription

@@ -26,6 +26,7 @@ type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByID(ctx context.Context, id int64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
+	GetByInviteCode(ctx context.Context, code string) (*User, error)
 	GetFirstAdmin(ctx context.Context) (*User, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id int64) error
@@ -37,6 +38,8 @@ type UserRepository interface {
 	DeductBalance(ctx context.Context, id int64, amount float64) error
 	UpdateConcurrency(ctx context.Context, id int64, amount int) error
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
+	ExistsByInviteCode(ctx context.Context, code string) (bool, error)
+	SetInviteCode(ctx context.Context, id int64, code string) error
 	RemoveGroupFromAllowedGroups(ctx context.Context, groupID int64) (int64, error)
 }
 

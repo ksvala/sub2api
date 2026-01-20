@@ -17,11 +17,17 @@ func UserFromServiceShallow(u *service.User) *User {
 		Username:      u.Username,
 		Role:          u.Role,
 		Balance:       u.Balance,
+		InviteCode:    u.InviteCode,
 		Concurrency:   u.Concurrency,
 		Status:        u.Status,
 		AllowedGroups: u.AllowedGroups,
 		CreatedAt:     u.CreatedAt,
 		UpdatedAt:     u.UpdatedAt,
+		InviterID:          u.InviterID,
+		InviterEmail:       u.InviterEmail,
+		InviteStatus:       u.InviteStatus,
+		InviteConfirmedAt:  u.InviteConfirmedAt,
+		InviteRewardAmount: u.InviteRewardAmount,
 	}
 }
 
@@ -429,6 +435,7 @@ func UsageCleanupTaskFromService(task *service.UsageCleanupTask) *UsageCleanupTa
 			Model:       task.Filters.Model,
 			Stream:      task.Filters.Stream,
 			BillingType: task.Filters.BillingType,
+			IPAddress:   task.Filters.IPAddress,
 		},
 		CreatedBy:    task.CreatedBy,
 		DeletedRows:  task.DeletedRows,

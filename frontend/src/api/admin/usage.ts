@@ -41,6 +41,7 @@ export interface UsageCleanupFilters {
   model?: string | null
   stream?: boolean | null
   billing_type?: number | null
+  ip_address?: string
 }
 
 export interface UsageCleanupTask {
@@ -68,11 +69,13 @@ export interface CreateUsageCleanupTaskRequest {
   model?: string | null
   stream?: boolean | null
   billing_type?: number | null
+  ip_address?: string
   timezone?: string
 }
 
 export interface AdminUsageQueryParams extends UsageQueryParams {
   user_id?: number
+  ip_address?: string
 }
 
 // ==================== API Functions ====================
@@ -105,6 +108,8 @@ export async function getStats(params: {
   group_id?: number
   model?: string
   stream?: boolean
+  billing_type?: number | null
+  ip_address?: string
   period?: string
   start_date?: string
   end_date?: string

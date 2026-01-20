@@ -53,6 +53,7 @@ type AuthService struct {
 	turnstileService  *TurnstileService
 	emailQueueService *EmailQueueService
 	promoService      *PromoService
+	inviteService     *InviteService
 }
 
 // NewAuthService 创建认证服务实例
@@ -64,6 +65,7 @@ func NewAuthService(
 	turnstileService *TurnstileService,
 	emailQueueService *EmailQueueService,
 	promoService *PromoService,
+	inviteService *InviteService,
 ) *AuthService {
 	return &AuthService{
 		userRepo:          userRepo,
@@ -73,16 +75,17 @@ func NewAuthService(
 		turnstileService:  turnstileService,
 		emailQueueService: emailQueueService,
 		promoService:      promoService,
+		inviteService:     inviteService,
 	}
 }
 
 // Register 用户注册，返回token和用户
 func (s *AuthService) Register(ctx context.Context, email, password string) (string, *User, error) {
-	return s.RegisterWithVerification(ctx, email, password, "", "")
+	return s.RegisterWithVerification(ctx, email, password, "", "", "")
 }
 
 // RegisterWithVerification 用户注册（支持邮件验证和优惠码），返回token和用户
-func (s *AuthService) RegisterWithVerification(ctx context.Context, email, password, verifyCode, promoCode string) (string, *User, error) {
+func (s *AuthService) RegisterWithVerification(ctx context.Context, email, password, verifyCode, promoCode, inviteCode string) (string, *User, error) {
 	// 检查是否开放注册（默认关闭：settingService 未配置时不允许注册）
 	if s.settingService == nil || !s.settingService.IsRegistrationEnabled(ctx) {
 		return "", nil, ErrRegDisabled
@@ -126,6 +129,19 @@ func (s *AuthService) RegisterWithVerification(ctx context.Context, email, passw
 		return "", nil, fmt.Errorf("hash password: %w", err)
 	}
 
+	inviteCode = strings.TrimSpace(inviteCode)
+	var inviter *User
+	if inviteCode != "" {
+		if s.inviteService == nil {
+			return "", nil, ErrInviteCodeInvalid
+		}
+		inviterUser, err := s.inviteService.ResolveInviter(ctx, inviteCode)
+		if err != nil {
+			return "", nil, err
+		}
+		inviter = inviterUser
+	}
+
 	// 获取默认配置
 	defaultBalance := s.cfg.Default.UserBalance
 	defaultConcurrency := s.cfg.Default.UserConcurrency
@@ -134,12 +150,22 @@ func (s *AuthService) RegisterWithVerification(ctx context.Context, email, passw
 		defaultConcurrency = s.settingService.GetDefaultConcurrency(ctx)
 	}
 
+	inviteCodeValue := ""
+	if s.inviteService != nil {
+		code, err := s.inviteService.generateUniqueInviteCode(ctx)
+		if err != nil {
+			return "", nil, err
+		}
+		inviteCodeValue = code
+	}
+
 	// 创建用户
 	user := &User{
 		Email:        email,
 		PasswordHash: hashedPassword,
 		Role:         RoleUser,
 		Balance:      defaultBalance,
+		InviteCode:   inviteCodeValue,
 		Concurrency:  defaultConcurrency,
 		Status:       StatusActive,
 	}
@@ -163,6 +189,13 @@ func (s *AuthService) RegisterWithVerification(ctx context.Context, email, passw
 			if updatedUser, err := s.userRepo.GetByID(ctx, user.ID); err == nil {
 				user = updatedUser
 			}
+		}
+	}
+
+	if inviter != nil && s.inviteService != nil {
+		if _, err := s.inviteService.BindInvite(ctx, inviter.ID, user.ID, inviteCode); err != nil {
+			_ = s.userRepo.Delete(ctx, user.ID)
+			return "", nil, err
 		}
 	}
 

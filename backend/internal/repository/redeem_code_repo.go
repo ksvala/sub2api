@@ -202,6 +202,30 @@ func (r *redeemCodeRepository) ListByUser(ctx context.Context, userID int64, lim
 	return redeemCodeEntitiesToService(codes), nil
 }
 
+func (r *redeemCodeRepository) ListByUserWithFilters(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	q := r.client.RedeemCode.Query().Where(redeemcode.UsedByEQ(userID))
+	if codeType != "" {
+		q = q.Where(redeemcode.TypeEQ(codeType))
+	}
+
+	total, err := q.Clone().Count(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	codes, err := q.
+		WithGroup().
+		Offset(params.Offset()).
+		Limit(params.Limit()).
+		Order(dbent.Desc(redeemcode.FieldUsedAt)).
+		All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return redeemCodeEntitiesToService(codes), paginationResultFromTotal(int64(total), params), nil
+}
+
 func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {
 	if m == nil {
 		return nil

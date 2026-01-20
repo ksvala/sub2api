@@ -52,6 +52,7 @@ type CreateUsageCleanupTaskRequest struct {
 	Model       *string `json:"model"`
 	Stream      *bool   `json:"stream"`
 	BillingType *int8   `json:"billing_type"`
+	IPAddress   *string `json:"ip_address"`
 	Timezone    string  `json:"timezone"`
 }
 
@@ -99,6 +100,7 @@ func (h *UsageHandler) List(c *gin.Context) {
 	}
 
 	model := c.Query("model")
+	ipAddress := strings.TrimSpace(c.Query("ip_address"))
 
 	var stream *bool
 	if streamStr := c.Query("stream"); streamStr != "" {
@@ -151,6 +153,7 @@ func (h *UsageHandler) List(c *gin.Context) {
 		AccountID:   accountID,
 		GroupID:     groupID,
 		Model:       model,
+		IPAddress:   ipAddress,
 		Stream:      stream,
 		BillingType: billingType,
 		StartTime:   startTime,
@@ -212,6 +215,7 @@ func (h *UsageHandler) Stats(c *gin.Context) {
 	}
 
 	model := c.Query("model")
+	ipAddress := strings.TrimSpace(c.Query("ip_address"))
 
 	var stream *bool
 	if streamStr := c.Query("stream"); streamStr != "" {
@@ -277,6 +281,7 @@ func (h *UsageHandler) Stats(c *gin.Context) {
 		AccountID:   accountID,
 		GroupID:     groupID,
 		Model:       model,
+		IPAddress:   ipAddress,
 		Stream:      stream,
 		BillingType: billingType,
 		StartTime:   &startTime,
@@ -441,6 +446,7 @@ func (h *UsageHandler) CreateCleanupTask(c *gin.Context) {
 		Model:       req.Model,
 		Stream:      req.Stream,
 		BillingType: req.BillingType,
+		IPAddress:   req.IPAddress,
 	}
 
 	var userID any
@@ -471,8 +477,12 @@ func (h *UsageHandler) CreateCleanupTask(c *gin.Context) {
 	if filters.BillingType != nil {
 		billingType = *filters.BillingType
 	}
+	var ipAddress any
+	if filters.IPAddress != nil {
+		ipAddress = *filters.IPAddress
+	}
 
-	log.Printf("[UsageCleanup] 请求创建清理任务: operator=%d start=%s end=%s user_id=%v api_key_id=%v account_id=%v group_id=%v model=%v stream=%v billing_type=%v tz=%q",
+	log.Printf("[UsageCleanup] 请求创建清理任务: operator=%d start=%s end=%s user_id=%v api_key_id=%v account_id=%v group_id=%v model=%v stream=%v billing_type=%v ip_address=%v tz=%q",
 		subject.UserID,
 		filters.StartTime.Format(time.RFC3339),
 		filters.EndTime.Format(time.RFC3339),
@@ -483,6 +493,7 @@ func (h *UsageHandler) CreateCleanupTask(c *gin.Context) {
 		model,
 		stream,
 		billingType,
+		ipAddress,
 		req.Timezone,
 	)
 

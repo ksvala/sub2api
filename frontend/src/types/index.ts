@@ -30,9 +30,15 @@ export interface User {
   email: string
   role: 'admin' | 'user' // User role for authorization
   balance: number // User balance for API usage
+  invite_code?: string
   concurrency: number // Allowed concurrent requests
   status: 'active' | 'disabled' // Account status
   allowed_groups: number[] | null // Allowed group IDs (null = all non-exclusive groups)
+  inviter_id?: number | null
+  inviter_email?: string
+  invite_status?: string
+  invite_confirmed_at?: string | null
+  invite_reward_amount?: number | null
   subscriptions?: UserSubscription[] // User's active subscriptions
   created_at: string
   updated_at: string
@@ -55,6 +61,7 @@ export interface RegisterRequest {
   verify_code?: string
   turnstile_token?: string
   promo_code?: string
+  invite_code?: string
 }
 
 export interface SendVerifyCodeRequest {
@@ -206,6 +213,50 @@ export interface PaginatedResponse<T> {
   page: number
   page_size: number
   pages: number
+}
+
+// ==================== Invite Types ====================
+
+export interface InviteSummary {
+  invite_code: string
+  total_invites: number
+  pending_invites: number
+  confirmed_invites: number
+  total_reward_amount: number
+}
+
+export interface InviteRecord {
+  id: number
+  invitee_email: string
+  created_at: string
+  status: string
+  confirmed_at?: string | null
+  reward_amount: number
+}
+
+export interface InviteRewardRecord {
+  id: number
+  amount: number
+  used_at?: string | null
+  notes: string
+  created_at: string
+}
+
+export interface InviteLog {
+  id: number
+  action: string
+  inviter_id: number
+  inviter_email: string
+  invitee_id: number
+  invitee_email: string
+  admin_id?: number | null
+  admin_email?: string
+  reward_amount: number
+  created_at: string
+}
+
+export interface InviteSettings {
+  reward_amount: number
 }
 
 // ==================== UI State Types ====================

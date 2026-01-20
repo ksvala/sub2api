@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	dbuser "github.com/Wei-Shaw/sub2api/ent/user"
 	"github.com/Wei-Shaw/sub2api/ent/userallowedgroup"
 	"github.com/Wei-Shaw/sub2api/ent/usersubscription"
@@ -50,7 +51,7 @@ func (r *userRepository) Create(ctx context.Context, userIn *service.User) error
 		txClient = r.client
 	}
 
-	created, err := txClient.User.Create().
+	builder := txClient.User.Create().
 		SetEmail(userIn.Email).
 		SetUsername(userIn.Username).
 		SetNotes(userIn.Notes).
@@ -58,8 +59,11 @@ func (r *userRepository) Create(ctx context.Context, userIn *service.User) error
 		SetRole(userIn.Role).
 		SetBalance(userIn.Balance).
 		SetConcurrency(userIn.Concurrency).
-		SetStatus(userIn.Status).
-		Save(ctx)
+		SetStatus(userIn.Status)
+	if userIn.InviteCode != "" {
+		builder.SetInviteCode(userIn.InviteCode)
+	}
+	created, err := builder.Save(ctx)
 	if err != nil {
 		return translatePersistenceError(err, nil, service.ErrEmailExists)
 	}
@@ -264,6 +268,28 @@ func (r *userRepository) ListWithFilters(ctx context.Context, params pagination.
 		}
 	}
 
+	invites, err := r.client.Invitation.Query().
+		Where(invitation.InviteeIDIn(userIDs...)).
+		WithInviter().
+		All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	for i := range invites {
+		invite := invites[i]
+		if u, ok := userMap[invite.InviteeID]; ok {
+			inviterID := invite.InviterID
+			u.InviterID = &inviterID
+			if invite.Edges.Inviter != nil {
+				u.InviterEmail = invite.Edges.Inviter.Email
+			}
+			u.InviteStatus = invite.Status
+			u.InviteConfirmedAt = invite.ConfirmedAt
+			rewardAmount := invite.RewardAmount
+			u.InviteRewardAmount = &rewardAmount
+		}
+	}
+
 	return outUsers, paginationResultFromTotal(int64(total), params), nil
 }
 
@@ -361,6 +387,47 @@ func (r *userRepository) UpdateConcurrency(ctx context.Context, id int64, amount
 
 func (r *userRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	return r.client.User.Query().Where(dbuser.EmailEQ(email)).Exist(ctx)
+}
+
+func (r *userRepository) GetByInviteCode(ctx context.Context, code string) (*service.User, error) {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return nil, service.ErrUserNotFound
+	}
+	userEntity, err := r.client.User.Query().
+		Where(dbuser.InviteCodeEQ(code)).
+		Only(ctx)
+	if err != nil {
+		return nil, translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	return userEntityToService(userEntity), nil
+}
+
+func (r *userRepository) ExistsByInviteCode(ctx context.Context, code string) (bool, error) {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return false, nil
+	}
+	return r.client.User.Query().Where(dbuser.InviteCodeEQ(code)).Exist(ctx)
+}
+
+func (r *userRepository) SetInviteCode(ctx context.Context, id int64, code string) error {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return nil
+	}
+	client := clientFromContext(ctx, r.client)
+	affected, err := client.User.Update().
+		Where(dbuser.IDEQ(id)).
+		SetInviteCode(code).
+		Save(ctx)
+	if err != nil {
+		return translatePersistenceError(err, service.ErrUserNotFound, nil)
+	}
+	if affected == 0 {
+		return service.ErrUserNotFound
+	}
+	return nil
 }
 
 func (r *userRepository) RemoveGroupFromAllowedGroups(ctx context.Context, groupID int64) (int64, error) {

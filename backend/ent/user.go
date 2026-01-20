@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	"github.com/Wei-Shaw/sub2api/ent/user"
 )
 
@@ -31,6 +32,8 @@ type User struct {
 	Role string `json:"role,omitempty"`
 	// Balance holds the value of the "balance" field.
 	Balance float64 `json:"balance,omitempty"`
+	// InviteCode holds the value of the "invite_code" field.
+	InviteCode *string `json:"invite_code,omitempty"`
 	// Concurrency holds the value of the "concurrency" field.
 	Concurrency int `json:"concurrency,omitempty"`
 	// Status holds the value of the "status" field.
@@ -63,11 +66,23 @@ type UserEdges struct {
 	AttributeValues []*UserAttributeValue `json:"attribute_values,omitempty"`
 	// PromoCodeUsages holds the value of the promo_code_usages edge.
 	PromoCodeUsages []*PromoCodeUsage `json:"promo_code_usages,omitempty"`
+	// SentInvitations holds the value of the sent_invitations edge.
+	SentInvitations []*Invitation `json:"sent_invitations,omitempty"`
+	// ReceivedInvitation holds the value of the received_invitation edge.
+	ReceivedInvitation *Invitation `json:"received_invitation,omitempty"`
+	// ConfirmedInvites holds the value of the confirmed_invites edge.
+	ConfirmedInvites []*Invitation `json:"confirmed_invites,omitempty"`
+	// InviteLogsAsInviter holds the value of the invite_logs_as_inviter edge.
+	InviteLogsAsInviter []*InviteLog `json:"invite_logs_as_inviter,omitempty"`
+	// InviteLogsAsInvitee holds the value of the invite_logs_as_invitee edge.
+	InviteLogsAsInvitee []*InviteLog `json:"invite_logs_as_invitee,omitempty"`
+	// InviteLogsAsAdmin holds the value of the invite_logs_as_admin edge.
+	InviteLogsAsAdmin []*InviteLog `json:"invite_logs_as_admin,omitempty"`
 	// UserAllowedGroups holds the value of the user_allowed_groups edge.
 	UserAllowedGroups []*UserAllowedGroup `json:"user_allowed_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [15]bool
 }
 
 // APIKeysOrErr returns the APIKeys value or an error if the edge
@@ -142,10 +157,66 @@ func (e UserEdges) PromoCodeUsagesOrErr() ([]*PromoCodeUsage, error) {
 	return nil, &NotLoadedError{edge: "promo_code_usages"}
 }
 
+// SentInvitationsOrErr returns the SentInvitations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SentInvitationsOrErr() ([]*Invitation, error) {
+	if e.loadedTypes[8] {
+		return e.SentInvitations, nil
+	}
+	return nil, &NotLoadedError{edge: "sent_invitations"}
+}
+
+// ReceivedInvitationOrErr returns the ReceivedInvitation value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ReceivedInvitationOrErr() (*Invitation, error) {
+	if e.ReceivedInvitation != nil {
+		return e.ReceivedInvitation, nil
+	} else if e.loadedTypes[9] {
+		return nil, &NotFoundError{label: invitation.Label}
+	}
+	return nil, &NotLoadedError{edge: "received_invitation"}
+}
+
+// ConfirmedInvitesOrErr returns the ConfirmedInvites value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ConfirmedInvitesOrErr() ([]*Invitation, error) {
+	if e.loadedTypes[10] {
+		return e.ConfirmedInvites, nil
+	}
+	return nil, &NotLoadedError{edge: "confirmed_invites"}
+}
+
+// InviteLogsAsInviterOrErr returns the InviteLogsAsInviter value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InviteLogsAsInviterOrErr() ([]*InviteLog, error) {
+	if e.loadedTypes[11] {
+		return e.InviteLogsAsInviter, nil
+	}
+	return nil, &NotLoadedError{edge: "invite_logs_as_inviter"}
+}
+
+// InviteLogsAsInviteeOrErr returns the InviteLogsAsInvitee value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InviteLogsAsInviteeOrErr() ([]*InviteLog, error) {
+	if e.loadedTypes[12] {
+		return e.InviteLogsAsInvitee, nil
+	}
+	return nil, &NotLoadedError{edge: "invite_logs_as_invitee"}
+}
+
+// InviteLogsAsAdminOrErr returns the InviteLogsAsAdmin value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InviteLogsAsAdminOrErr() ([]*InviteLog, error) {
+	if e.loadedTypes[13] {
+		return e.InviteLogsAsAdmin, nil
+	}
+	return nil, &NotLoadedError{edge: "invite_logs_as_admin"}
+}
+
 // UserAllowedGroupsOrErr returns the UserAllowedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) UserAllowedGroupsOrErr() ([]*UserAllowedGroup, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[14] {
 		return e.UserAllowedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "user_allowed_groups"}
@@ -160,7 +231,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case user.FieldID, user.FieldConcurrency:
 			values[i] = new(sql.NullInt64)
-		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole, user.FieldStatus, user.FieldUsername, user.FieldNotes:
+		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole, user.FieldInviteCode, user.FieldStatus, user.FieldUsername, user.FieldNotes:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -227,6 +298,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field balance", values[i])
 			} else if value.Valid {
 				_m.Balance = value.Float64
+			}
+		case user.FieldInviteCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field invite_code", values[i])
+			} else if value.Valid {
+				_m.InviteCode = new(string)
+				*_m.InviteCode = value.String
 			}
 		case user.FieldConcurrency:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -305,6 +383,36 @@ func (_m *User) QueryPromoCodeUsages() *PromoCodeUsageQuery {
 	return NewUserClient(_m.config).QueryPromoCodeUsages(_m)
 }
 
+// QuerySentInvitations queries the "sent_invitations" edge of the User entity.
+func (_m *User) QuerySentInvitations() *InvitationQuery {
+	return NewUserClient(_m.config).QuerySentInvitations(_m)
+}
+
+// QueryReceivedInvitation queries the "received_invitation" edge of the User entity.
+func (_m *User) QueryReceivedInvitation() *InvitationQuery {
+	return NewUserClient(_m.config).QueryReceivedInvitation(_m)
+}
+
+// QueryConfirmedInvites queries the "confirmed_invites" edge of the User entity.
+func (_m *User) QueryConfirmedInvites() *InvitationQuery {
+	return NewUserClient(_m.config).QueryConfirmedInvites(_m)
+}
+
+// QueryInviteLogsAsInviter queries the "invite_logs_as_inviter" edge of the User entity.
+func (_m *User) QueryInviteLogsAsInviter() *InviteLogQuery {
+	return NewUserClient(_m.config).QueryInviteLogsAsInviter(_m)
+}
+
+// QueryInviteLogsAsInvitee queries the "invite_logs_as_invitee" edge of the User entity.
+func (_m *User) QueryInviteLogsAsInvitee() *InviteLogQuery {
+	return NewUserClient(_m.config).QueryInviteLogsAsInvitee(_m)
+}
+
+// QueryInviteLogsAsAdmin queries the "invite_logs_as_admin" edge of the User entity.
+func (_m *User) QueryInviteLogsAsAdmin() *InviteLogQuery {
+	return NewUserClient(_m.config).QueryInviteLogsAsAdmin(_m)
+}
+
 // QueryUserAllowedGroups queries the "user_allowed_groups" edge of the User entity.
 func (_m *User) QueryUserAllowedGroups() *UserAllowedGroupQuery {
 	return NewUserClient(_m.config).QueryUserAllowedGroups(_m)
@@ -355,6 +463,11 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("balance=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Balance))
+	builder.WriteString(", ")
+	if v := _m.InviteCode; v != nil {
+		builder.WriteString("invite_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("concurrency=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Concurrency))

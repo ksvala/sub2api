@@ -64,6 +64,9 @@ func RegisterAdminRoutes(
 
 		// 用户属性管理
 		registerUserAttributeRoutes(admin, h)
+
+		// 邀请管理
+		registerInviteRoutes(admin, h)
 	}
 }
 
@@ -176,6 +179,16 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		// User attribute values
 		users.GET("/:id/attributes", h.Admin.UserAttribute.GetUserAttributes)
 		users.PUT("/:id/attributes", h.Admin.UserAttribute.UpdateUserAttributes)
+	}
+}
+
+func registerInviteRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	invites := admin.Group("/invites")
+	{
+		invites.GET("/settings", h.Admin.Invite.GetSettings)
+		invites.PUT("/settings", h.Admin.Invite.UpdateSettings)
+		invites.GET("/logs", h.Admin.Invite.ListLogs)
+		invites.POST("/:invitee_id/confirm", h.Admin.Invite.ConfirmInvite)
 	}
 }
 
