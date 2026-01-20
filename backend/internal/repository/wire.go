@@ -56,6 +56,7 @@ var ProviderSet = wire.NewSet(
 	NewProxyRepository,
 	NewRedeemCodeRepository,
 	NewPromoCodeRepository,
+	NewPlanRepository,
 	NewInviteRepository,
 	NewInviteLogRepository,
 	NewUsageLogRepository,

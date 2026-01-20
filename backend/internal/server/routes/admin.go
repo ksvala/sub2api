@@ -47,8 +47,14 @@ func RegisterAdminRoutes(
 		// 优惠码管理
 		registerPromoCodeRoutes(admin, h)
 
+		// 套餐管理
+		registerPlanRoutes(admin, h)
+
 		// 系统设置
 		registerSettingsRoutes(admin, h)
+
+		// 上传
+		registerUploadRoutes(admin, h)
 
 		// 运维监控（Ops）
 		registerOpsRoutes(admin, h)
@@ -67,6 +73,24 @@ func RegisterAdminRoutes(
 
 		// 邀请管理
 		registerInviteRoutes(admin, h)
+	}
+}
+
+func registerUploadRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	uploads := admin.Group("/uploads")
+	{
+		uploads.POST("/image", h.Admin.Upload.UploadImage)
+	}
+}
+
+func registerPlanRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+	plans := admin.Group("/plans")
+	{
+		plans.GET("", h.Admin.Plan.List)
+		plans.GET("/:id", h.Admin.Plan.GetByID)
+		plans.POST("", h.Admin.Plan.Create)
+		plans.PUT("/:id", h.Admin.Plan.Update)
+		plans.DELETE("/:id", h.Admin.Plan.Delete)
 	}
 }
 

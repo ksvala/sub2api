@@ -67,6 +67,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		SiteSubtitle:                         settings.SiteSubtitle,
 		APIBaseURL:                           settings.APIBaseURL,
 		ContactInfo:                          settings.ContactInfo,
+		CustomerServiceQR:                    settings.CustomerServiceQR,
 		DocURL:                               settings.DocURL,
 		HomeContent:                          settings.HomeContent,
 		HideCcsImportButton:                  settings.HideCcsImportButton,
@@ -119,6 +120,7 @@ type UpdateSettingsRequest struct {
 	SiteSubtitle        string `json:"site_subtitle"`
 	APIBaseURL          string `json:"api_base_url"`
 	ContactInfo         string `json:"contact_info"`
+	CustomerServiceQR   string `json:"customer_service_qr"`
 	DocURL              string `json:"doc_url"`
 	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
@@ -262,6 +264,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteSubtitle:               req.SiteSubtitle,
 		APIBaseURL:                 req.APIBaseURL,
 		ContactInfo:                req.ContactInfo,
+		CustomerServiceQR:          req.CustomerServiceQR,
 		DocURL:                     req.DocURL,
 		HomeContent:                req.HomeContent,
 		HideCcsImportButton:        req.HideCcsImportButton,

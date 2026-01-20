@@ -14,6 +14,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	"github.com/Wei-Shaw/sub2api/ent/invitelog"
+	"github.com/Wei-Shaw/sub2api/ent/plan"
 	"github.com/Wei-Shaw/sub2api/ent/predicate"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
@@ -245,6 +246,33 @@ func (f TraverseInviteLog) Traverse(ctx context.Context, q ent.Query) error {
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.InviteLogQuery", q)
+}
+
+// The PlanFunc type is an adapter to allow the use of ordinary function as a Querier.
+type PlanFunc func(context.Context, *ent.PlanQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f PlanFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.PlanQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.PlanQuery", q)
+}
+
+// The TraversePlan type is an adapter to allow the use of ordinary function as Traverser.
+type TraversePlan func(context.Context, *ent.PlanQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraversePlan) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraversePlan) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.PlanQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.PlanQuery", q)
 }
 
 // The PromoCodeFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -586,6 +614,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.InvitationQuery, predicate.Invitation, invitation.OrderOption]{typ: ent.TypeInvitation, tq: q}, nil
 	case *ent.InviteLogQuery:
 		return &query[*ent.InviteLogQuery, predicate.InviteLog, invitelog.OrderOption]{typ: ent.TypeInviteLog, tq: q}, nil
+	case *ent.PlanQuery:
+		return &query[*ent.PlanQuery, predicate.Plan, plan.OrderOption]{typ: ent.TypePlan, tq: q}, nil
 	case *ent.PromoCodeQuery:
 		return &query[*ent.PromoCodeQuery, predicate.PromoCode, promocode.OrderOption]{typ: ent.TypePromoCode, tq: q}, nil
 	case *ent.PromoCodeUsageQuery:

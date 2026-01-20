@@ -90,6 +90,29 @@ export interface PublicSettings {
   hide_ccs_import_button: boolean
   linuxdo_oauth_enabled: boolean
   version: string
+  customer_service_qr?: string
+}
+
+export interface Plan {
+  id: number
+  title: string
+  description: string
+  price: number
+  group_name: string
+  group_sort: number
+  daily_quota: number
+  total_quota: number
+  purchase_qr_url: string
+  enabled: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PlanGroup {
+  name: string
+  sort: number
+  plans: Plan[]
 }
 
 export interface AuthResponse {

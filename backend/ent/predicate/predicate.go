@@ -24,6 +24,9 @@ type Invitation func(*sql.Selector)
 // InviteLog is the predicate function for invitelog builders.
 type InviteLog func(*sql.Selector)
 
+// Plan is the predicate function for plan builders.
+type Plan func(*sql.Selector)
+
 // PromoCode is the predicate function for promocode builders.
 type PromoCode func(*sql.Selector)
 

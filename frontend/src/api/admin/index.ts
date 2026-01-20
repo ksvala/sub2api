@@ -19,6 +19,8 @@ import antigravityAPI from './antigravity'
 import userAttributesAPI from './userAttributes'
 import opsAPI from './ops'
 import invitesAdminAPI from './invites'
+import plansAPI from './plans'
+import uploadsAPI from './uploads'
 
 /**
  * Unified admin API object for convenient access
@@ -31,6 +33,8 @@ export const adminAPI = {
   proxies: proxiesAPI,
   redeem: redeemAPI,
   promo: promoAPI,
+  plans: plansAPI,
+  uploads: uploadsAPI,
   settings: settingsAPI,
   system: systemAPI,
   subscriptions: subscriptionsAPI,
@@ -58,7 +62,9 @@ export {
   antigravityAPI,
   userAttributesAPI,
   opsAPI,
-  invitesAdminAPI
+  invitesAdminAPI,
+  plansAPI,
+  uploadsAPI
 }
 
 export default adminAPI

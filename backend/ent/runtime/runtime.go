@@ -11,6 +11,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	"github.com/Wei-Shaw/sub2api/ent/invitelog"
+	"github.com/Wei-Shaw/sub2api/ent/plan"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
@@ -321,6 +322,66 @@ func init() {
 	invitelogDescCreatedAt := invitelogFields[6].Descriptor()
 	// invitelog.DefaultCreatedAt holds the default value on creation for the created_at field.
 	invitelog.DefaultCreatedAt = invitelogDescCreatedAt.Default.(func() time.Time)
+	planFields := schema.Plan{}.Fields()
+	_ = planFields
+	// planDescTitle is the schema descriptor for title field.
+	planDescTitle := planFields[0].Descriptor()
+	// plan.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	plan.TitleValidator = func() func(string) error {
+		validators := planDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planDescPrice is the schema descriptor for price field.
+	planDescPrice := planFields[2].Descriptor()
+	// plan.DefaultPrice holds the default value on creation for the price field.
+	plan.DefaultPrice = planDescPrice.Default.(float64)
+	// planDescGroupName is the schema descriptor for group_name field.
+	planDescGroupName := planFields[3].Descriptor()
+	// plan.DefaultGroupName holds the default value on creation for the group_name field.
+	plan.DefaultGroupName = planDescGroupName.Default.(string)
+	// plan.GroupNameValidator is a validator for the "group_name" field. It is called by the builders before save.
+	plan.GroupNameValidator = planDescGroupName.Validators[0].(func(string) error)
+	// planDescGroupSort is the schema descriptor for group_sort field.
+	planDescGroupSort := planFields[4].Descriptor()
+	// plan.DefaultGroupSort holds the default value on creation for the group_sort field.
+	plan.DefaultGroupSort = planDescGroupSort.Default.(int)
+	// planDescDailyQuota is the schema descriptor for daily_quota field.
+	planDescDailyQuota := planFields[5].Descriptor()
+	// plan.DefaultDailyQuota holds the default value on creation for the daily_quota field.
+	plan.DefaultDailyQuota = planDescDailyQuota.Default.(float64)
+	// planDescTotalQuota is the schema descriptor for total_quota field.
+	planDescTotalQuota := planFields[6].Descriptor()
+	// plan.DefaultTotalQuota holds the default value on creation for the total_quota field.
+	plan.DefaultTotalQuota = planDescTotalQuota.Default.(float64)
+	// planDescEnabled is the schema descriptor for enabled field.
+	planDescEnabled := planFields[8].Descriptor()
+	// plan.DefaultEnabled holds the default value on creation for the enabled field.
+	plan.DefaultEnabled = planDescEnabled.Default.(bool)
+	// planDescSortOrder is the schema descriptor for sort_order field.
+	planDescSortOrder := planFields[9].Descriptor()
+	// plan.DefaultSortOrder holds the default value on creation for the sort_order field.
+	plan.DefaultSortOrder = planDescSortOrder.Default.(int)
+	// planDescCreatedAt is the schema descriptor for created_at field.
+	planDescCreatedAt := planFields[10].Descriptor()
+	// plan.DefaultCreatedAt holds the default value on creation for the created_at field.
+	plan.DefaultCreatedAt = planDescCreatedAt.Default.(func() time.Time)
+	// planDescUpdatedAt is the schema descriptor for updated_at field.
+	planDescUpdatedAt := planFields[11].Descriptor()
+	// plan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	plan.DefaultUpdatedAt = planDescUpdatedAt.Default.(func() time.Time)
+	// plan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	plan.UpdateDefaultUpdatedAt = planDescUpdatedAt.UpdateDefault.(func() time.Time)
 	promocodeFields := schema.PromoCode{}.Fields()
 	_ = promocodeFields
 	// promocodeDescCode is the schema descriptor for code field.

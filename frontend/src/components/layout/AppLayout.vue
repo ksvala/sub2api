@@ -18,24 +18,53 @@
       <main class="p-4 md:p-6 lg:p-8">
         <slot />
       </main>
+
+      <!-- Customer Service Floating Button -->
+      <div v-if="customerServiceQr" class="fixed bottom-6 right-6 z-40">
+        <button
+          @click="showCsModal = true"
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition-transform hover:scale-110 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          :title="t('common.customerService')"
+        >
+          <Icon name="chat" class="h-6 w-6" />
+        </button>
+      </div>
+
+      <!-- Customer Service Modal -->
+      <BaseDialog :show="showCsModal" :title="t('common.customerService')" @close="showCsModal = false">
+        <div class="flex flex-col items-center justify-center p-4">
+          <div class="mb-4 h-64 w-64 overflow-hidden rounded-lg border border-gray-200 bg-white p-2 dark:border-dark-700 dark:bg-dark-800">
+            <img :src="customerServiceQr" class="h-full w-full object-contain" />
+          </div>
+          <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+            {{ t('common.scanToContact') }}
+          </p>
+        </div>
+      </BaseDialog>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import '@/styles/onboarding.css'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
 import { useAuthStore } from '@/stores/auth'
 import { useOnboardingTour } from '@/composables/useOnboardingTour'
 import { useOnboardingStore } from '@/stores/onboarding'
 import AppSidebar from './AppSidebar.vue'
 import AppHeader from './AppHeader.vue'
+import Icon from '@/components/icons/Icon.vue'
+import BaseDialog from '@/components/common/BaseDialog.vue'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const isAdmin = computed(() => authStore.user?.role === 'admin')
+const customerServiceQr = computed(() => appStore.cachedPublicSettings?.customer_service_qr)
+const showCsModal = ref(false)
 
 const { replayTour } = useOnboardingTour({
   storageKey: isAdmin.value ? 'admin_guide' : 'user_guide',

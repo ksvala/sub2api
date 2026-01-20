@@ -98,6 +98,18 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/plans',
+    name: 'Plans',
+    component: () => import('@/views/user/PlansView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: 'Plans',
+      titleKey: 'plans.title',
+      descriptionKey: 'plans.description'
+    }
+  },
+  {
     path: '/keys',
     name: 'Keys',
     component: () => import('@/views/user/KeysView.vue'),
@@ -197,6 +209,18 @@ const routes: RouteRecordRaw[] = [
       title: 'Ops Monitoring',
       titleKey: 'admin.ops.title',
       descriptionKey: 'admin.ops.description'
+    }
+  },
+  {
+    path: '/admin/plans',
+    name: 'AdminPlans',
+    component: () => import('@/views/admin/PlansView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Plan Management',
+      titleKey: 'admin.plans.title',
+      descriptionKey: 'admin.plans.description'
     }
   },
   {

@@ -392,6 +392,50 @@ var (
 			},
 		},
 	}
+	// PlansColumns holds the columns for the "plans" table.
+	PlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "title", Type: field.TypeString, Size: 120},
+		{Name: "description", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "price", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "group_name", Type: field.TypeString, Size: 80, Default: "default"},
+		{Name: "group_sort", Type: field.TypeInt, Default: 0},
+		{Name: "daily_quota", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "total_quota", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
+		{Name: "purchase_qr_url", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+	}
+	// PlansTable holds the schema information for the "plans" table.
+	PlansTable = &schema.Table{
+		Name:       "plans",
+		Columns:    PlansColumns,
+		PrimaryKey: []*schema.Column{PlansColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "plan_group_name",
+				Unique:  false,
+				Columns: []*schema.Column{PlansColumns[4]},
+			},
+			{
+				Name:    "plan_group_sort",
+				Unique:  false,
+				Columns: []*schema.Column{PlansColumns[5]},
+			},
+			{
+				Name:    "plan_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{PlansColumns[9]},
+			},
+			{
+				Name:    "plan_sort_order",
+				Unique:  false,
+				Columns: []*schema.Column{PlansColumns[10]},
+			},
+		},
+	}
 	// PromoCodesColumns holds the columns for the "promo_codes" table.
 	PromoCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -971,6 +1015,7 @@ var (
 		GroupsTable,
 		UserInvitesTable,
 		InviteLogsTable,
+		PlansTable,
 		PromoCodesTable,
 		PromoCodeUsagesTable,
 		ProxiesTable,
@@ -1016,6 +1061,9 @@ func init() {
 	InviteLogsTable.ForeignKeys[3].RefTable = UsersTable
 	InviteLogsTable.Annotation = &entsql.Annotation{
 		Table: "invite_logs",
+	}
+	PlansTable.Annotation = &entsql.Annotation{
+		Table: "plans",
 	}
 	PromoCodesTable.Annotation = &entsql.Annotation{
 		Table: "promo_codes",

@@ -68,6 +68,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeySiteSubtitle,
 		SettingKeyAPIBaseURL,
 		SettingKeyContactInfo,
+		SettingKeyCustomerServiceQR,
 		SettingKeyDocURL,
 		SettingKeyHomeContent,
 		SettingKeyHideCcsImportButton,
@@ -97,6 +98,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SiteSubtitle:        s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
 		APIBaseURL:          settings[SettingKeyAPIBaseURL],
 		ContactInfo:         settings[SettingKeyContactInfo],
+		CustomerServiceQR:   settings[SettingKeyCustomerServiceQR],
 		DocURL:              settings[SettingKeyDocURL],
 		HomeContent:         settings[SettingKeyHomeContent],
 		HideCcsImportButton: settings[SettingKeyHideCcsImportButton] == "true",
@@ -135,6 +137,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		SiteSubtitle        string `json:"site_subtitle,omitempty"`
 		APIBaseURL          string `json:"api_base_url,omitempty"`
 		ContactInfo         string `json:"contact_info,omitempty"`
+		CustomerServiceQR   string `json:"customer_service_qr,omitempty"`
 		DocURL              string `json:"doc_url,omitempty"`
 		HomeContent         string `json:"home_content,omitempty"`
 		HideCcsImportButton bool   `json:"hide_ccs_import_button"`
@@ -151,6 +154,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		SiteSubtitle:        settings.SiteSubtitle,
 		APIBaseURL:          settings.APIBaseURL,
 		ContactInfo:         settings.ContactInfo,
+		CustomerServiceQR:   settings.CustomerServiceQR,
 		DocURL:              settings.DocURL,
 		HomeContent:         settings.HomeContent,
 		HideCcsImportButton: settings.HideCcsImportButton,
@@ -200,6 +204,7 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	updates[SettingKeySiteSubtitle] = settings.SiteSubtitle
 	updates[SettingKeyAPIBaseURL] = settings.APIBaseURL
 	updates[SettingKeyContactInfo] = settings.ContactInfo
+	updates[SettingKeyCustomerServiceQR] = settings.CustomerServiceQR
 	updates[SettingKeyDocURL] = settings.DocURL
 	updates[SettingKeyHomeContent] = settings.HomeContent
 	updates[SettingKeyHideCcsImportButton] = strconv.FormatBool(settings.HideCcsImportButton)
@@ -334,6 +339,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyPromoCodeEnabled:    "true", // 默认启用优惠码功能
 		SettingKeySiteName:            "Sub2API",
 		SettingKeySiteLogo:            "",
+		SettingKeyCustomerServiceQR:  "",
 		SettingKeyDefaultConcurrency:  strconv.Itoa(s.cfg.Default.UserConcurrency),
 		SettingKeyDefaultBalance:      strconv.FormatFloat(s.cfg.Default.UserBalance, 'f', 8, 64),
 		SettingKeyInviteRewardAmount: "0",
@@ -379,6 +385,7 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		SiteSubtitle:                 s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
 		APIBaseURL:                   settings[SettingKeyAPIBaseURL],
 		ContactInfo:                  settings[SettingKeyContactInfo],
+		CustomerServiceQR:            settings[SettingKeyCustomerServiceQR],
 		DocURL:                       settings[SettingKeyDocURL],
 		HomeContent:                  settings[SettingKeyHomeContent],
 		HideCcsImportButton:          settings[SettingKeyHideCcsImportButton] == "true",

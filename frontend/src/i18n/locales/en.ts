@@ -186,6 +186,8 @@ export default {
     copiedToClipboard: 'Copied to clipboard',
     copyFailed: 'Failed to copy',
     contactSupport: 'Contact Support',
+    customerService: 'Customer Service',
+    scanToContact: 'Scan QR Code to Contact',
     add: 'Add',
     invalidEmail: 'Please enter a valid email address',
     optional: 'optional',
@@ -238,7 +240,23 @@ export default {
     logout: 'Logout',
     github: 'GitHub',
     mySubscriptions: 'My Subscriptions',
+    plans: 'Plans',
     docs: 'Docs'
+  },
+
+  // Plans
+  plans: {
+    title: 'Plans',
+    description: 'Choose a plan that suits your needs',
+    noPlans: 'No plans available',
+    dailyQuota: 'Daily Quota',
+    totalQuota: 'Total Quota',
+    purchase: 'Purchase',
+    scanToPurchase: 'Scan QR Code to Purchase',
+    noQrCode: 'No QR Code',
+    purchaseNote: 'Please include your account email in the payment note',
+    contacted: 'Already Contacted',
+    defaultGroup: 'Default Plans'
   },
 
   // Auth

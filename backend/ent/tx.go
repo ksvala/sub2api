@@ -26,6 +26,8 @@ type Tx struct {
 	Invitation *InvitationClient
 	// InviteLog is the client for interacting with the InviteLog builders.
 	InviteLog *InviteLogClient
+	// Plan is the client for interacting with the Plan builders.
+	Plan *PlanClient
 	// PromoCode is the client for interacting with the PromoCode builders.
 	PromoCode *PromoCodeClient
 	// PromoCodeUsage is the client for interacting with the PromoCodeUsage builders.
@@ -187,6 +189,7 @@ func (tx *Tx) init() {
 	tx.Group = NewGroupClient(tx.config)
 	tx.Invitation = NewInvitationClient(tx.config)
 	tx.InviteLog = NewInviteLogClient(tx.config)
+	tx.Plan = NewPlanClient(tx.config)
 	tx.PromoCode = NewPromoCodeClient(tx.config)
 	tx.PromoCodeUsage = NewPromoCodeUsageClient(tx.config)
 	tx.Proxy = NewProxyClient(tx.config)

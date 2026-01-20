@@ -782,6 +782,72 @@
               </div>
             </div>
 
+            <!-- Customer Service QR Upload -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('admin.settings.site.customerServiceQr') }}
+              </label>
+              <div class="flex items-start gap-6">
+                <!-- QR Preview -->
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 dark:border-dark-600 dark:bg-dark-800"
+                    :class="{ 'border-solid': form.customer_service_qr }"
+                  >
+                    <img
+                      v-if="form.customer_service_qr"
+                      :src="form.customer_service_qr"
+                      alt="QR Code"
+                      class="h-full w-full object-contain"
+                    />
+                    <svg
+                      v-else
+                      class="h-8 w-8 text-gray-400 dark:text-dark-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <!-- Upload Controls -->
+                <div class="flex-1 space-y-3">
+                  <div class="flex items-center gap-3">
+                    <label class="btn btn-secondary btn-sm cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        @change="handleCsQrUpload"
+                      />
+                      <Icon name="upload" size="sm" class="mr-1.5" :stroke-width="2" />
+                      {{ t('admin.settings.site.uploadImage') }}
+                    </label>
+                    <button
+                      v-if="form.customer_service_qr"
+                      type="button"
+                      @click="form.customer_service_qr = ''"
+                      class="btn btn-secondary btn-sm text-red-600 hover:text-red-700 dark:text-red-400"
+                    >
+                      <Icon name="trash" size="sm" class="mr-1.5" :stroke-width="2" />
+                      {{ t('admin.settings.site.remove') }}
+                    </button>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ t('admin.settings.site.qrHint') }}
+                  </p>
+                  <p v-if="csQrError" class="text-xs text-red-500">{{ csQrError }}</p>
+                  <p v-if="csQrUploading" class="text-xs text-blue-500">{{ t('common.uploading') }}...</p>
+                </div>
+              </div>
+            </div>
+
             <!-- Home Content -->
             <div>
               <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1067,6 +1133,8 @@ const testingSmtp = ref(false)
 const sendingTestEmail = ref(false)
 const testEmailAddress = ref('')
 const logoError = ref('')
+const csQrError = ref('')
+const csQrUploading = ref(false)
 
 // Admin API Key 状态
 const adminApiKeyLoading = ref(true)
@@ -1106,6 +1174,7 @@ const form = reactive<SettingsForm>({
   doc_url: '',
   home_content: '',
   hide_ccs_import_button: false,
+  customer_service_qr: '',
   smtp_host: '',
   smtp_port: 587,
   smtp_username: '',
@@ -1195,6 +1264,32 @@ function handleLogoUpload(event: Event) {
   input.value = ''
 }
 
+async function handleCsQrUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  csQrError.value = ''
+
+  if (!file) return
+
+  // Check file type
+  if (!file.type.startsWith('image/')) {
+    csQrError.value = t('admin.settings.site.logoTypeError')
+    input.value = ''
+    return
+  }
+
+  csQrUploading.value = true
+  try {
+    const { url } = await adminAPI.uploads.uploadImage(file)
+    form.customer_service_qr = url
+  } catch (error: any) {
+    csQrError.value = error.message
+  } finally {
+    csQrUploading.value = false
+    input.value = ''
+  }
+}
+
 async function loadSettings() {
   loading.value = true
   try {
@@ -1229,6 +1324,7 @@ async function saveSettings() {
       doc_url: form.doc_url,
       home_content: form.home_content,
       hide_ccs_import_button: form.hide_ccs_import_button,
+      customer_service_qr: form.customer_service_qr,
       smtp_host: form.smtp_host,
       smtp_port: form.smtp_port,
       smtp_username: form.smtp_username,

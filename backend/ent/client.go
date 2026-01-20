@@ -21,6 +21,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	"github.com/Wei-Shaw/sub2api/ent/invitelog"
+	"github.com/Wei-Shaw/sub2api/ent/plan"
 	"github.com/Wei-Shaw/sub2api/ent/promocode"
 	"github.com/Wei-Shaw/sub2api/ent/promocodeusage"
 	"github.com/Wei-Shaw/sub2api/ent/proxy"
@@ -54,6 +55,8 @@ type Client struct {
 	Invitation *InvitationClient
 	// InviteLog is the client for interacting with the InviteLog builders.
 	InviteLog *InviteLogClient
+	// Plan is the client for interacting with the Plan builders.
+	Plan *PlanClient
 	// PromoCode is the client for interacting with the PromoCode builders.
 	PromoCode *PromoCodeClient
 	// PromoCodeUsage is the client for interacting with the PromoCodeUsage builders.
@@ -95,6 +98,7 @@ func (c *Client) init() {
 	c.Group = NewGroupClient(c.config)
 	c.Invitation = NewInvitationClient(c.config)
 	c.InviteLog = NewInviteLogClient(c.config)
+	c.Plan = NewPlanClient(c.config)
 	c.PromoCode = NewPromoCodeClient(c.config)
 	c.PromoCodeUsage = NewPromoCodeUsageClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
@@ -205,6 +209,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Group:                   NewGroupClient(cfg),
 		Invitation:              NewInvitationClient(cfg),
 		InviteLog:               NewInviteLogClient(cfg),
+		Plan:                    NewPlanClient(cfg),
 		PromoCode:               NewPromoCodeClient(cfg),
 		PromoCodeUsage:          NewPromoCodeUsageClient(cfg),
 		Proxy:                   NewProxyClient(cfg),
@@ -242,6 +247,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Group:                   NewGroupClient(cfg),
 		Invitation:              NewInvitationClient(cfg),
 		InviteLog:               NewInviteLogClient(cfg),
+		Plan:                    NewPlanClient(cfg),
 		PromoCode:               NewPromoCodeClient(cfg),
 		PromoCodeUsage:          NewPromoCodeUsageClient(cfg),
 		Proxy:                   NewProxyClient(cfg),
@@ -283,7 +289,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.APIKey, c.Account, c.AccountGroup, c.Group, c.Invitation, c.InviteLog,
+		c.APIKey, c.Account, c.AccountGroup, c.Group, c.Invitation, c.InviteLog, c.Plan,
 		c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.Setting,
 		c.UsageCleanupTask, c.UsageLog, c.User, c.UserAllowedGroup,
 		c.UserAttributeDefinition, c.UserAttributeValue, c.UserSubscription,
@@ -296,7 +302,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.APIKey, c.Account, c.AccountGroup, c.Group, c.Invitation, c.InviteLog,
+		c.APIKey, c.Account, c.AccountGroup, c.Group, c.Invitation, c.InviteLog, c.Plan,
 		c.PromoCode, c.PromoCodeUsage, c.Proxy, c.RedeemCode, c.Setting,
 		c.UsageCleanupTask, c.UsageLog, c.User, c.UserAllowedGroup,
 		c.UserAttributeDefinition, c.UserAttributeValue, c.UserSubscription,
@@ -320,6 +326,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Invitation.mutate(ctx, m)
 	case *InviteLogMutation:
 		return c.InviteLog.mutate(ctx, m)
+	case *PlanMutation:
+		return c.Plan.mutate(ctx, m)
 	case *PromoCodeMutation:
 		return c.PromoCode.mutate(ctx, m)
 	case *PromoCodeUsageMutation:
@@ -1501,6 +1509,139 @@ func (c *InviteLogClient) mutate(ctx context.Context, m *InviteLogMutation) (Val
 		return (&InviteLogDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown InviteLog mutation op: %q", m.Op())
+	}
+}
+
+// PlanClient is a client for the Plan schema.
+type PlanClient struct {
+	config
+}
+
+// NewPlanClient returns a client for the Plan from the given config.
+func NewPlanClient(c config) *PlanClient {
+	return &PlanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `plan.Hooks(f(g(h())))`.
+func (c *PlanClient) Use(hooks ...Hook) {
+	c.hooks.Plan = append(c.hooks.Plan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `plan.Intercept(f(g(h())))`.
+func (c *PlanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Plan = append(c.inters.Plan, interceptors...)
+}
+
+// Create returns a builder for creating a Plan entity.
+func (c *PlanClient) Create() *PlanCreate {
+	mutation := newPlanMutation(c.config, OpCreate)
+	return &PlanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Plan entities.
+func (c *PlanClient) CreateBulk(builders ...*PlanCreate) *PlanCreateBulk {
+	return &PlanCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlanClient) MapCreateBulk(slice any, setFunc func(*PlanCreate, int)) *PlanCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlanCreateBulk{err: fmt.Errorf("calling to PlanClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlanCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Plan.
+func (c *PlanClient) Update() *PlanUpdate {
+	mutation := newPlanMutation(c.config, OpUpdate)
+	return &PlanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlanClient) UpdateOne(_m *Plan) *PlanUpdateOne {
+	mutation := newPlanMutation(c.config, OpUpdateOne, withPlan(_m))
+	return &PlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlanClient) UpdateOneID(id int64) *PlanUpdateOne {
+	mutation := newPlanMutation(c.config, OpUpdateOne, withPlanID(id))
+	return &PlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Plan.
+func (c *PlanClient) Delete() *PlanDelete {
+	mutation := newPlanMutation(c.config, OpDelete)
+	return &PlanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlanClient) DeleteOne(_m *Plan) *PlanDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlanClient) DeleteOneID(id int64) *PlanDeleteOne {
+	builder := c.Delete().Where(plan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlanDeleteOne{builder}
+}
+
+// Query returns a query builder for Plan.
+func (c *PlanClient) Query() *PlanQuery {
+	return &PlanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Plan entity by its id.
+func (c *PlanClient) Get(ctx context.Context, id int64) (*Plan, error) {
+	return c.Query().Where(plan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlanClient) GetX(ctx context.Context, id int64) *Plan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PlanClient) Hooks() []Hook {
+	return c.hooks.Plan
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlanClient) Interceptors() []Interceptor {
+	return c.inters.Plan
+}
+
+func (c *PlanClient) mutate(ctx context.Context, m *PlanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Plan mutation op: %q", m.Op())
 	}
 }
 
@@ -3622,13 +3763,13 @@ func (c *UserSubscriptionClient) mutate(ctx context.Context, m *UserSubscription
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		APIKey, Account, AccountGroup, Group, Invitation, InviteLog, PromoCode,
+		APIKey, Account, AccountGroup, Group, Invitation, InviteLog, Plan, PromoCode,
 		PromoCodeUsage, Proxy, RedeemCode, Setting, UsageCleanupTask, UsageLog, User,
 		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
 		UserSubscription []ent.Hook
 	}
 	inters struct {
-		APIKey, Account, AccountGroup, Group, Invitation, InviteLog, PromoCode,
+		APIKey, Account, AccountGroup, Group, Invitation, InviteLog, Plan, PromoCode,
 		PromoCodeUsage, Proxy, RedeemCode, Setting, UsageCleanupTask, UsageLog, User,
 		UserAllowedGroup, UserAttributeDefinition, UserAttributeValue,
 		UserSubscription []ent.Interceptor

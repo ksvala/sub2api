@@ -183,6 +183,8 @@ export default {
     copiedToClipboard: '已复制到剪贴板',
     copyFailed: '复制失败',
     contactSupport: '联系客服',
+    customerService: '联系客服',
+    scanToContact: '扫码联系客服',
     add: '添加',
     invalidEmail: '请输入有效的邮箱地址',
     optional: '可选',
@@ -235,7 +237,23 @@ export default {
     logout: '退出登录',
     github: 'GitHub',
     mySubscriptions: '我的订阅',
+    plans: '套餐',
     docs: '文档'
+  },
+
+  // Plans
+  plans: {
+    title: '套餐',
+    description: '选择适合您的套餐',
+    noPlans: '暂无套餐',
+    dailyQuota: '每日额度',
+    totalQuota: '总额度',
+    purchase: '购买',
+    scanToPurchase: '扫码购买',
+    noQrCode: '暂无二维码',
+    purchaseNote: '付款时请务必备注您的账号邮箱',
+    contacted: '我已联系',
+    defaultGroup: '默认套餐'
   },
 
   // Auth
@@ -699,6 +717,36 @@ export default {
       systemSettings: '系统设置',
       configureSystem: '配置系统设置',
       failedToLoad: '加载仪表盘数据失败'
+    },
+
+    // Plans Management
+    plans: {
+      title: '套餐管理',
+      description: '管理订阅套餐和配额',
+      create: '创建套餐',
+      noPlans: '暂无套餐',
+      createFirst: '创建您的第一个套餐以开始销售订阅。',
+      dailyQuota: '每日额度',
+      totalQuota: '总额度',
+      sortOrder: '排序',
+      editPlan: '编辑套餐',
+      createPlan: '创建套餐',
+      deleteTitle: '删除套餐',
+      deleteConfirm: "确定要删除套餐 '{title}' 吗？",
+      form: {
+        title: '标题',
+        description: '描述',
+        price: '价格 (元)',
+        sortOrder: '排序',
+        groupSettings: '分组设置',
+        groupName: '分组名称',
+        groupSort: '分组排序',
+        quotaSettings: '配额设置',
+        dailyQuota: '每日额度 ($)',
+        totalQuota: '总额度 ($)',
+        purchaseQr: '购买二维码',
+        enabled: '启用'
+      }
     },
 
     // Users Management

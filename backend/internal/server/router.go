@@ -2,6 +2,9 @@ package server
 
 import (
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/handler"
@@ -46,10 +49,44 @@ func SetupRouter(
 		}
 	}
 
+	uploadDir := resolveUploadDir()
+	if uploadDir != "" {
+		if err := os.MkdirAll(uploadDir, 0o755); err != nil {
+			log.Printf("Warning: failed to create upload dir: %v", err)
+		} else {
+			r.Static("/uploads", uploadDir)
+		}
+	}
+
 	// 注册路由
 	registerRoutes(r, handlers, jwtAuth, adminAuth, apiKeyAuth, apiKeyService, subscriptionService, opsService, cfg, redisClient)
 
 	return r
+}
+
+func resolveUploadDir() string {
+	baseDir := resolveDataDir()
+	if baseDir == "" {
+		return ""
+	}
+	return filepath.Join(baseDir, "uploads")
+}
+
+func resolveDataDir() string {
+	if value := strings.TrimSpace(os.Getenv("DATA_DIR")); value != "" {
+		return value
+	}
+
+	dockerDataDir := "/app/data"
+	if info, err := os.Stat(dockerDataDir); err == nil && info.IsDir() {
+		testFile := filepath.Join(dockerDataDir, ".write_test")
+		if err := os.WriteFile(testFile, []byte("test"), 0o644); err == nil {
+			_ = os.Remove(testFile)
+			return dockerDataDir
+		}
+	}
+
+	return "."
 }
 
 // registerRoutes 注册所有 HTTP 路由
