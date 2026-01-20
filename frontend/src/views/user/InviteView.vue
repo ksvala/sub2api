@@ -34,7 +34,7 @@
                 @click="copyInviteLink"
                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-white/20 py-3 font-medium transition-colors hover:bg-white/30"
               >
-                <Icon name="share" size="md" />
+                <Icon name="link" size="md" />
                 {{ t('invites.copyLink') }}
               </button>
             </div>
