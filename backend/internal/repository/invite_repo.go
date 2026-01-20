@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
+	stdsql "database/sql"
 
-	"entgo.io/ent/dialect/sql"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
@@ -98,7 +99,7 @@ func (r *inviteRepository) ListByInviter(ctx context.Context, inviterID int64, p
 		WithInvitee().
 		Offset(params.Offset()).
 		Limit(params.Limit()).
-		Order(invitation.ByCreatedAt(sql.OrderDesc())).
+		Order(invitation.ByCreatedAt(entsql.OrderDesc())).
 		All(ctx)
 	if err != nil {
 		return nil, nil, err
@@ -127,14 +128,21 @@ func (r *inviteRepository) GetSummaryByInviter(ctx context.Context, inviterID in
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
-	rewardSum, err := base.Clone().
+	if confirmed == 0 {
+		return total, pending, confirmed, 0, nil
+	}
+	var rewardSum stdsql.NullFloat64
+	if err := base.Clone().
 		Where(invitation.StatusEQ(service.InviteStatusConfirmed)).
 		Aggregate(ent.Sum(invitation.FieldRewardAmount)).
-		Float64(ctx)
-	if err != nil {
+		Scan(ctx, &rewardSum); err != nil {
 		return 0, 0, 0, 0, err
 	}
-	return total, pending, confirmed, rewardSum, nil
+
+	if rewardSum.Valid {
+		return total, pending, confirmed, rewardSum.Float64, nil
+	}
+	return total, pending, confirmed, 0, nil
 }
 
 func inviteEntityToService(m *ent.Invitation) *service.Invite {

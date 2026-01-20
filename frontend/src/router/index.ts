@@ -284,18 +284,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/admin/invites/settings',
-    name: 'AdminInviteSettings',
-    component: () => import('@/views/admin/InviteSettingsView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Invite Settings',
-      titleKey: 'admin.invites.settings.title',
-      descriptionKey: 'admin.invites.settings.description'
-    }
-  },
-  {
     path: '/admin/invites/logs',
     name: 'AdminInviteLogs',
     component: () => import('@/views/admin/InviteLogsView.vue'),

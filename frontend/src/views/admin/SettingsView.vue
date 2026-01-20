@@ -561,6 +561,72 @@
           </div>
         </div>
 
+        <!-- Invite Settings -->
+        <div class="card">
+          <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ t('invites.admin.settingsTitle') }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {{ t('invites.admin.settingsDesc') }}
+            </p>
+          </div>
+          <div class="space-y-5 p-6">
+            <!-- Loading State -->
+            <div v-if="inviteSettingsLoading" class="flex items-center gap-2 text-gray-500">
+              <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-primary-600"></div>
+              {{ t('common.loading') }}
+            </div>
+
+            <div v-else>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ t('invites.admin.rewardAmount') }}
+              </label>
+              <div class="flex items-center gap-4">
+                <input
+                  v-model.number="inviteSettings.reward_amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="input w-full md:w-1/2"
+                  :disabled="inviteSettingsSaving"
+                />
+                <button
+                  type="button"
+                  @click="saveInviteSettings"
+                  class="btn btn-primary"
+                  :disabled="inviteSettingsSaving"
+                >
+                  <svg
+                    v-if="inviteSettingsSaving"
+                    class="mr-1 h-4 w-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  {{ inviteSettingsSaving ? t('common.saving') : t('common.save') }}
+                </button>
+              </div>
+              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('invites.admin.rewardAmountHint') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Site Settings -->
         <div class="card">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
@@ -983,6 +1049,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api'
+import { invitesAdminAPI } from '@/api/admin/invites'
 import type { SystemSettings, UpdateSettingsRequest } from '@/api/admin/settings'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -1346,9 +1413,40 @@ async function saveStreamTimeoutSettings() {
   }
 }
 
+// Invite Settings
+const inviteSettings = reactive({ reward_amount: 0 })
+const inviteSettingsLoading = ref(true)
+const inviteSettingsSaving = ref(false)
+
+async function loadInviteSettings() {
+  inviteSettingsLoading.value = true
+  try {
+    const data = await invitesAdminAPI.getInviteSettings()
+    Object.assign(inviteSettings, data)
+  } catch (error) {
+    console.error('Failed to load invite settings:', error)
+  } finally {
+    inviteSettingsLoading.value = false
+  }
+}
+
+async function saveInviteSettings() {
+  inviteSettingsSaving.value = true
+  try {
+    await invitesAdminAPI.updateInviteSettings(inviteSettings)
+    appStore.showSuccess(t('common.success'))
+  } catch (error) {
+    console.error('Failed to save invite settings:', error)
+    appStore.showError(t('common.error'))
+  } finally {
+    inviteSettingsSaving.value = false
+  }
+}
+
 onMounted(() => {
   loadSettings()
   loadAdminApiKey()
   loadStreamTimeoutSettings()
+  loadInviteSettings()
 })
 </script>
