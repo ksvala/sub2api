@@ -28,38 +28,74 @@
       <template v-if="isAdmin">
         <div
           v-for="section in adminNavSections"
-          :key="section.title"
+          :key="section.id"
           class="sidebar-section mb-2"
         >
-          <!-- Section Title / Divider -->
-          <div v-if="!sidebarCollapsed" class="px-3 mb-2 mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            {{ section.title }}
-          </div>
-          <div v-else class="mx-3 my-3 h-px bg-gray-200 dark:bg-dark-700"></div>
-
-          <router-link
-            v-for="item in section.items"
-            :key="item.path"
-            :to="item.path"
-            class="sidebar-link mb-1"
-            :class="{ 'sidebar-link-active': isActive(item.path) }"
-            :title="sidebarCollapsed ? item.label : undefined"
-            :id="
-              item.path === '/admin/accounts'
-                ? 'sidebar-channel-manage'
-                : item.path === '/admin/groups'
-                  ? 'sidebar-group-manage'
-                  : item.path === '/admin/redeem'
-                    ? 'sidebar-wallet'
-                    : undefined
-            "
-            @click="handleMenuItemClick(item.path)"
+          <!-- Section Title / Group Header -->
+          <button
+            @click="toggleSection(section.id)"
+            class="flex w-full items-center px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-200 transition-colors focus:outline-none"
+            :class="[
+              sidebarCollapsed ? 'justify-center' : 'justify-between',
+              { 'text-indigo-500 dark:text-indigo-400': isSectionActive(section) }
+            ]"
+            :title="sidebarCollapsed ? section.title : undefined"
           >
-            <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
-            <transition name="fade">
-              <span v-if="!sidebarCollapsed">{{ item.label }}</span>
-            </transition>
-          </router-link>
+            <!-- Collapsed: Show Group Icon -->
+            <component 
+              v-if="sidebarCollapsed" 
+              :is="section.icon" 
+              class="h-5 w-5" 
+            />
+            
+            <!-- Expanded: Show Title + Chevron -->
+            <template v-else>
+              <span>{{ section.title }}</span>
+              <ChevronDownIcon 
+                class="h-3 w-3 transition-transform duration-200"
+                :class="{ '-rotate-90': !expandedSections[section.id] }"
+              />
+            </template>
+          </button>
+
+          <!-- Group Items (Collapsible) -->
+          <transition 
+            enter-active-class="transition-all duration-200 ease-out"
+            leave-active-class="transition-all duration-150 ease-in"
+            enter-from-class="opacity-0 -translate-y-2 max-h-0"
+            enter-to-class="opacity-100 translate-y-0 max-h-[500px]"
+            leave-from-class="opacity-100 translate-y-0 max-h-[500px]"
+            leave-to-class="opacity-0 -translate-y-2 max-h-0"
+          >
+            <div v-show="expandedSections[section.id]" class="overflow-hidden">
+              <router-link
+                v-for="item in section.items"
+                :key="item.path"
+                :to="item.path"
+                class="sidebar-link mb-1"
+                :class="[
+                  { 'sidebar-link-active': isActive(item.path) },
+                  sidebarCollapsed ? '' : 'pl-6'
+                ]"
+                :title="sidebarCollapsed ? item.label : undefined"
+                :id="
+                  item.path === '/admin/accounts'
+                    ? 'sidebar-channel-manage'
+                    : item.path === '/admin/groups'
+                      ? 'sidebar-group-manage'
+                      : item.path === '/admin/redeem'
+                        ? 'sidebar-wallet'
+                        : undefined
+                "
+                @click="handleMenuItemClick(item.path)"
+              >
+                <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
+                <transition name="fade">
+                  <span v-if="!sidebarCollapsed">{{ item.label }}</span>
+                </transition>
+              </router-link>
+            </div>
+          </transition>
         </div>
 
         <!-- Personal Section for Admin (hidden in simple mode) -->
@@ -435,6 +471,66 @@ const ChevronDoubleRightIcon = {
     )
 }
 
+const ChevronDownIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M19.5 8.25l-7.5 7.5-7.5-7.5'
+        })
+      ]
+    )
+}
+
+const HomeIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25'
+        })
+      ]
+    )
+}
+
+const RocketLaunchIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z'
+        })
+      ]
+    )
+}
+
+const CpuChipIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z'
+        })
+      ]
+    )
+}
+
 // User navigation items (for regular users)
 const userNavItems = computed(() => {
   const items = [
@@ -463,42 +559,53 @@ const personalNavItems = computed(() => {
   return authStore.isSimpleMode ? items.filter(item => !item.hideInSimpleMode) : items
 })
 
+type NavItem = {
+  path: string
+  label: string
+  icon: any
+  hideInSimpleMode?: boolean
+}
+
 // Admin navigation sections
 const adminNavSections = computed(() => {
-  const sections: { title: string; items: any[] }[] = []
+  const sections: { id: string; title: string; icon: any; items: NavItem[] }[] = []
 
   // 1. Common Group (常用)
-  const commonItems = [
+  const commonItems: NavItem[] = [
     { path: '/admin/dashboard', label: t('nav.dashboard'), icon: DashboardIcon },
     { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
     { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
     { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
     ...(adminSettingsStore.opsMonitoringEnabled
-      ? [{ path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon }]
+      ? ([{ path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon }] as NavItem[])
       : []),
     { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon },
     // Keeping Groups in Common as it relates to User Management
     { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon, hideInSimpleMode: true },
   ]
   sections.push({
+    id: 'common',
     title: '常用',
+    icon: HomeIcon,
     items: authStore.isSimpleMode ? commonItems.filter(i => !i.hideInSimpleMode) : commonItems
   })
 
   // 2. Operations Group (运营)
-  const opsItems = [
+  const opsItems: NavItem[] = [
     { path: '/admin/plans', label: t('nav.plans'), icon: GridIcon },
     { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
     { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon, hideInSimpleMode: true },
     { path: '/admin/invites/logs', label: t('nav.inviteLogs'), icon: TicketIcon, hideInSimpleMode: true },
   ]
   sections.push({
+    id: 'ops',
     title: '运营',
+    icon: RocketLaunchIcon,
     items: authStore.isSimpleMode ? opsItems.filter(i => !i.hideInSimpleMode) : opsItems
   })
 
   // 3. System Group (系统)
-  const systemItems = [
+  const systemItems: NavItem[] = [
     { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
     { path: '/admin/settings', label: t('nav.settings'), icon: CogIcon }
   ]
@@ -509,12 +616,52 @@ const adminNavSections = computed(() => {
   }
 
   sections.push({
+    id: 'system',
     title: '系统',
+    icon: CpuChipIcon,
     items: authStore.isSimpleMode ? systemItems.filter(i => !i.hideInSimpleMode) : systemItems
   })
 
   return sections.filter(s => s.items.length > 0)
 })
+
+// Collapsible Logic
+const expandedSections = ref<Record<string, boolean>>({})
+
+function toggleSection(id: string) {
+  const willExpand = !expandedSections.value[id]
+  
+  // Collapse all other sections
+  Object.keys(expandedSections.value).forEach((key) => {
+    expandedSections.value[key] = false
+  })
+  
+  // Expand the target section if it was closed
+  if (willExpand) {
+    expandedSections.value[id] = true
+  }
+}
+
+function isSectionActive(section: { items: NavItem[] }) {
+  return section.items.some(item => isActive(item.path))
+}
+
+// Auto-expand sections based on current route
+watch(
+  () => route.path,
+  () => {
+    if (isAdmin.value) {
+      // Find the active section
+      const activeSectionId = adminNavSections.value.find(section => isSectionActive(section))?.id
+      
+      // Update all sections: only expand the active one
+      adminNavSections.value.forEach(section => {
+        expandedSections.value[section.id] = (section.id === activeSectionId)
+      })
+    }
+  },
+  { immediate: true }
+)
 
 function toggleSidebar() {
   appStore.toggleSidebar()
