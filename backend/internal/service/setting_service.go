@@ -94,9 +94,9 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		PromoCodeEnabled:    settings[SettingKeyPromoCodeEnabled] != "false", // 默认启用
 		TurnstileEnabled:    settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:    settings[SettingKeyTurnstileSiteKey],
-		SiteName:            s.getStringOrDefault(settings, SettingKeySiteName, "Sub2API"),
+		SiteName:            s.getStringOrDefault(settings, SettingKeySiteName, "YesCodex"),
 		SiteLogo:            settings[SettingKeySiteLogo],
-		SiteSubtitle:        s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
+		SiteSubtitle:        s.getStringOrDefault(settings, SettingKeySiteSubtitle, "稳定、简单、透明的 Codex 中转站"),
 		APIBaseURL:          settings[SettingKeyAPIBaseURL],
 		ContactInfo:         settings[SettingKeyContactInfo],
 		CustomerServiceQR:   settings[SettingKeyCustomerServiceQR],
@@ -276,7 +276,7 @@ func (s *SettingService) IsPromoCodeEnabled(ctx context.Context) bool {
 func (s *SettingService) GetSiteName(ctx context.Context) string {
 	value, err := s.settingRepo.GetValue(ctx, SettingKeySiteName)
 	if err != nil || value == "" {
-		return "Sub2API"
+		return "YesCodex"
 	}
 	return value
 }
@@ -342,7 +342,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyRegistrationEnabled: "true",
 		SettingKeyEmailVerifyEnabled:  "false",
 		SettingKeyPromoCodeEnabled:    "true", // 默认启用优惠码功能
-		SettingKeySiteName:            "Sub2API",
+		SettingKeySiteName:            "YesCodex",
 		SettingKeySiteLogo:            "",
 		SettingKeyCustomerServiceQR:  "",
 		SettingKeyAfterSalesGroupQR:  "",
@@ -386,9 +386,9 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		TurnstileEnabled:             settings[SettingKeyTurnstileEnabled] == "true",
 		TurnstileSiteKey:             settings[SettingKeyTurnstileSiteKey],
 		TurnstileSecretKeyConfigured: settings[SettingKeyTurnstileSecretKey] != "",
-		SiteName:                     s.getStringOrDefault(settings, SettingKeySiteName, "Sub2API"),
+		SiteName:                     s.getStringOrDefault(settings, SettingKeySiteName, "YesCodex"),
 		SiteLogo:                     settings[SettingKeySiteLogo],
-		SiteSubtitle:                 s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
+		SiteSubtitle:                 s.getStringOrDefault(settings, SettingKeySiteSubtitle, "稳定、简单、透明的 Codex 中转站"),
 		APIBaseURL:                   settings[SettingKeyAPIBaseURL],
 		ContactInfo:                  settings[SettingKeyContactInfo],
 		CustomerServiceQR:            settings[SettingKeyCustomerServiceQR],
