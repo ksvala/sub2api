@@ -914,26 +914,6 @@
               </div>
             </div>
 
-            <!-- Home Content -->
-            <div>
-              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('admin.settings.site.homeContent') }}
-              </label>
-              <textarea
-                v-model="form.home_content"
-                rows="6"
-                class="input font-mono text-sm"
-                :placeholder="t('admin.settings.site.homeContentPlaceholder')"
-              ></textarea>
-              <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                {{ t('admin.settings.site.homeContentHint') }}
-              </p>
-              <!-- iframe CSP Warning -->
-              <p class="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                {{ t('admin.settings.site.homeContentIframeWarning') }}
-              </p>
-            </div>
-
             <!-- Hide CCS Import Button -->
             <div
               class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
@@ -1240,7 +1220,6 @@ const form = reactive<SettingsForm>({
   api_base_url: '',
   contact_info: '',
   doc_url: '',
-  home_content: '',
   hide_ccs_import_button: false,
   customer_service_qr: '',
   after_sales_group_qr: '',
@@ -1417,7 +1396,6 @@ async function saveSettings() {
       api_base_url: form.api_base_url,
       contact_info: form.contact_info,
       doc_url: form.doc_url,
-      home_content: form.home_content,
       hide_ccs_import_button: form.hide_ccs_import_button,
       customer_service_qr: form.customer_service_qr,
       after_sales_group_qr: form.after_sales_group_qr,

@@ -204,6 +204,49 @@ var (
 			},
 		},
 	}
+	// AdminActionLogsColumns holds the columns for the "admin_action_logs" table.
+	AdminActionLogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "action", Type: field.TypeString, Size: 64},
+		{Name: "resource_type", Type: field.TypeString, Size: 64},
+		{Name: "resource_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "payload", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "ip_address", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "user_agent", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "admin_id", Type: field.TypeInt64, Nullable: true},
+	}
+	// AdminActionLogsTable holds the schema information for the "admin_action_logs" table.
+	AdminActionLogsTable = &schema.Table{
+		Name:       "admin_action_logs",
+		Columns:    AdminActionLogsColumns,
+		PrimaryKey: []*schema.Column{AdminActionLogsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "admin_action_logs_users_admin_action_logs",
+				Columns:    []*schema.Column{AdminActionLogsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "adminactionlog_admin_id",
+				Unique:  false,
+				Columns: []*schema.Column{AdminActionLogsColumns[8]},
+			},
+			{
+				Name:    "adminactionlog_resource_type",
+				Unique:  false,
+				Columns: []*schema.Column{AdminActionLogsColumns[2]},
+			},
+			{
+				Name:    "adminactionlog_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{AdminActionLogsColumns[7]},
+			},
+		},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -1012,6 +1055,7 @@ var (
 		APIKeysTable,
 		AccountsTable,
 		AccountGroupsTable,
+		AdminActionLogsTable,
 		GroupsTable,
 		UserInvitesTable,
 		InviteLogsTable,
@@ -1045,6 +1089,10 @@ func init() {
 	AccountGroupsTable.ForeignKeys[1].RefTable = GroupsTable
 	AccountGroupsTable.Annotation = &entsql.Annotation{
 		Table: "account_groups",
+	}
+	AdminActionLogsTable.ForeignKeys[0].RefTable = UsersTable
+	AdminActionLogsTable.Annotation = &entsql.Annotation{
+		Table: "admin_action_logs",
 	}
 	GroupsTable.Annotation = &entsql.Annotation{
 		Table: "groups",

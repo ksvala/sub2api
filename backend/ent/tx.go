@@ -20,6 +20,8 @@ type Tx struct {
 	Account *AccountClient
 	// AccountGroup is the client for interacting with the AccountGroup builders.
 	AccountGroup *AccountGroupClient
+	// AdminActionLog is the client for interacting with the AdminActionLog builders.
+	AdminActionLog *AdminActionLogClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// Invitation is the client for interacting with the Invitation builders.
@@ -186,6 +188,7 @@ func (tx *Tx) init() {
 	tx.APIKey = NewAPIKeyClient(tx.config)
 	tx.Account = NewAccountClient(tx.config)
 	tx.AccountGroup = NewAccountGroupClient(tx.config)
+	tx.AdminActionLog = NewAdminActionLogClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.Invitation = NewInvitationClient(tx.config)
 	tx.InviteLog = NewInviteLogClient(tx.config)

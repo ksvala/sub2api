@@ -67,6 +67,8 @@ const (
 	EdgeInviteLogsAsInvitee = "invite_logs_as_invitee"
 	// EdgeInviteLogsAsAdmin holds the string denoting the invite_logs_as_admin edge name in mutations.
 	EdgeInviteLogsAsAdmin = "invite_logs_as_admin"
+	// EdgeAdminActionLogs holds the string denoting the admin_action_logs edge name in mutations.
+	EdgeAdminActionLogs = "admin_action_logs"
 	// EdgeUserAllowedGroups holds the string denoting the user_allowed_groups edge name in mutations.
 	EdgeUserAllowedGroups = "user_allowed_groups"
 	// Table holds the table name of the user in the database.
@@ -167,6 +169,13 @@ const (
 	InviteLogsAsAdminInverseTable = "invite_logs"
 	// InviteLogsAsAdminColumn is the table column denoting the invite_logs_as_admin relation/edge.
 	InviteLogsAsAdminColumn = "admin_id"
+	// AdminActionLogsTable is the table that holds the admin_action_logs relation/edge.
+	AdminActionLogsTable = "admin_action_logs"
+	// AdminActionLogsInverseTable is the table name for the AdminActionLog entity.
+	// It exists in this package in order to avoid circular dependency with the "adminactionlog" package.
+	AdminActionLogsInverseTable = "admin_action_logs"
+	// AdminActionLogsColumn is the table column denoting the admin_action_logs relation/edge.
+	AdminActionLogsColumn = "admin_id"
 	// UserAllowedGroupsTable is the table that holds the user_allowed_groups relation/edge.
 	UserAllowedGroupsTable = "user_allowed_groups"
 	// UserAllowedGroupsInverseTable is the table name for the UserAllowedGroup entity.
@@ -506,6 +515,20 @@ func ByInviteLogsAsAdmin(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 	}
 }
 
+// ByAdminActionLogsCount orders the results by admin_action_logs count.
+func ByAdminActionLogsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAdminActionLogsStep(), opts...)
+	}
+}
+
+// ByAdminActionLogs orders the results by admin_action_logs terms.
+func ByAdminActionLogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAdminActionLogsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByUserAllowedGroupsCount orders the results by user_allowed_groups count.
 func ByUserAllowedGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -615,6 +638,13 @@ func newInviteLogsAsAdminStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(InviteLogsAsAdminInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, InviteLogsAsAdminTable, InviteLogsAsAdminColumn),
+	)
+}
+func newAdminActionLogsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AdminActionLogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AdminActionLogsTable, AdminActionLogsColumn),
 	)
 }
 func newUserAllowedGroupsStep() *sqlgraph.Step {

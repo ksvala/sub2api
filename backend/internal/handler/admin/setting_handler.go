@@ -20,15 +20,17 @@ type SettingHandler struct {
 	emailService     *service.EmailService
 	turnstileService *service.TurnstileService
 	opsService       *service.OpsService
+	adminActionLogService *service.AdminActionLogService
 }
 
 // NewSettingHandler 创建系统设置处理器
-func NewSettingHandler(settingService *service.SettingService, emailService *service.EmailService, turnstileService *service.TurnstileService, opsService *service.OpsService) *SettingHandler {
+func NewSettingHandler(settingService *service.SettingService, emailService *service.EmailService, turnstileService *service.TurnstileService, opsService *service.OpsService, adminActionLogService *service.AdminActionLogService) *SettingHandler {
 	return &SettingHandler{
-		settingService:   settingService,
-		emailService:     emailService,
-		turnstileService: turnstileService,
-		opsService:       opsService,
+		settingService:       settingService,
+		emailService:         emailService,
+		turnstileService:     turnstileService,
+		opsService:           opsService,
+		adminActionLogService: adminActionLogService,
 	}
 }
 
@@ -70,7 +72,6 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		CustomerServiceQR:                    settings.CustomerServiceQR,
 		AfterSalesGroupQR:                    settings.AfterSalesGroupQR,
 		DocURL:                               settings.DocURL,
-		HomeContent:                          settings.HomeContent,
 		HideCcsImportButton:                  settings.HideCcsImportButton,
 		DefaultConcurrency:                   settings.DefaultConcurrency,
 		DefaultBalance:                       settings.DefaultBalance,
@@ -124,7 +125,6 @@ type UpdateSettingsRequest struct {
 	CustomerServiceQR   string `json:"customer_service_qr"`
 	AfterSalesGroupQR   string `json:"after_sales_group_qr"`
 	DocURL              string `json:"doc_url"`
-	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
 
 	// 默认配置
@@ -269,7 +269,6 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomerServiceQR:          req.CustomerServiceQR,
 		AfterSalesGroupQR:          req.AfterSalesGroupQR,
 		DocURL:                     req.DocURL,
-		HomeContent:                req.HomeContent,
 		HideCcsImportButton:        req.HideCcsImportButton,
 		DefaultConcurrency:         req.DefaultConcurrency,
 		DefaultBalance:             req.DefaultBalance,
@@ -344,7 +343,6 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		APIBaseURL:                           updatedSettings.APIBaseURL,
 		ContactInfo:                          updatedSettings.ContactInfo,
 		DocURL:                               updatedSettings.DocURL,
-		HomeContent:                          updatedSettings.HomeContent,
 		HideCcsImportButton:                  updatedSettings.HideCcsImportButton,
 		DefaultConcurrency:                   updatedSettings.DefaultConcurrency,
 		DefaultBalance:                       updatedSettings.DefaultBalance,
@@ -380,6 +378,20 @@ func (h *SettingHandler) auditSettingsUpdate(c *gin.Context, before *service.Sys
 		role,
 		changed,
 	)
+
+	if h.adminActionLogService != nil {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"changed_fields": changed,
+		})
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "update_settings",
+			ResourceType: "settings",
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
+	}
 }
 
 func diffSettings(before *service.SystemSettings, after *service.SystemSettings, req UpdateSettingsRequest) []string {
@@ -449,9 +461,6 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	}
 	if before.DocURL != after.DocURL {
 		changed = append(changed, "doc_url")
-	}
-	if before.HomeContent != after.HomeContent {
-		changed = append(changed, "home_content")
 	}
 	if before.HideCcsImportButton != after.HideCcsImportButton {
 		changed = append(changed, "hide_ccs_import_button")

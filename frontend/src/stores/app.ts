@@ -323,7 +323,6 @@ export const useAppStore = defineStore('app', () => {
         customer_service_qr: '',
         after_sales_group_qr: '',
         doc_url: docUrl.value,
-        home_content: '',
         hide_ccs_import_button: false,
         linuxdo_oauth_enabled: false,
         version: siteVersion.value

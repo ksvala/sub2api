@@ -5,6 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	"image/png"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -12,6 +15,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/image/webp"
 )
 
 const (
@@ -40,6 +45,9 @@ func (s *UploadService) SaveImage(ctx context.Context, file *multipart.FileHeade
 	if contentType == "" {
 		contentType = mime.TypeByExtension(filepath.Ext(file.Filename))
 	}
+	if strings.Contains(strings.ToLower(contentType), "svg") {
+		return "", fmt.Errorf("unsupported file type")
+	}
 	if !strings.HasPrefix(contentType, "image/") {
 		return "", fmt.Errorf("unsupported file type")
 	}
@@ -48,7 +56,7 @@ func (s *UploadService) SaveImage(ctx context.Context, file *multipart.FileHeade
 		return "", fmt.Errorf("prepare upload dir: %w", err)
 	}
 
-	name, err := randomFileName(file.Filename)
+	name, err := randomFileNameWithExt(".png")
 	if err != nil {
 		return "", err
 	}
@@ -69,8 +77,24 @@ func (s *UploadService) SaveImage(ctx context.Context, file *multipart.FileHeade
 	}
 
 	detected := http.DetectContentType(buf)
+	if strings.Contains(strings.ToLower(detected), "svg") {
+		return "", fmt.Errorf("unsupported file type")
+	}
 	if !strings.HasPrefix(detected, "image/") {
 		return "", fmt.Errorf("unsupported file type")
+	}
+	if detected != "image/png" && detected != "image/jpeg" && detected != "image/webp" {
+		return "", fmt.Errorf("unsupported file type")
+	}
+
+	var img image.Image
+	if detected == "image/webp" {
+		img, err = webp.Decode(src)
+	} else {
+		img, _, err = image.Decode(src)
+	}
+	if err != nil {
+		return "", fmt.Errorf("decode image: %w", err)
 	}
 
 	fileHandle, err := os.Create(path)
@@ -79,21 +103,24 @@ func (s *UploadService) SaveImage(ctx context.Context, file *multipart.FileHeade
 	}
 	defer func() { _ = fileHandle.Close() }()
 
-	if _, err := io.Copy(fileHandle, src); err != nil {
-		return "", fmt.Errorf("save file: %w", err)
+	if err := png.Encode(fileHandle, img); err != nil {
+		return "", fmt.Errorf("encode image: %w", err)
 	}
 
 	return "/uploads/" + name, nil
 }
 
-func randomFileName(original string) (string, error) {
+func randomFileNameWithExt(ext string) (string, error) {
 	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", fmt.Errorf("generate file name: %w", err)
 	}
-	ext := strings.ToLower(filepath.Ext(original))
+	ext = strings.ToLower(strings.TrimSpace(ext))
 	if ext == "" {
 		ext = ".png"
+	}
+	if !strings.HasPrefix(ext, ".") {
+		ext = "." + ext
 	}
 	return hex.EncodeToString(bytes) + ext, nil
 }

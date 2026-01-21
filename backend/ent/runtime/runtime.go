@@ -7,6 +7,7 @@ import (
 
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/accountgroup"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -213,6 +214,24 @@ func init() {
 	accountgroupDescCreatedAt := accountgroupFields[3].Descriptor()
 	// accountgroup.DefaultCreatedAt holds the default value on creation for the created_at field.
 	accountgroup.DefaultCreatedAt = accountgroupDescCreatedAt.Default.(func() time.Time)
+	adminactionlogFields := schema.AdminActionLog{}.Fields()
+	_ = adminactionlogFields
+	// adminactionlogDescAction is the schema descriptor for action field.
+	adminactionlogDescAction := adminactionlogFields[1].Descriptor()
+	// adminactionlog.ActionValidator is a validator for the "action" field. It is called by the builders before save.
+	adminactionlog.ActionValidator = adminactionlogDescAction.Validators[0].(func(string) error)
+	// adminactionlogDescResourceType is the schema descriptor for resource_type field.
+	adminactionlogDescResourceType := adminactionlogFields[2].Descriptor()
+	// adminactionlog.ResourceTypeValidator is a validator for the "resource_type" field. It is called by the builders before save.
+	adminactionlog.ResourceTypeValidator = adminactionlogDescResourceType.Validators[0].(func(string) error)
+	// adminactionlogDescIPAddress is the schema descriptor for ip_address field.
+	adminactionlogDescIPAddress := adminactionlogFields[5].Descriptor()
+	// adminactionlog.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
+	adminactionlog.IPAddressValidator = adminactionlogDescIPAddress.Validators[0].(func(string) error)
+	// adminactionlogDescCreatedAt is the schema descriptor for created_at field.
+	adminactionlogDescCreatedAt := adminactionlogFields[7].Descriptor()
+	// adminactionlog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	adminactionlog.DefaultCreatedAt = adminactionlogDescCreatedAt.Default.(func() time.Time)
 	groupMixin := schema.Group{}.Mixin()
 	groupMixinHooks1 := groupMixin[1].Hooks()
 	group.Hooks[0] = groupMixinHooks1[0]

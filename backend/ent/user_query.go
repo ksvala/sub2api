@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -48,6 +49,7 @@ type UserQuery struct {
 	withInviteLogsAsInviter   *InviteLogQuery
 	withInviteLogsAsInvitee   *InviteLogQuery
 	withInviteLogsAsAdmin     *InviteLogQuery
+	withAdminActionLogs       *AdminActionLogQuery
 	withUserAllowedGroups     *UserAllowedGroupQuery
 	modifiers                 []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -394,6 +396,28 @@ func (_q *UserQuery) QueryInviteLogsAsAdmin() *InviteLogQuery {
 	return query
 }
 
+// QueryAdminActionLogs chains the current query on the "admin_action_logs" edge.
+func (_q *UserQuery) QueryAdminActionLogs() *AdminActionLogQuery {
+	query := (&AdminActionLogClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(adminactionlog.Table, adminactionlog.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AdminActionLogsTable, user.AdminActionLogsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryUserAllowedGroups chains the current query on the "user_allowed_groups" edge.
 func (_q *UserQuery) QueryUserAllowedGroups() *UserAllowedGroupQuery {
 	query := (&UserAllowedGroupClient{config: _q.config}).Query()
@@ -622,6 +646,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withInviteLogsAsInviter:   _q.withInviteLogsAsInviter.Clone(),
 		withInviteLogsAsInvitee:   _q.withInviteLogsAsInvitee.Clone(),
 		withInviteLogsAsAdmin:     _q.withInviteLogsAsAdmin.Clone(),
+		withAdminActionLogs:       _q.withAdminActionLogs.Clone(),
 		withUserAllowedGroups:     _q.withUserAllowedGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -783,6 +808,17 @@ func (_q *UserQuery) WithInviteLogsAsAdmin(opts ...func(*InviteLogQuery)) *UserQ
 	return _q
 }
 
+// WithAdminActionLogs tells the query-builder to eager-load the nodes that are connected to
+// the "admin_action_logs" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithAdminActionLogs(opts ...func(*AdminActionLogQuery)) *UserQuery {
+	query := (&AdminActionLogClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAdminActionLogs = query
+	return _q
+}
+
 // WithUserAllowedGroups tells the query-builder to eager-load the nodes that are connected to
 // the "user_allowed_groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithUserAllowedGroups(opts ...func(*UserAllowedGroupQuery)) *UserQuery {
@@ -872,7 +908,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [15]bool{
+		loadedTypes = [16]bool{
 			_q.withAPIKeys != nil,
 			_q.withRedeemCodes != nil,
 			_q.withSubscriptions != nil,
@@ -887,6 +923,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withInviteLogsAsInviter != nil,
 			_q.withInviteLogsAsInvitee != nil,
 			_q.withInviteLogsAsAdmin != nil,
+			_q.withAdminActionLogs != nil,
 			_q.withUserAllowedGroups != nil,
 		}
 	)
@@ -1007,6 +1044,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadInviteLogsAsAdmin(ctx, query, nodes,
 			func(n *User) { n.Edges.InviteLogsAsAdmin = []*InviteLog{} },
 			func(n *User, e *InviteLog) { n.Edges.InviteLogsAsAdmin = append(n.Edges.InviteLogsAsAdmin, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAdminActionLogs; query != nil {
+		if err := _q.loadAdminActionLogs(ctx, query, nodes,
+			func(n *User) { n.Edges.AdminActionLogs = []*AdminActionLog{} },
+			func(n *User, e *AdminActionLog) { n.Edges.AdminActionLogs = append(n.Edges.AdminActionLogs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1462,6 +1506,39 @@ func (_q *UserQuery) loadInviteLogsAsAdmin(ctx context.Context, query *InviteLog
 	}
 	query.Where(predicate.InviteLog(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.InviteLogsAsAdminColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AdminID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "admin_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "admin_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadAdminActionLogs(ctx context.Context, query *AdminActionLogQuery, nodes []*User, init func(*User), assign func(*User, *AdminActionLog)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(adminactionlog.FieldAdminID)
+	}
+	query.Where(predicate.AdminActionLog(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.AdminActionLogsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

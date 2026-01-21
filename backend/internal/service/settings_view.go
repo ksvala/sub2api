@@ -34,7 +34,6 @@ type SystemSettings struct {
 	CustomerServiceQR   string
 	AfterSalesGroupQR   string
 	DocURL              string
-	HomeContent         string
 	HideCcsImportButton bool
 
 	DefaultConcurrency int
@@ -72,7 +71,6 @@ type PublicSettings struct {
 	CustomerServiceQR   string
 	AfterSalesGroupQR   string
 	DocURL              string
-	HomeContent         string
 	HideCcsImportButton bool
 	LinuxDoOAuthEnabled bool
 	Version             string

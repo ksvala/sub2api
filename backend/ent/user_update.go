@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -423,6 +424,21 @@ func (_u *UserUpdate) AddInviteLogsAsAdmin(v ...*InviteLog) *UserUpdate {
 	return _u.AddInviteLogsAsAdminIDs(ids...)
 }
 
+// AddAdminActionLogIDs adds the "admin_action_logs" edge to the AdminActionLog entity by IDs.
+func (_u *UserUpdate) AddAdminActionLogIDs(ids ...int64) *UserUpdate {
+	_u.mutation.AddAdminActionLogIDs(ids...)
+	return _u
+}
+
+// AddAdminActionLogs adds the "admin_action_logs" edges to the AdminActionLog entity.
+func (_u *UserUpdate) AddAdminActionLogs(v ...*AdminActionLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAdminActionLogIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -705,6 +721,27 @@ func (_u *UserUpdate) RemoveInviteLogsAsAdmin(v ...*InviteLog) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveInviteLogsAsAdminIDs(ids...)
+}
+
+// ClearAdminActionLogs clears all "admin_action_logs" edges to the AdminActionLog entity.
+func (_u *UserUpdate) ClearAdminActionLogs() *UserUpdate {
+	_u.mutation.ClearAdminActionLogs()
+	return _u
+}
+
+// RemoveAdminActionLogIDs removes the "admin_action_logs" edge to AdminActionLog entities by IDs.
+func (_u *UserUpdate) RemoveAdminActionLogIDs(ids ...int64) *UserUpdate {
+	_u.mutation.RemoveAdminActionLogIDs(ids...)
+	return _u
+}
+
+// RemoveAdminActionLogs removes "admin_action_logs" edges to AdminActionLog entities.
+func (_u *UserUpdate) RemoveAdminActionLogs(v ...*AdminActionLog) *UserUpdate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAdminActionLogIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1467,6 +1504,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.AdminActionLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAdminActionLogsIDs(); len(nodes) > 0 && !_u.mutation.AdminActionLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AdminActionLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1873,6 +1955,21 @@ func (_u *UserUpdateOne) AddInviteLogsAsAdmin(v ...*InviteLog) *UserUpdateOne {
 	return _u.AddInviteLogsAsAdminIDs(ids...)
 }
 
+// AddAdminActionLogIDs adds the "admin_action_logs" edge to the AdminActionLog entity by IDs.
+func (_u *UserUpdateOne) AddAdminActionLogIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.AddAdminActionLogIDs(ids...)
+	return _u
+}
+
+// AddAdminActionLogs adds the "admin_action_logs" edges to the AdminActionLog entity.
+func (_u *UserUpdateOne) AddAdminActionLogs(v ...*AdminActionLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAdminActionLogIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -2155,6 +2252,27 @@ func (_u *UserUpdateOne) RemoveInviteLogsAsAdmin(v ...*InviteLog) *UserUpdateOne
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveInviteLogsAsAdminIDs(ids...)
+}
+
+// ClearAdminActionLogs clears all "admin_action_logs" edges to the AdminActionLog entity.
+func (_u *UserUpdateOne) ClearAdminActionLogs() *UserUpdateOne {
+	_u.mutation.ClearAdminActionLogs()
+	return _u
+}
+
+// RemoveAdminActionLogIDs removes the "admin_action_logs" edge to AdminActionLog entities by IDs.
+func (_u *UserUpdateOne) RemoveAdminActionLogIDs(ids ...int64) *UserUpdateOne {
+	_u.mutation.RemoveAdminActionLogIDs(ids...)
+	return _u
+}
+
+// RemoveAdminActionLogs removes "admin_action_logs" edges to AdminActionLog entities.
+func (_u *UserUpdateOne) RemoveAdminActionLogs(v ...*AdminActionLog) *UserUpdateOne {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAdminActionLogIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -2940,6 +3058,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AdminActionLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAdminActionLogsIDs(); len(nodes) > 0 && !_u.mutation.AdminActionLogsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AdminActionLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

@@ -86,6 +86,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("invite_logs_as_inviter", InviteLog.Type),
 		edge.To("invite_logs_as_invitee", InviteLog.Type),
 		edge.To("invite_logs_as_admin", InviteLog.Type),
+		edge.To("admin_action_logs", AdminActionLog.Type),
 	}
 }
 

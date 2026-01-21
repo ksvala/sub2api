@@ -32,9 +32,9 @@ func (h *PlanHandler) List(c *gin.Context) {
 		return
 	}
 
-	items := make([]dto.Plan, 0, len(plans))
+	items := make([]dto.PublicPlan, 0, len(plans))
 	for i := range plans {
-		items = append(items, *dto.PlanFromService(&plans[i]))
+		items = append(items, *dto.PublicPlanFromService(&plans[i]))
 	}
 	response.Paginated(c, items, result.Total, page, pageSize)
 }

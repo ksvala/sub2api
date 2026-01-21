@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/accountgroup"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -46,6 +47,7 @@ const (
 	TypeAPIKey                  = "APIKey"
 	TypeAccount                 = "Account"
 	TypeAccountGroup            = "AccountGroup"
+	TypeAdminActionLog          = "AdminActionLog"
 	TypeGroup                   = "Group"
 	TypeInvitation              = "Invitation"
 	TypeInviteLog               = "InviteLog"
@@ -3837,6 +3839,899 @@ func (m *AccountGroupMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AccountGroup edge %s", name)
+}
+
+// AdminActionLogMutation represents an operation that mutates the AdminActionLog nodes in the graph.
+type AdminActionLogMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int64
+	action         *string
+	resource_type  *string
+	resource_id    *int64
+	addresource_id *int64
+	payload        *string
+	ip_address     *string
+	user_agent     *string
+	created_at     *time.Time
+	clearedFields  map[string]struct{}
+	admin          *int64
+	clearedadmin   bool
+	done           bool
+	oldValue       func(context.Context) (*AdminActionLog, error)
+	predicates     []predicate.AdminActionLog
+}
+
+var _ ent.Mutation = (*AdminActionLogMutation)(nil)
+
+// adminactionlogOption allows management of the mutation configuration using functional options.
+type adminactionlogOption func(*AdminActionLogMutation)
+
+// newAdminActionLogMutation creates new mutation for the AdminActionLog entity.
+func newAdminActionLogMutation(c config, op Op, opts ...adminactionlogOption) *AdminActionLogMutation {
+	m := &AdminActionLogMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdminActionLog,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdminActionLogID sets the ID field of the mutation.
+func withAdminActionLogID(id int64) adminactionlogOption {
+	return func(m *AdminActionLogMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AdminActionLog
+		)
+		m.oldValue = func(ctx context.Context) (*AdminActionLog, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AdminActionLog.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdminActionLog sets the old AdminActionLog of the mutation.
+func withAdminActionLog(node *AdminActionLog) adminactionlogOption {
+	return func(m *AdminActionLogMutation) {
+		m.oldValue = func(context.Context) (*AdminActionLog, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdminActionLogMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdminActionLogMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdminActionLogMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AdminActionLogMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AdminActionLog.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAdminID sets the "admin_id" field.
+func (m *AdminActionLogMutation) SetAdminID(i int64) {
+	m.admin = &i
+}
+
+// AdminID returns the value of the "admin_id" field in the mutation.
+func (m *AdminActionLogMutation) AdminID() (r int64, exists bool) {
+	v := m.admin
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdminID returns the old "admin_id" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldAdminID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAdminID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAdminID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdminID: %w", err)
+	}
+	return oldValue.AdminID, nil
+}
+
+// ClearAdminID clears the value of the "admin_id" field.
+func (m *AdminActionLogMutation) ClearAdminID() {
+	m.admin = nil
+	m.clearedFields[adminactionlog.FieldAdminID] = struct{}{}
+}
+
+// AdminIDCleared returns if the "admin_id" field was cleared in this mutation.
+func (m *AdminActionLogMutation) AdminIDCleared() bool {
+	_, ok := m.clearedFields[adminactionlog.FieldAdminID]
+	return ok
+}
+
+// ResetAdminID resets all changes to the "admin_id" field.
+func (m *AdminActionLogMutation) ResetAdminID() {
+	m.admin = nil
+	delete(m.clearedFields, adminactionlog.FieldAdminID)
+}
+
+// SetAction sets the "action" field.
+func (m *AdminActionLogMutation) SetAction(s string) {
+	m.action = &s
+}
+
+// Action returns the value of the "action" field in the mutation.
+func (m *AdminActionLogMutation) Action() (r string, exists bool) {
+	v := m.action
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAction returns the old "action" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldAction(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAction is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAction requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAction: %w", err)
+	}
+	return oldValue.Action, nil
+}
+
+// ResetAction resets all changes to the "action" field.
+func (m *AdminActionLogMutation) ResetAction() {
+	m.action = nil
+}
+
+// SetResourceType sets the "resource_type" field.
+func (m *AdminActionLogMutation) SetResourceType(s string) {
+	m.resource_type = &s
+}
+
+// ResourceType returns the value of the "resource_type" field in the mutation.
+func (m *AdminActionLogMutation) ResourceType() (r string, exists bool) {
+	v := m.resource_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceType returns the old "resource_type" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldResourceType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceType: %w", err)
+	}
+	return oldValue.ResourceType, nil
+}
+
+// ResetResourceType resets all changes to the "resource_type" field.
+func (m *AdminActionLogMutation) ResetResourceType() {
+	m.resource_type = nil
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *AdminActionLogMutation) SetResourceID(i int64) {
+	m.resource_id = &i
+	m.addresource_id = nil
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *AdminActionLogMutation) ResourceID() (r int64, exists bool) {
+	v := m.resource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldResourceID(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// AddResourceID adds i to the "resource_id" field.
+func (m *AdminActionLogMutation) AddResourceID(i int64) {
+	if m.addresource_id != nil {
+		*m.addresource_id += i
+	} else {
+		m.addresource_id = &i
+	}
+}
+
+// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
+func (m *AdminActionLogMutation) AddedResourceID() (r int64, exists bool) {
+	v := m.addresource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (m *AdminActionLogMutation) ClearResourceID() {
+	m.resource_id = nil
+	m.addresource_id = nil
+	m.clearedFields[adminactionlog.FieldResourceID] = struct{}{}
+}
+
+// ResourceIDCleared returns if the "resource_id" field was cleared in this mutation.
+func (m *AdminActionLogMutation) ResourceIDCleared() bool {
+	_, ok := m.clearedFields[adminactionlog.FieldResourceID]
+	return ok
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *AdminActionLogMutation) ResetResourceID() {
+	m.resource_id = nil
+	m.addresource_id = nil
+	delete(m.clearedFields, adminactionlog.FieldResourceID)
+}
+
+// SetPayload sets the "payload" field.
+func (m *AdminActionLogMutation) SetPayload(s string) {
+	m.payload = &s
+}
+
+// Payload returns the value of the "payload" field in the mutation.
+func (m *AdminActionLogMutation) Payload() (r string, exists bool) {
+	v := m.payload
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPayload returns the old "payload" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldPayload(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPayload is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPayload requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayload: %w", err)
+	}
+	return oldValue.Payload, nil
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (m *AdminActionLogMutation) ClearPayload() {
+	m.payload = nil
+	m.clearedFields[adminactionlog.FieldPayload] = struct{}{}
+}
+
+// PayloadCleared returns if the "payload" field was cleared in this mutation.
+func (m *AdminActionLogMutation) PayloadCleared() bool {
+	_, ok := m.clearedFields[adminactionlog.FieldPayload]
+	return ok
+}
+
+// ResetPayload resets all changes to the "payload" field.
+func (m *AdminActionLogMutation) ResetPayload() {
+	m.payload = nil
+	delete(m.clearedFields, adminactionlog.FieldPayload)
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (m *AdminActionLogMutation) SetIPAddress(s string) {
+	m.ip_address = &s
+}
+
+// IPAddress returns the value of the "ip_address" field in the mutation.
+func (m *AdminActionLogMutation) IPAddress() (r string, exists bool) {
+	v := m.ip_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAddress returns the old "ip_address" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldIPAddress(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAddress: %w", err)
+	}
+	return oldValue.IPAddress, nil
+}
+
+// ClearIPAddress clears the value of the "ip_address" field.
+func (m *AdminActionLogMutation) ClearIPAddress() {
+	m.ip_address = nil
+	m.clearedFields[adminactionlog.FieldIPAddress] = struct{}{}
+}
+
+// IPAddressCleared returns if the "ip_address" field was cleared in this mutation.
+func (m *AdminActionLogMutation) IPAddressCleared() bool {
+	_, ok := m.clearedFields[adminactionlog.FieldIPAddress]
+	return ok
+}
+
+// ResetIPAddress resets all changes to the "ip_address" field.
+func (m *AdminActionLogMutation) ResetIPAddress() {
+	m.ip_address = nil
+	delete(m.clearedFields, adminactionlog.FieldIPAddress)
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *AdminActionLogMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *AdminActionLogMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldUserAgent(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ClearUserAgent clears the value of the "user_agent" field.
+func (m *AdminActionLogMutation) ClearUserAgent() {
+	m.user_agent = nil
+	m.clearedFields[adminactionlog.FieldUserAgent] = struct{}{}
+}
+
+// UserAgentCleared returns if the "user_agent" field was cleared in this mutation.
+func (m *AdminActionLogMutation) UserAgentCleared() bool {
+	_, ok := m.clearedFields[adminactionlog.FieldUserAgent]
+	return ok
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *AdminActionLogMutation) ResetUserAgent() {
+	m.user_agent = nil
+	delete(m.clearedFields, adminactionlog.FieldUserAgent)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *AdminActionLogMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *AdminActionLogMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the AdminActionLog entity.
+// If the AdminActionLog object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminActionLogMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *AdminActionLogMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// ClearAdmin clears the "admin" edge to the User entity.
+func (m *AdminActionLogMutation) ClearAdmin() {
+	m.clearedadmin = true
+	m.clearedFields[adminactionlog.FieldAdminID] = struct{}{}
+}
+
+// AdminCleared reports if the "admin" edge to the User entity was cleared.
+func (m *AdminActionLogMutation) AdminCleared() bool {
+	return m.AdminIDCleared() || m.clearedadmin
+}
+
+// AdminIDs returns the "admin" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AdminID instead. It exists only for internal usage by the builders.
+func (m *AdminActionLogMutation) AdminIDs() (ids []int64) {
+	if id := m.admin; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAdmin resets all changes to the "admin" edge.
+func (m *AdminActionLogMutation) ResetAdmin() {
+	m.admin = nil
+	m.clearedadmin = false
+}
+
+// Where appends a list predicates to the AdminActionLogMutation builder.
+func (m *AdminActionLogMutation) Where(ps ...predicate.AdminActionLog) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AdminActionLogMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AdminActionLogMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AdminActionLog, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AdminActionLogMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AdminActionLogMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AdminActionLog).
+func (m *AdminActionLogMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdminActionLogMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.admin != nil {
+		fields = append(fields, adminactionlog.FieldAdminID)
+	}
+	if m.action != nil {
+		fields = append(fields, adminactionlog.FieldAction)
+	}
+	if m.resource_type != nil {
+		fields = append(fields, adminactionlog.FieldResourceType)
+	}
+	if m.resource_id != nil {
+		fields = append(fields, adminactionlog.FieldResourceID)
+	}
+	if m.payload != nil {
+		fields = append(fields, adminactionlog.FieldPayload)
+	}
+	if m.ip_address != nil {
+		fields = append(fields, adminactionlog.FieldIPAddress)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, adminactionlog.FieldUserAgent)
+	}
+	if m.created_at != nil {
+		fields = append(fields, adminactionlog.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdminActionLogMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case adminactionlog.FieldAdminID:
+		return m.AdminID()
+	case adminactionlog.FieldAction:
+		return m.Action()
+	case adminactionlog.FieldResourceType:
+		return m.ResourceType()
+	case adminactionlog.FieldResourceID:
+		return m.ResourceID()
+	case adminactionlog.FieldPayload:
+		return m.Payload()
+	case adminactionlog.FieldIPAddress:
+		return m.IPAddress()
+	case adminactionlog.FieldUserAgent:
+		return m.UserAgent()
+	case adminactionlog.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdminActionLogMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case adminactionlog.FieldAdminID:
+		return m.OldAdminID(ctx)
+	case adminactionlog.FieldAction:
+		return m.OldAction(ctx)
+	case adminactionlog.FieldResourceType:
+		return m.OldResourceType(ctx)
+	case adminactionlog.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case adminactionlog.FieldPayload:
+		return m.OldPayload(ctx)
+	case adminactionlog.FieldIPAddress:
+		return m.OldIPAddress(ctx)
+	case adminactionlog.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case adminactionlog.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown AdminActionLog field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdminActionLogMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case adminactionlog.FieldAdminID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdminID(v)
+		return nil
+	case adminactionlog.FieldAction:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAction(v)
+		return nil
+	case adminactionlog.FieldResourceType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceType(v)
+		return nil
+	case adminactionlog.FieldResourceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case adminactionlog.FieldPayload:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPayload(v)
+		return nil
+	case adminactionlog.FieldIPAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAddress(v)
+		return nil
+	case adminactionlog.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case adminactionlog.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdminActionLogMutation) AddedFields() []string {
+	var fields []string
+	if m.addresource_id != nil {
+		fields = append(fields, adminactionlog.FieldResourceID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdminActionLogMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case adminactionlog.FieldResourceID:
+		return m.AddedResourceID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdminActionLogMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case adminactionlog.FieldResourceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdminActionLogMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(adminactionlog.FieldAdminID) {
+		fields = append(fields, adminactionlog.FieldAdminID)
+	}
+	if m.FieldCleared(adminactionlog.FieldResourceID) {
+		fields = append(fields, adminactionlog.FieldResourceID)
+	}
+	if m.FieldCleared(adminactionlog.FieldPayload) {
+		fields = append(fields, adminactionlog.FieldPayload)
+	}
+	if m.FieldCleared(adminactionlog.FieldIPAddress) {
+		fields = append(fields, adminactionlog.FieldIPAddress)
+	}
+	if m.FieldCleared(adminactionlog.FieldUserAgent) {
+		fields = append(fields, adminactionlog.FieldUserAgent)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdminActionLogMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdminActionLogMutation) ClearField(name string) error {
+	switch name {
+	case adminactionlog.FieldAdminID:
+		m.ClearAdminID()
+		return nil
+	case adminactionlog.FieldResourceID:
+		m.ClearResourceID()
+		return nil
+	case adminactionlog.FieldPayload:
+		m.ClearPayload()
+		return nil
+	case adminactionlog.FieldIPAddress:
+		m.ClearIPAddress()
+		return nil
+	case adminactionlog.FieldUserAgent:
+		m.ClearUserAgent()
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdminActionLogMutation) ResetField(name string) error {
+	switch name {
+	case adminactionlog.FieldAdminID:
+		m.ResetAdminID()
+		return nil
+	case adminactionlog.FieldAction:
+		m.ResetAction()
+		return nil
+	case adminactionlog.FieldResourceType:
+		m.ResetResourceType()
+		return nil
+	case adminactionlog.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case adminactionlog.FieldPayload:
+		m.ResetPayload()
+		return nil
+	case adminactionlog.FieldIPAddress:
+		m.ResetIPAddress()
+		return nil
+	case adminactionlog.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case adminactionlog.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdminActionLogMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.admin != nil {
+		edges = append(edges, adminactionlog.EdgeAdmin)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdminActionLogMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case adminactionlog.EdgeAdmin:
+		if id := m.admin; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdminActionLogMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdminActionLogMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdminActionLogMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedadmin {
+		edges = append(edges, adminactionlog.EdgeAdmin)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdminActionLogMutation) EdgeCleared(name string) bool {
+	switch name {
+	case adminactionlog.EdgeAdmin:
+		return m.clearedadmin
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdminActionLogMutation) ClearEdge(name string) error {
+	switch name {
+	case adminactionlog.EdgeAdmin:
+		m.ClearAdmin()
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdminActionLogMutation) ResetEdge(name string) error {
+	switch name {
+	case adminactionlog.EdgeAdmin:
+		m.ResetAdmin()
+		return nil
+	}
+	return fmt.Errorf("unknown AdminActionLog edge %s", name)
 }
 
 // GroupMutation represents an operation that mutates the Group nodes in the graph.
@@ -17463,6 +18358,9 @@ type UserMutation struct {
 	invite_logs_as_admin          map[int64]struct{}
 	removedinvite_logs_as_admin   map[int64]struct{}
 	clearedinvite_logs_as_admin   bool
+	admin_action_logs             map[int64]struct{}
+	removedadmin_action_logs      map[int64]struct{}
+	clearedadmin_action_logs      bool
 	done                          bool
 	oldValue                      func(context.Context) (*User, error)
 	predicates                    []predicate.User
@@ -18805,6 +19703,60 @@ func (m *UserMutation) ResetInviteLogsAsAdmin() {
 	m.removedinvite_logs_as_admin = nil
 }
 
+// AddAdminActionLogIDs adds the "admin_action_logs" edge to the AdminActionLog entity by ids.
+func (m *UserMutation) AddAdminActionLogIDs(ids ...int64) {
+	if m.admin_action_logs == nil {
+		m.admin_action_logs = make(map[int64]struct{})
+	}
+	for i := range ids {
+		m.admin_action_logs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAdminActionLogs clears the "admin_action_logs" edge to the AdminActionLog entity.
+func (m *UserMutation) ClearAdminActionLogs() {
+	m.clearedadmin_action_logs = true
+}
+
+// AdminActionLogsCleared reports if the "admin_action_logs" edge to the AdminActionLog entity was cleared.
+func (m *UserMutation) AdminActionLogsCleared() bool {
+	return m.clearedadmin_action_logs
+}
+
+// RemoveAdminActionLogIDs removes the "admin_action_logs" edge to the AdminActionLog entity by IDs.
+func (m *UserMutation) RemoveAdminActionLogIDs(ids ...int64) {
+	if m.removedadmin_action_logs == nil {
+		m.removedadmin_action_logs = make(map[int64]struct{})
+	}
+	for i := range ids {
+		delete(m.admin_action_logs, ids[i])
+		m.removedadmin_action_logs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAdminActionLogs returns the removed IDs of the "admin_action_logs" edge to the AdminActionLog entity.
+func (m *UserMutation) RemovedAdminActionLogsIDs() (ids []int64) {
+	for id := range m.removedadmin_action_logs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AdminActionLogsIDs returns the "admin_action_logs" edge IDs in the mutation.
+func (m *UserMutation) AdminActionLogsIDs() (ids []int64) {
+	for id := range m.admin_action_logs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAdminActionLogs resets all changes to the "admin_action_logs" edge.
+func (m *UserMutation) ResetAdminActionLogs() {
+	m.admin_action_logs = nil
+	m.clearedadmin_action_logs = false
+	m.removedadmin_action_logs = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -19167,7 +20119,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 14)
+	edges := make([]string, 0, 15)
 	if m.api_keys != nil {
 		edges = append(edges, user.EdgeAPIKeys)
 	}
@@ -19209,6 +20161,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.invite_logs_as_admin != nil {
 		edges = append(edges, user.EdgeInviteLogsAsAdmin)
+	}
+	if m.admin_action_logs != nil {
+		edges = append(edges, user.EdgeAdminActionLogs)
 	}
 	return edges
 }
@@ -19299,13 +20254,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeAdminActionLogs:
+		ids := make([]ent.Value, 0, len(m.admin_action_logs))
+		for id := range m.admin_action_logs {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 14)
+	edges := make([]string, 0, 15)
 	if m.removedapi_keys != nil {
 		edges = append(edges, user.EdgeAPIKeys)
 	}
@@ -19344,6 +20305,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedinvite_logs_as_admin != nil {
 		edges = append(edges, user.EdgeInviteLogsAsAdmin)
+	}
+	if m.removedadmin_action_logs != nil {
+		edges = append(edges, user.EdgeAdminActionLogs)
 	}
 	return edges
 }
@@ -19430,13 +20394,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeAdminActionLogs:
+		ids := make([]ent.Value, 0, len(m.removedadmin_action_logs))
+		for id := range m.removedadmin_action_logs {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 14)
+	edges := make([]string, 0, 15)
 	if m.clearedapi_keys {
 		edges = append(edges, user.EdgeAPIKeys)
 	}
@@ -19479,6 +20449,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedinvite_logs_as_admin {
 		edges = append(edges, user.EdgeInviteLogsAsAdmin)
 	}
+	if m.clearedadmin_action_logs {
+		edges = append(edges, user.EdgeAdminActionLogs)
+	}
 	return edges
 }
 
@@ -19514,6 +20487,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedinvite_logs_as_invitee
 	case user.EdgeInviteLogsAsAdmin:
 		return m.clearedinvite_logs_as_admin
+	case user.EdgeAdminActionLogs:
+		return m.clearedadmin_action_logs
 	}
 	return false
 }
@@ -19574,6 +20549,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeInviteLogsAsAdmin:
 		m.ResetInviteLogsAsAdmin()
+		return nil
+	case user.EdgeAdminActionLogs:
+		m.ResetAdminActionLogs()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

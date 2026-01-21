@@ -2861,10 +2861,6 @@ export default {
       customerServiceQr: 'Customer Service QR',
       afterSalesGroupQr: 'After-Sales Group QR',
       qrHint: 'Users scan to contact support or join group',
-      homeContent: 'Home Announcement',
-      homeContentPlaceholder: 'Supports HTML content',
-      homeContentHint: 'Displayed in the middle area of the home page',
-      homeContentIframeWarning: 'Note: If embedding an iframe, ensure the target site allows embedding.',
       hideCcsImportButton: 'Hide CCS Import Button',
       hideCcsImportButtonHint: 'Hide the Import to CC-Switch button in API Key list'
     },

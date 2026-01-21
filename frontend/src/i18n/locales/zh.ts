@@ -3043,10 +3043,6 @@ export default {
       customerServiceQr: '客服二维码',
       afterSalesGroupQr: '售后群二维码',
       qrHint: '用户扫描联系客服或加入售后群',
-      homeContent: '首页公告',
-      homeContentPlaceholder: '支持 HTML 内容',
-      homeContentHint: '显示在首页中间区域',
-      homeContentIframeWarning: '注意：如需嵌入 iframe，请确保目标站点允许被嵌入。',
       hideCcsImportButton: '隐藏 CCS 导入按钮',
       hideCcsImportButtonHint: '在 API Key 列表中隐藏导入到 CC-Switch 的按钮'
     },

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -395,6 +396,21 @@ func (_c *UserCreate) AddInviteLogsAsAdmin(v ...*InviteLog) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddInviteLogsAsAdminIDs(ids...)
+}
+
+// AddAdminActionLogIDs adds the "admin_action_logs" edge to the AdminActionLog entity by IDs.
+func (_c *UserCreate) AddAdminActionLogIDs(ids ...int64) *UserCreate {
+	_c.mutation.AddAdminActionLogIDs(ids...)
+	return _c
+}
+
+// AddAdminActionLogs adds the "admin_action_logs" edges to the AdminActionLog entity.
+func (_c *UserCreate) AddAdminActionLogs(v ...*AdminActionLog) *UserCreate {
+	ids := make([]int64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAdminActionLogIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -833,6 +849,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(invitelog.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AdminActionLogsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AdminActionLogsTable,
+			Columns: []string{user.AdminActionLogsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(adminactionlog.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/accountgroup"
+	"github.com/Wei-Shaw/sub2api/ent/adminactionlog"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/invitation"
@@ -94,6 +95,7 @@ func checkColumn(t, c string) error {
 			apikey.Table:                  apikey.ValidColumn,
 			account.Table:                 account.ValidColumn,
 			accountgroup.Table:            accountgroup.ValidColumn,
+			adminactionlog.Table:          adminactionlog.ValidColumn,
 			group.Table:                   group.ValidColumn,
 			invitation.Table:              invitation.ValidColumn,
 			invitelog.Table:               invitelog.ValidColumn,

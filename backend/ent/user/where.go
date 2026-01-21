@@ -1112,6 +1112,29 @@ func HasInviteLogsAsAdminWith(preds ...predicate.InviteLog) predicate.User {
 	})
 }
 
+// HasAdminActionLogs applies the HasEdge predicate on the "admin_action_logs" edge.
+func HasAdminActionLogs() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AdminActionLogsTable, AdminActionLogsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAdminActionLogsWith applies the HasEdge predicate on the "admin_action_logs" edge with a given conditions (other predicates).
+func HasAdminActionLogsWith(preds ...predicate.AdminActionLog) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newAdminActionLogsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasUserAllowedGroups applies the HasEdge predicate on the "user_allowed_groups" edge.
 func HasUserAllowedGroups() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -7,6 +7,7 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/dto"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
+	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -14,12 +15,16 @@ import (
 
 // PlanHandler handles admin plan management
 type PlanHandler struct {
-	planService *service.PlanService
+	planService           *service.PlanService
+	adminActionLogService *service.AdminActionLogService
 }
 
 // NewPlanHandler creates a new admin plan handler
-func NewPlanHandler(planService *service.PlanService) *PlanHandler {
-	return &PlanHandler{planService: planService}
+func NewPlanHandler(planService *service.PlanService, adminActionLogService *service.AdminActionLogService) *PlanHandler {
+	return &PlanHandler{
+		planService:           planService,
+		adminActionLogService: adminActionLogService,
+	}
 }
 
 type CreatePlanRequest struct {
@@ -122,6 +127,30 @@ func (h *PlanHandler) Create(c *gin.Context) {
 		return
 	}
 
+	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"title":        plan.Title,
+			"price":        plan.Price,
+			"group_name":   plan.GroupName,
+			"group_sort":   plan.GroupSort,
+			"daily_quota":  plan.DailyQuota,
+			"total_quota":  plan.TotalQuota,
+			"enabled":      plan.Enabled,
+			"sort_order":   plan.SortOrder,
+			"purchase_qr":  plan.PurchaseQRURL,
+		})
+		planID := plan.ID
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "create_plan",
+			ResourceType: "plan",
+			ResourceID:   &planID,
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
+	}
+
 	response.Success(c, dto.PlanFromService(plan))
 }
 
@@ -157,6 +186,30 @@ func (h *PlanHandler) Update(c *gin.Context) {
 		return
 	}
 
+	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"title":        plan.Title,
+			"price":        plan.Price,
+			"group_name":   plan.GroupName,
+			"group_sort":   plan.GroupSort,
+			"daily_quota":  plan.DailyQuota,
+			"total_quota":  plan.TotalQuota,
+			"enabled":      plan.Enabled,
+			"sort_order":   plan.SortOrder,
+			"purchase_qr":  plan.PurchaseQRURL,
+		})
+		planID := plan.ID
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "update_plan",
+			ResourceType: "plan",
+			ResourceID:   &planID,
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
+	}
+
 	response.Success(c, dto.PlanFromService(plan))
 }
 
@@ -172,6 +225,21 @@ func (h *PlanHandler) Delete(c *gin.Context) {
 	if err := h.planService.Delete(c.Request.Context(), planID); err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+
+	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"plan_id": planID,
+		})
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "delete_plan",
+			ResourceType: "plan",
+			ResourceID:   &planID,
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
 	}
 
 	response.Success(c, gin.H{"message": "Plan deleted successfully"})

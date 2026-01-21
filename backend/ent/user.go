@@ -78,11 +78,13 @@ type UserEdges struct {
 	InviteLogsAsInvitee []*InviteLog `json:"invite_logs_as_invitee,omitempty"`
 	// InviteLogsAsAdmin holds the value of the invite_logs_as_admin edge.
 	InviteLogsAsAdmin []*InviteLog `json:"invite_logs_as_admin,omitempty"`
+	// AdminActionLogs holds the value of the admin_action_logs edge.
+	AdminActionLogs []*AdminActionLog `json:"admin_action_logs,omitempty"`
 	// UserAllowedGroups holds the value of the user_allowed_groups edge.
 	UserAllowedGroups []*UserAllowedGroup `json:"user_allowed_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [15]bool
+	loadedTypes [16]bool
 }
 
 // APIKeysOrErr returns the APIKeys value or an error if the edge
@@ -213,10 +215,19 @@ func (e UserEdges) InviteLogsAsAdminOrErr() ([]*InviteLog, error) {
 	return nil, &NotLoadedError{edge: "invite_logs_as_admin"}
 }
 
+// AdminActionLogsOrErr returns the AdminActionLogs value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AdminActionLogsOrErr() ([]*AdminActionLog, error) {
+	if e.loadedTypes[14] {
+		return e.AdminActionLogs, nil
+	}
+	return nil, &NotLoadedError{edge: "admin_action_logs"}
+}
+
 // UserAllowedGroupsOrErr returns the UserAllowedGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) UserAllowedGroupsOrErr() ([]*UserAllowedGroup, error) {
-	if e.loadedTypes[14] {
+	if e.loadedTypes[15] {
 		return e.UserAllowedGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "user_allowed_groups"}
@@ -411,6 +422,11 @@ func (_m *User) QueryInviteLogsAsInvitee() *InviteLogQuery {
 // QueryInviteLogsAsAdmin queries the "invite_logs_as_admin" edge of the User entity.
 func (_m *User) QueryInviteLogsAsAdmin() *InviteLogQuery {
 	return NewUserClient(_m.config).QueryInviteLogsAsAdmin(_m)
+}
+
+// QueryAdminActionLogs queries the "admin_action_logs" edge of the User entity.
+func (_m *User) QueryAdminActionLogs() *AdminActionLogQuery {
+	return NewUserClient(_m.config).QueryAdminActionLogs(_m)
 }
 
 // QueryUserAllowedGroups queries the "user_allowed_groups" edge of the User entity.

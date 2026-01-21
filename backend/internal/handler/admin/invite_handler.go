@@ -16,12 +16,16 @@ import (
 
 // InviteHandler handles admin invite management
 type InviteHandler struct {
-	inviteService *service.InviteService
+	inviteService         *service.InviteService
+	adminActionLogService *service.AdminActionLogService
 }
 
 // NewInviteHandler creates a new admin invite handler
-func NewInviteHandler(inviteService *service.InviteService) *InviteHandler {
-	return &InviteHandler{inviteService: inviteService}
+func NewInviteHandler(inviteService *service.InviteService, adminActionLogService *service.AdminActionLogService) *InviteHandler {
+	return &InviteHandler{
+		inviteService:         inviteService,
+		adminActionLogService: adminActionLogService,
+	}
 }
 
 type UpdateInviteSettingsRequest struct {
@@ -77,6 +81,25 @@ func (h *InviteHandler) ConfirmInvite(c *gin.Context) {
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+
+	if invite != nil {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"invite_id":     invite.ID,
+			"inviter_id":    invite.InviterID,
+			"invitee_id":    invite.InviteeID,
+			"reward_amount": invite.RewardAmount,
+		})
+		inviteID := invite.ID
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "confirm_invite",
+			ResourceType: "invite",
+			ResourceID:   &inviteID,
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
 	}
 
 	response.Success(c, dto.InviteRecordFromService(invite))

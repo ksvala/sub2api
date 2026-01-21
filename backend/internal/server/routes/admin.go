@@ -2,18 +2,29 @@
 package routes
 
 import (
+	"time"
+
 	"github.com/Wei-Shaw/sub2api/internal/handler"
-	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
+	"github.com/Wei-Shaw/sub2api/internal/middleware"
+	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 // RegisterAdminRoutes 注册管理员路由
 func RegisterAdminRoutes(
 	v1 *gin.RouterGroup,
 	h *handler.Handlers,
-	adminAuth middleware.AdminAuthMiddleware,
+	adminAuth servermiddleware.AdminAuthMiddleware,
+	redisClient *redis.Client,
 ) {
+	// Create rate limiter and ban limiter for admin endpoints that require protection
+	rateLimiter := middleware.NewRateLimiter(redisClient)
+	banLimiter := middleware.NewBanLimiter(redisClient)
+	banWindow := 10 * time.Minute
+	banDuration := 5 * time.Hour
+
 	admin := v1.Group("/admin")
 	admin.Use(gin.HandlerFunc(adminAuth))
 	{
@@ -54,7 +65,7 @@ func RegisterAdminRoutes(
 		registerSettingsRoutes(admin, h)
 
 		// 上传
-		registerUploadRoutes(admin, h)
+		registerUploadRoutes(admin, h, rateLimiter, banLimiter, banWindow, banDuration)
 
 		// 运维监控（Ops）
 		registerOpsRoutes(admin, h)
@@ -72,14 +83,20 @@ func RegisterAdminRoutes(
 		registerUserAttributeRoutes(admin, h)
 
 		// 邀请管理
-		registerInviteRoutes(admin, h)
+		registerInviteRoutes(admin, h, rateLimiter, banLimiter, banWindow, banDuration)
 	}
 }
 
-func registerUploadRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerUploadRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter, banLimiter *middleware.BanLimiter, banWindow time.Duration, banDuration time.Duration) {
 	uploads := admin.Group("/uploads")
 	{
-		uploads.POST("/image", h.Admin.Upload.UploadImage)
+		uploads.POST("/image",
+			banLimiter.BanOnFailure("admin-upload", 5, banWindow, banDuration),
+			rateLimiter.LimitWithOptions("admin-upload", 10, time.Minute, middleware.RateLimitOptions{
+				FailureMode: middleware.RateLimitFailClose,
+			}),
+			h.Admin.Upload.UploadImage,
+		)
 	}
 }
 
@@ -206,13 +223,19 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerInviteRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerInviteRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter, banLimiter *middleware.BanLimiter, banWindow time.Duration, banDuration time.Duration) {
 	invites := admin.Group("/invites")
 	{
 		invites.GET("/settings", h.Admin.Invite.GetSettings)
 		invites.PUT("/settings", h.Admin.Invite.UpdateSettings)
 		invites.GET("/logs", h.Admin.Invite.ListLogs)
-		invites.POST("/:invitee_id/confirm", h.Admin.Invite.ConfirmInvite)
+		invites.POST("/:invitee_id/confirm",
+			banLimiter.BanOnFailure("admin-invite-confirm", 5, banWindow, banDuration),
+			rateLimiter.LimitWithOptions("admin-invite-confirm", 10, time.Minute, middleware.RateLimitOptions{
+				FailureMode: middleware.RateLimitFailClose,
+			}),
+			h.Admin.Invite.ConfirmInvite,
+		)
 	}
 }
 

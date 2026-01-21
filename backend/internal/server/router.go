@@ -54,7 +54,14 @@ func SetupRouter(
 		if err := os.MkdirAll(uploadDir, 0o755); err != nil {
 			log.Printf("Warning: failed to create upload dir: %v", err)
 		} else {
-			r.Static("/uploads", uploadDir)
+			uploads := r.Group("/uploads")
+			uploads.Use(func(c *gin.Context) {
+				c.Header("X-Content-Type-Options", "nosniff")
+				c.Header("Content-Security-Policy", "sandbox; default-src 'none'; img-src 'self' data:")
+				c.Header("Cache-Control", "no-store")
+				c.Next()
+			})
+			uploads.Static("/", uploadDir)
 		}
 	}
 
@@ -112,6 +119,6 @@ func registerRoutes(
 	routes.RegisterPublicRoutes(v1, h)
 	routes.RegisterAuthRoutes(v1, h, jwtAuth, redisClient)
 	routes.RegisterUserRoutes(v1, h, jwtAuth)
-	routes.RegisterAdminRoutes(v1, h, adminAuth)
+	routes.RegisterAdminRoutes(v1, h, adminAuth, redisClient)
 	routes.RegisterGatewayRoutes(r, h, apiKeyAuth, apiKeyService, subscriptionService, opsService, cfg)
 }
