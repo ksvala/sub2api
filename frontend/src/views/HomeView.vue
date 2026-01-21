@@ -40,9 +40,37 @@
     <header class="relative z-20 px-6 py-4">
       <nav class="mx-auto flex max-w-6xl items-center justify-between">
         <!-- Logo -->
-        <div class="flex items-center">
-          <div class="h-10 w-10 overflow-hidden rounded-xl shadow-md">
-            <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
+        <div class="flex items-center gap-8">
+          <div class="flex items-center" @click="scrollToTop" role="button">
+            <div class="h-10 w-10 overflow-hidden rounded-xl shadow-md cursor-pointer transition-transform hover:scale-105">
+              <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
+            </div>
+            <span class="ml-3 text-xl font-bold text-gray-900 dark:text-white hidden sm:block">{{ siteName }}</span>
+          </div>
+          
+          <!-- Desktop Nav Links -->
+          <div class="hidden md:flex items-center gap-6">
+            <button 
+              @click="scrollToTop"
+              class="text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
+            >
+              {{ t('nav.home') }}
+            </button>
+            <button 
+              @click="scrollToPricing"
+              class="text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
+            >
+              {{ t('nav.plans') }}
+            </button>
+            <a
+              v-if="docUrl"
+              :href="docUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
+            >
+              {{ t('nav.docs') }}
+            </a>
           </div>
         </div>
 
@@ -50,18 +78,6 @@
         <div class="flex items-center gap-3">
           <!-- Language Switcher -->
           <LocaleSwitcher />
-
-          <!-- Doc Link -->
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
-            :title="t('home.viewDocs')"
-          >
-            <Icon name="book" size="md" />
-          </a>
 
           <!-- Theme Toggle -->
           <button
@@ -102,7 +118,7 @@
           <router-link
             v-else
             to="/login"
-            class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
+            class="inline-flex items-center rounded-full bg-gray-900 px-4 py-1.5 text-xs font-medium text-white transition-all hover:bg-gray-800 hover:shadow-lg dark:bg-gray-800 dark:hover:bg-gray-700"
           >
             {{ t('home.login') }}
           </router-link>
@@ -114,34 +130,43 @@
     <main class="relative z-10 flex-1 px-6 py-16">
       <div class="mx-auto max-w-6xl">
         <!-- Hero Section - Left/Right Layout -->
-        <div class="mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
+        <div class="mb-20 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
           <!-- Left: Text Content -->
           <div class="flex-1 text-center lg:text-left">
             <h1
-              class="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
+              class="mb-6 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-6xl lg:text-7xl leading-tight"
             >
-              {{ siteName }}
+              <span class="block">{{ siteName }}</span>
+              <span class="block text-primary-500 bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-600 mt-2">
+                {{ siteSubtitle }}
+              </span>
             </h1>
-            <p class="mb-8 text-lg text-gray-600 dark:text-dark-300 md:text-xl">
-              {{ siteSubtitle }}
+            <p class="mb-8 text-lg text-gray-600 dark:text-dark-300 md:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              {{ t('home.heroDesc', 'Seamlessly access top-tier AI models through a unified, high-performance API gateway. Built for developers, by developers.') }}
             </p>
 
             <!-- CTA Button -->
-            <div>
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <router-link
                 :to="isAuthenticated ? dashboardPath : '/login'"
-                class="btn btn-primary px-8 py-3 text-base shadow-lg shadow-primary-500/30"
+                class="btn btn-primary px-8 py-3.5 text-base shadow-xl shadow-primary-500/20 hover:shadow-primary-500/30 hover:-translate-y-0.5 transition-all duration-300 rounded-xl"
               >
                 {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
                 <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
               </router-link>
+              <button
+                @click="scrollToPricing"
+                class="px-8 py-3.5 text-base font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-primary-600 transition-all dark:bg-dark-800 dark:text-gray-300 dark:border-dark-700 dark:hover:bg-dark-700"
+              >
+                {{ t('home.viewPricing') }}
+              </button>
             </div>
           </div>
 
           <!-- Right: Terminal Animation -->
-          <div class="flex flex-1 justify-center lg:justify-end">
-            <div class="terminal-container">
-              <div class="terminal-window">
+          <div class="flex flex-1 justify-center lg:justify-end w-full max-w-lg lg:max-w-none">
+            <div class="terminal-container w-full">
+              <div class="terminal-window w-full">
                 <!-- Window header -->
                 <div class="terminal-header">
                   <div class="terminal-buttons">
@@ -177,9 +202,9 @@
         </div>
 
         <!-- Feature Tags - Centered -->
-        <div class="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+        <div class="mb-24 flex flex-wrap items-center justify-center gap-4 md:gap-6">
           <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
+            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80 transition-transform hover:scale-105"
           >
             <Icon name="swap" size="sm" class="text-primary-500" />
             <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
@@ -187,7 +212,7 @@
             }}</span>
           </div>
           <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
+            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80 transition-transform hover:scale-105"
           >
             <Icon name="shield" size="sm" class="text-primary-500" />
             <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
@@ -195,7 +220,7 @@
             }}</span>
           </div>
           <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
+            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80 transition-transform hover:scale-105"
           >
             <Icon name="chart" size="sm" class="text-primary-500" />
             <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
@@ -205,33 +230,33 @@
         </div>
 
         <!-- Features Grid -->
-        <div class="mb-12 grid gap-6 md:grid-cols-3">
+        <div class="mb-24 grid gap-8 md:grid-cols-3">
           <!-- Feature 1: Unified Gateway -->
           <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
+            class="group rounded-3xl border border-gray-200/50 bg-white/60 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
           >
             <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-110"
+              class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-110"
             >
               <Icon name="server" size="lg" class="text-white" />
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">
               {{ t('home.features.unifiedGateway') }}
             </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
+            <p class="text-base leading-relaxed text-gray-600 dark:text-dark-400">
               {{ t('home.features.unifiedGatewayDesc') }}
             </p>
           </div>
 
           <!-- Feature 2: Account Pool -->
           <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
+            class="group rounded-3xl border border-gray-200/50 bg-white/60 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
           >
             <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30 transition-transform group-hover:scale-110"
+              class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/30 transition-transform group-hover:scale-110"
             >
               <svg
-                class="h-6 w-6 text-white"
+                class="h-7 w-7 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -244,23 +269,23 @@
                 />
               </svg>
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">
               {{ t('home.features.multiAccount') }}
             </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
+            <p class="text-base leading-relaxed text-gray-600 dark:text-dark-400">
               {{ t('home.features.multiAccountDesc') }}
             </p>
           </div>
 
           <!-- Feature 3: Billing & Quota -->
           <div
-            class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
+            class="group rounded-3xl border border-gray-200/50 bg-white/60 p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
           >
             <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30 transition-transform group-hover:scale-110"
+              class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30 transition-transform group-hover:scale-110"
             >
               <svg
-                class="h-6 w-6 text-white"
+                class="h-7 w-7 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -273,18 +298,95 @@
                 />
               </svg>
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">
               {{ t('home.features.balanceQuota') }}
             </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
+            <p class="text-base leading-relaxed text-gray-600 dark:text-dark-400">
               {{ t('home.features.balanceQuotaDesc') }}
             </p>
           </div>
         </div>
 
+        <!-- Pricing Section -->
+        <div id="pricing" class="mb-24 scroll-mt-24">
+           <div class="mb-12 text-center">
+            <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+              {{ t('plans.title') }}
+            </h2>
+            <p class="mx-auto max-w-2xl text-lg text-gray-600 dark:text-dark-300">
+              {{ t('plans.description') }}
+            </p>
+          </div>
+
+          <div v-if="loadingPlans" class="flex justify-center py-12">
+            <Icon name="refresh" size="lg" class="animate-spin text-primary-500" />
+          </div>
+          
+          <div v-else-if="groupedPlans.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            {{ t('plans.noPlans') }}
+          </div>
+
+          <div v-else class="space-y-16">
+            <div v-for="group in groupedPlans" :key="group.name">
+              <div v-if="groupedPlans.length > 1" class="mb-8 flex items-center gap-4">
+                <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">{{ group.name }}</h3>
+                <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
+              </div>
+              
+              <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <div
+                  v-for="plan in group.plans"
+                  :key="plan.id"
+                  class="relative flex flex-col rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-dark-700 dark:bg-dark-800"
+                >
+
+                  <div class="mb-6">
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">{{ plan.title }}</h4>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 min-h-[40px]">{{ plan.description }}</p>
+                  </div>
+
+                  <div class="mb-6 flex items-baseline gap-1">
+                    <span class="text-4xl font-extrabold text-gray-900 dark:text-white">¥{{ plan.price }}</span>
+                    <!-- <span class="text-sm font-medium text-gray-500 dark:text-gray-400">/{{ t('plans.month') }}</span> -->
+                  </div>
+
+                  <ul class="mb-8 space-y-4 flex-1">
+                    <li class="flex items-center gap-3">
+                      <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
+                        <Icon name="check" size="sm" />
+                      </div>
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium text-gray-900 dark:text-white">${{ plan.daily_quota }}</span>
+                        {{ t('plans.dailyQuota') }}
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                      <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
+                        <Icon name="check" size="sm" />
+                      </div>
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium text-gray-900 dark:text-white">${{ plan.total_quota }}</span>
+                        {{ t('plans.totalQuota') }}
+                      </span>
+                    </li>
+                  </ul>
+
+                  <button
+                    @click="openPurchase(plan)"
+                    class="w-full rounded-xl bg-primary-600 py-3 text-sm font-bold text-white transition-all hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/25 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {{ t('plans.purchase') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Supported Providers -->
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
+        <div class="mb-12 text-center">
+          <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
             {{ t('home.providers.title') }}
           </h2>
           <p class="text-sm text-gray-600 dark:text-dark-400">
@@ -295,7 +397,7 @@
         <div class="mb-16 flex flex-wrap items-center justify-center gap-4">
           <!-- Claude - Supported -->
           <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
+            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60 transition-transform hover:scale-105"
           >
             <div
               class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-orange-500"
@@ -310,7 +412,7 @@
           </div>
           <!-- GPT - Supported -->
           <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
+            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60 transition-transform hover:scale-105"
           >
             <div
               class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600"
@@ -325,7 +427,7 @@
           </div>
           <!-- Gemini - Supported -->
           <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
+            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60 transition-transform hover:scale-105"
           >
             <div
               class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600"
@@ -340,7 +442,7 @@
           </div>
           <!-- Antigravity - Supported -->
           <div
-            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60"
+            class="flex items-center gap-2 rounded-xl border border-primary-200 bg-white/60 px-5 py-3 ring-1 ring-primary-500/20 backdrop-blur-sm dark:border-primary-800 dark:bg-dark-800/60 transition-transform hover:scale-105"
           >
             <div
               class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-pink-600"
@@ -373,14 +475,32 @@
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-10 border-t border-gray-200/50 px-6 py-8 dark:border-dark-800/50">
+    <footer class="relative z-10 border-t border-gray-200/50 px-6 py-12 dark:border-dark-800/50 bg-white/50 dark:bg-dark-900/50 backdrop-blur-sm">
       <div
-        class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 text-center sm:flex-row sm:text-left"
+        class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 text-center sm:flex-row sm:text-left"
       >
-        <p class="text-sm text-gray-500 dark:text-dark-400">
-          &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
-        </p>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+            <div class="h-8 w-8 overflow-hidden rounded-lg shadow-sm">
+              <img :src="siteLogo || '/logo.png'" alt="Logo" class="h-full w-full object-contain" />
+            </div>
+            <p class="text-sm text-gray-500 dark:text-dark-400">
+            &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <button 
+              @click="scrollToTop" 
+              class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+            >
+                {{ t('nav.home') }}
+            </button>
+            <button 
+              @click="scrollToPricing" 
+              class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+            >
+                {{ t('nav.plans') }}
+            </button>
           <a
             v-if="docUrl"
             :href="docUrl"
@@ -401,6 +521,55 @@
         </div>
       </div>
     </footer>
+    
+    <!-- Purchase Modal -->
+    <BaseDialog
+      :show="showPurchaseModal"
+      :title="selectedPlan?.title || ''"
+      width="narrow"
+      @close="showPurchaseModal = false"
+    >
+      <div v-if="selectedPlan" class="space-y-6 text-center">
+        <div class="rounded-xl bg-gray-50 p-4 dark:bg-dark-800">
+           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">{{ selectedPlan.title }}</h3>
+           <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedPlan.description }}</p>
+           <div class="mt-4 text-3xl font-bold text-primary-600 dark:text-primary-400">
+             ¥{{ selectedPlan.price }}
+           </div>
+        </div>
+
+        <div v-if="selectedPlan.purchase_qr_url" class="flex flex-col items-center gap-4">
+           <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('plans.scanToPurchase') }}</p>
+           <div class="rounded-xl overflow-hidden border border-gray-200 shadow-md dark:border-dark-700">
+              <img :src="selectedPlan.purchase_qr_url" alt="QR Code" class="h-48 w-48 object-contain" />
+           </div>
+           <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+              {{ t('plans.purchaseNote') }}
+           </p>
+         </div>
+         <div v-else class="py-8 text-center text-gray-500 dark:text-gray-400">
+            <Icon name="infoCircle" size="xl" class="mx-auto mb-2 opacity-50" />
+            <p>{{ t('plans.noQrCode') }}</p>
+         </div>
+      </div>
+
+      <template #footer>
+        <div class="flex gap-3">
+          <button
+            @click="showPurchaseModal = false"
+            class="btn btn-secondary flex-1 justify-center"
+          >
+            {{ t('common.close') }}
+          </button>
+          <button
+            @click="showPurchaseModal = false"
+            class="btn btn-primary flex-1 justify-center"
+          >
+            {{ t('plans.contacted') }}
+          </button>
+        </div>
+      </template>
+    </BaseDialog>
   </div>
 </template>
 
@@ -410,6 +579,9 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
+import BaseDialog from '@/components/common/BaseDialog.vue'
+import { plansAPI } from '@/api/plans'
+import type { Plan } from '@/types'
 
 const { t } = useI18n()
 
@@ -448,6 +620,71 @@ const userInitial = computed(() => {
 // Current year for footer
 const currentYear = computed(() => new Date().getFullYear())
 
+// Plans
+const plans = ref<Plan[]>([])
+const loadingPlans = ref(false)
+const showPurchaseModal = ref(false)
+const selectedPlan = ref<Plan | null>(null)
+
+// Computed grouped plans
+const groupedPlans = computed(() => {
+  if (!plans.value.length) return []
+  
+  const groups: Record<string, Plan[]> = {}
+  
+  // Group plans
+  plans.value.forEach(plan => {
+    const name = plan.group_name || t('plans.defaultGroup')
+    if (!groups[name]) groups[name] = []
+    groups[name].push(plan)
+  })
+
+  // Sort groups
+  const sortedGroupNames = Object.keys(groups).sort((a, b) => {
+    // Find representative plans to get group_sort
+    const planA = groups[a][0]
+    const planB = groups[b][0]
+    // Default to 0 if undefined
+    return (planA.group_sort || 0) - (planB.group_sort || 0)
+  })
+
+  // Return array of objects with sorted plans
+  return sortedGroupNames.map(name => {
+    return {
+      name,
+      plans: groups[name].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    }
+  })
+})
+
+async function fetchPlans() {
+  loadingPlans.value = true
+  try {
+    const items = await plansAPI.getPlans()
+    plans.value = items
+  } catch (e) {
+    console.error('Failed to fetch plans:', e)
+  } finally {
+    loadingPlans.value = false
+  }
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function scrollToPricing() {
+  const el = document.getElementById('pricing')
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+function openPurchase(plan: Plan) {
+  selectedPlan.value = plan
+  showPurchaseModal.value = true
+}
+
 // Toggle theme
 function toggleTheme() {
   isDark.value = !isDark.value
@@ -477,6 +714,9 @@ onMounted(() => {
   if (!appStore.publicSettingsLoaded) {
     appStore.fetchPublicSettings()
   }
+
+  // Fetch plans
+  fetchPlans()
 })
 </script>
 
@@ -489,7 +729,8 @@ onMounted(() => {
 
 /* Terminal Window */
 .terminal-window {
-  width: 420px;
+  width: 100%;
+  max-width: 480px;
   background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
   border-radius: 14px;
   box-shadow:
@@ -499,6 +740,7 @@ onMounted(() => {
   overflow: hidden;
   transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
   transition: transform 0.3s ease;
+  margin: 0 auto;
 }
 
 .terminal-window:hover {
@@ -546,7 +788,7 @@ onMounted(() => {
 
 /* Terminal Body */
 .terminal-body {
-  padding: 20px 24px;
+  padding: 24px 28px;
   font-family: ui-monospace, 'Fira Code', monospace;
   font-size: 14px;
   line-height: 2;

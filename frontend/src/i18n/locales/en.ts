@@ -40,6 +40,8 @@ export default {
   // Home Page
   home: {
     viewOnGithub: 'View on GitHub',
+    viewPricing: 'View Pricing',
+    heroDesc: 'Seamlessly access top-tier AI models through a unified, high-performance API gateway. Built for developers, by developers.',
     viewDocs: 'View Documentation',
     docs: 'Docs',
     switchToLight: 'Switch to Light Mode',
@@ -216,6 +218,7 @@ export default {
 
   // Navigation
   nav: {
+    home: 'Home',
     invites: 'Invites',
     inviteSettings: 'Invite Settings',
     inviteLogs: 'Invite Logs',
@@ -248,6 +251,8 @@ export default {
   // Plans
   plans: {
     title: 'Plans',
+    popular: 'Popular',
+    month: 'Month',
     description: 'Choose a plan that suits your needs',
     noPlans: 'No plans available',
     dailyQuota: 'Daily Quota',

@@ -77,10 +77,6 @@ func RegisterUserRoutes(
 			invites.GET("/rewards", h.Invite.ListRewards)
 		}
 
-		// 套餐列表
-		plans := authenticated.Group("/plans")
-		{
-			plans.GET("", h.Plan.List)
-		}
+		// NOTE: /api/v1/plans is public (see routes/common.go)
 	}
 }

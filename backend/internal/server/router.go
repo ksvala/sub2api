@@ -109,6 +109,7 @@ func registerRoutes(
 	v1 := r.Group("/api/v1")
 
 	// 注册各模块路由
+	routes.RegisterPublicRoutes(v1, h)
 	routes.RegisterAuthRoutes(v1, h, jwtAuth, redisClient)
 	routes.RegisterUserRoutes(v1, h, jwtAuth)
 	routes.RegisterAdminRoutes(v1, h, adminAuth)

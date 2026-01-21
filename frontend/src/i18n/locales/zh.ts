@@ -40,6 +40,8 @@ export default {
   // Home Page
   home: {
     viewOnGithub: '在 GitHub 上查看',
+    viewPricing: '查看价格',
+    heroDesc: '通过统一的高性能 API 网关无缝访问顶级 AI 模型。专为开发者打造。',
     viewDocs: '查看文档',
     docs: '文档',
     switchToLight: '切换到浅色模式',
@@ -213,6 +215,7 @@ export default {
 
   // Navigation
   nav: {
+    home: '首页',
     invites: '邀请好友',
     inviteSettings: '邀请设置',
     inviteLogs: '邀请日志',
@@ -245,6 +248,8 @@ export default {
   // Plans
   plans: {
     title: '套餐',
+    popular: '热门',
+    month: '月',
     description: '选择适合您的套餐',
     noPlans: '暂无套餐',
     dailyQuota: '每日额度',
