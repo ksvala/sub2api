@@ -69,6 +69,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyAPIBaseURL,
 		SettingKeyContactInfo,
 		SettingKeyCustomerServiceQR,
+		SettingKeyAfterSalesGroupQR,
 		SettingKeyDocURL,
 		SettingKeyHomeContent,
 		SettingKeyHideCcsImportButton,
@@ -99,6 +100,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		APIBaseURL:          settings[SettingKeyAPIBaseURL],
 		ContactInfo:         settings[SettingKeyContactInfo],
 		CustomerServiceQR:   settings[SettingKeyCustomerServiceQR],
+		AfterSalesGroupQR:   settings[SettingKeyAfterSalesGroupQR],
 		DocURL:              settings[SettingKeyDocURL],
 		HomeContent:         settings[SettingKeyHomeContent],
 		HideCcsImportButton: settings[SettingKeyHideCcsImportButton] == "true",
@@ -138,6 +140,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		APIBaseURL          string `json:"api_base_url,omitempty"`
 		ContactInfo         string `json:"contact_info,omitempty"`
 		CustomerServiceQR   string `json:"customer_service_qr,omitempty"`
+		AfterSalesGroupQR   string `json:"after_sales_group_qr,omitempty"`
 		DocURL              string `json:"doc_url,omitempty"`
 		HomeContent         string `json:"home_content,omitempty"`
 		HideCcsImportButton bool   `json:"hide_ccs_import_button"`
@@ -155,6 +158,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		APIBaseURL:          settings.APIBaseURL,
 		ContactInfo:         settings.ContactInfo,
 		CustomerServiceQR:   settings.CustomerServiceQR,
+		AfterSalesGroupQR:   settings.AfterSalesGroupQR,
 		DocURL:              settings.DocURL,
 		HomeContent:         settings.HomeContent,
 		HideCcsImportButton: settings.HideCcsImportButton,
@@ -205,6 +209,7 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	updates[SettingKeyAPIBaseURL] = settings.APIBaseURL
 	updates[SettingKeyContactInfo] = settings.ContactInfo
 	updates[SettingKeyCustomerServiceQR] = settings.CustomerServiceQR
+	updates[SettingKeyAfterSalesGroupQR] = settings.AfterSalesGroupQR
 	updates[SettingKeyDocURL] = settings.DocURL
 	updates[SettingKeyHomeContent] = settings.HomeContent
 	updates[SettingKeyHideCcsImportButton] = strconv.FormatBool(settings.HideCcsImportButton)
@@ -340,6 +345,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeySiteName:            "Sub2API",
 		SettingKeySiteLogo:            "",
 		SettingKeyCustomerServiceQR:  "",
+		SettingKeyAfterSalesGroupQR:  "",
 		SettingKeyDefaultConcurrency:  strconv.Itoa(s.cfg.Default.UserConcurrency),
 		SettingKeyDefaultBalance:      strconv.FormatFloat(s.cfg.Default.UserBalance, 'f', 8, 64),
 		SettingKeyInviteRewardAmount: "0",
@@ -386,6 +392,7 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		APIBaseURL:                   settings[SettingKeyAPIBaseURL],
 		ContactInfo:                  settings[SettingKeyContactInfo],
 		CustomerServiceQR:            settings[SettingKeyCustomerServiceQR],
+		AfterSalesGroupQR:            settings[SettingKeyAfterSalesGroupQR],
 		DocURL:                       settings[SettingKeyDocURL],
 		HomeContent:                  settings[SettingKeyHomeContent],
 		HideCcsImportButton:          settings[SettingKeyHideCcsImportButton] == "true",

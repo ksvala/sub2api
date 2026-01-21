@@ -32,6 +32,7 @@ type SystemSettings struct {
 	APIBaseURL          string
 	ContactInfo         string
 	CustomerServiceQR   string
+	AfterSalesGroupQR   string
 	DocURL              string
 	HomeContent         string
 	HideCcsImportButton bool
@@ -69,6 +70,7 @@ type PublicSettings struct {
 	APIBaseURL          string
 	ContactInfo         string
 	CustomerServiceQR   string
+	AfterSalesGroupQR   string
 	DocURL              string
 	HomeContent         string
 	HideCcsImportButton bool

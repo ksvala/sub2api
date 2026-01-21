@@ -43,6 +43,7 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 		APIBaseURL:          settings.APIBaseURL,
 		ContactInfo:         settings.ContactInfo,
 		CustomerServiceQR:   settings.CustomerServiceQR,
+		AfterSalesGroupQR:   settings.AfterSalesGroupQR,
 		DocURL:              settings.DocURL,
 		HomeContent:         settings.HomeContent,
 		HideCcsImportButton: settings.HideCcsImportButton,

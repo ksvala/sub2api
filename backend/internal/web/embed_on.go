@@ -87,6 +87,7 @@ func (s *FrontendServer) Middleware() gin.HandlerFunc {
 			strings.HasPrefix(path, "/v1/") ||
 			strings.HasPrefix(path, "/v1beta/") ||
 			strings.HasPrefix(path, "/antigravity/") ||
+			strings.HasPrefix(path, "/uploads/") ||
 			strings.HasPrefix(path, "/setup/") ||
 			path == "/health" ||
 			path == "/responses" {
@@ -106,6 +107,9 @@ func (s *FrontendServer) Middleware() gin.HandlerFunc {
 		}
 
 		// Serve static files normally
+		// NOTE: Disable caching to avoid stale assets during rapid iteration.
+		// (Assets are fingerprinted by Vite, but some environments still cache aggressively.)
+		c.Header("Cache-Control", "no-store")
 		s.fileServer.ServeHTTP(c.Writer, c.Request)
 		c.Abort()
 	}
@@ -210,6 +214,7 @@ func ServeEmbeddedFrontend() gin.HandlerFunc {
 			strings.HasPrefix(path, "/v1/") ||
 			strings.HasPrefix(path, "/v1beta/") ||
 			strings.HasPrefix(path, "/antigravity/") ||
+			strings.HasPrefix(path, "/uploads/") ||
 			strings.HasPrefix(path, "/setup/") ||
 			path == "/health" ||
 			path == "/responses" {

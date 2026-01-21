@@ -91,6 +91,7 @@ export interface PublicSettings {
   linuxdo_oauth_enabled: boolean
   version: string
   customer_service_qr?: string
+  after_sales_group_qr?: string
 }
 
 export interface Plan {

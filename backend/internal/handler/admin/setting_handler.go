@@ -68,6 +68,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		APIBaseURL:                           settings.APIBaseURL,
 		ContactInfo:                          settings.ContactInfo,
 		CustomerServiceQR:                    settings.CustomerServiceQR,
+		AfterSalesGroupQR:                    settings.AfterSalesGroupQR,
 		DocURL:                               settings.DocURL,
 		HomeContent:                          settings.HomeContent,
 		HideCcsImportButton:                  settings.HideCcsImportButton,
@@ -121,6 +122,7 @@ type UpdateSettingsRequest struct {
 	APIBaseURL          string `json:"api_base_url"`
 	ContactInfo         string `json:"contact_info"`
 	CustomerServiceQR   string `json:"customer_service_qr"`
+	AfterSalesGroupQR   string `json:"after_sales_group_qr"`
 	DocURL              string `json:"doc_url"`
 	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
@@ -265,6 +267,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		APIBaseURL:                 req.APIBaseURL,
 		ContactInfo:                req.ContactInfo,
 		CustomerServiceQR:          req.CustomerServiceQR,
+		AfterSalesGroupQR:          req.AfterSalesGroupQR,
 		DocURL:                     req.DocURL,
 		HomeContent:                req.HomeContent,
 		HideCcsImportButton:        req.HideCcsImportButton,

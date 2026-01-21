@@ -29,6 +29,7 @@ type SystemSettings struct {
 	APIBaseURL          string `json:"api_base_url"`
 	ContactInfo         string `json:"contact_info"`
 	CustomerServiceQR   string `json:"customer_service_qr"`
+	AfterSalesGroupQR   string `json:"after_sales_group_qr"`
 	DocURL              string `json:"doc_url"`
 	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
@@ -66,6 +67,7 @@ type PublicSettings struct {
 	APIBaseURL          string `json:"api_base_url"`
 	ContactInfo         string `json:"contact_info"`
 	CustomerServiceQR   string `json:"customer_service_qr"`
+	AfterSalesGroupQR   string `json:"after_sales_group_qr"`
 	DocURL              string `json:"doc_url"`
 	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
