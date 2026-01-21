@@ -56,15 +56,15 @@ export default {
       realtimeBilling: 'Real-time Billing'
     },
     features: {
-      unifiedGateway: 'Unified API Gateway',
+      unifiedGateway: 'Codex Relay Gateway',
       unifiedGatewayDesc:
-        'Convert Claude subscriptions to API endpoints. Access AI capabilities through standard /v1/messages interface.',
-      multiAccount: 'Multi-Account Pool',
+        'A stable relay entry for Codex with a unified calling experience, reducing failures and timeouts caused by network instability.',
+      multiAccount: 'Stability & Availability',
       multiAccountDesc:
-        'Manage multiple upstream accounts with smart load balancing. Support OAuth and API Key authentication.',
-      balanceQuota: 'Balance & Quota',
+        'Improved connectivity and retry strategy to increase success rate and keep responses stable for production usage.',
+      balanceQuota: 'Transparent Usage & Quota',
       balanceQuotaDesc:
-        'Token-based billing with precise usage tracking. Manage quotas and recharge with redeem codes.'
+        'Track usage by request and tokens, manage balance/quota and plans with clear, auditable cost control.'
     },
     providers: {
       title: 'Supported Providers',

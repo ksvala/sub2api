@@ -56,12 +56,12 @@ export default {
       realtimeBilling: '实时计费'
     },
     features: {
-      unifiedGateway: '统一 API 网关',
-      unifiedGatewayDesc: '将 Claude 订阅转换为 API 接口，通过标准 /v1/messages 接口访问 AI 能力。',
-      multiAccount: '多账号池',
-      multiAccountDesc: '智能负载均衡管理多个上游账号，支持 OAuth 和 API Key 认证。',
-      balanceQuota: '余额与配额',
-      balanceQuotaDesc: '基于 Token 的精确计费和用量追踪，支持配额管理和兑换码充值。'
+      unifiedGateway: 'Codex 中转网关',
+      unifiedGatewayDesc: '为 Codex 提供稳定的中转入口与统一调用方式，减少网络波动带来的失败与超时，让接入更省心。',
+      multiAccount: '稳定性与可用性',
+      multiAccountDesc: '优化连接与重试策略，提升请求成功率与响应稳定性；适合需要长期稳定调用的业务场景。',
+      balanceQuota: '透明用量与配额',
+      balanceQuotaDesc: '按请求与 Token 统计用量，支持余额/配额与套餐配置，费用清晰可追踪，方便团队管理与控制成本。'
     },
     providers: {
       title: '支持的服务商',
