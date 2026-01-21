@@ -26,10 +26,19 @@
     <nav class="sidebar-nav scrollbar-hide">
       <!-- Admin View: Admin menu first, then personal menu -->
       <template v-if="isAdmin">
-        <!-- Admin Section -->
-        <div class="sidebar-section">
+        <div
+          v-for="section in adminNavSections"
+          :key="section.title"
+          class="sidebar-section mb-2"
+        >
+          <!-- Section Title / Divider -->
+          <div v-if="!sidebarCollapsed" class="px-3 mb-2 mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            {{ section.title }}
+          </div>
+          <div v-else class="mx-3 my-3 h-px bg-gray-200 dark:bg-dark-700"></div>
+
           <router-link
-            v-for="item in adminNavItems"
+            v-for="item in section.items"
             :key="item.path"
             :to="item.path"
             class="sidebar-link mb-1"
@@ -454,35 +463,57 @@ const personalNavItems = computed(() => {
   return authStore.isSimpleMode ? items.filter(item => !item.hideInSimpleMode) : items
 })
 
-// Admin navigation items
-const adminNavItems = computed(() => {
-  const baseItems = [
+// Admin navigation sections
+const adminNavSections = computed(() => {
+  const sections: { title: string; items: any[] }[] = []
+
+  // 1. Common Group (常用)
+  const commonItems = [
     { path: '/admin/dashboard', label: t('nav.dashboard'), icon: DashboardIcon },
+    { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
+    { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
+    { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
     ...(adminSettingsStore.opsMonitoringEnabled
       ? [{ path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon }]
       : []),
-    { path: '/admin/plans', label: t('nav.plans'), icon: GridIcon },
-    { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
+    { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon },
+    // Keeping Groups in Common as it relates to User Management
     { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon, hideInSimpleMode: true },
-    { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
-    { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
-    { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
+  ]
+  sections.push({
+    title: '常用',
+    items: authStore.isSimpleMode ? commonItems.filter(i => !i.hideInSimpleMode) : commonItems
+  })
+
+  // 2. Operations Group (运营)
+  const opsItems = [
+    { path: '/admin/plans', label: t('nav.plans'), icon: GridIcon },
     { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
     { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon, hideInSimpleMode: true },
     { path: '/admin/invites/logs', label: t('nav.inviteLogs'), icon: TicketIcon, hideInSimpleMode: true },
-    { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon },
   ]
+  sections.push({
+    title: '运营',
+    items: authStore.isSimpleMode ? opsItems.filter(i => !i.hideInSimpleMode) : opsItems
+  })
 
-  // 简单模式下，在系统设置前插入 API密钥
+  // 3. System Group (系统)
+  const systemItems = [
+    { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
+    { path: '/admin/settings', label: t('nav.settings'), icon: CogIcon }
+  ]
+  
+  // In simple mode, add API Keys to system group (or wherever fitting)
   if (authStore.isSimpleMode) {
-    const filtered = baseItems.filter(item => !item.hideInSimpleMode)
-    filtered.push({ path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon })
-    filtered.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
-    return filtered
+    systemItems.unshift({ path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon })
   }
 
-  baseItems.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
-  return baseItems
+  sections.push({
+    title: '系统',
+    items: authStore.isSimpleMode ? systemItems.filter(i => !i.hideInSimpleMode) : systemItems
+  })
+
+  return sections.filter(s => s.items.length > 0)
 })
 
 function toggleSidebar() {
