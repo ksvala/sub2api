@@ -16,20 +16,20 @@ import (
 
 // SettingHandler 系统设置处理器
 type SettingHandler struct {
-	settingService   *service.SettingService
-	emailService     *service.EmailService
-	turnstileService *service.TurnstileService
-	opsService       *service.OpsService
+	settingService        *service.SettingService
+	emailService          *service.EmailService
+	turnstileService      *service.TurnstileService
+	opsService            *service.OpsService
 	adminActionLogService *service.AdminActionLogService
 }
 
 // NewSettingHandler 创建系统设置处理器
 func NewSettingHandler(settingService *service.SettingService, emailService *service.EmailService, turnstileService *service.TurnstileService, opsService *service.OpsService, adminActionLogService *service.AdminActionLogService) *SettingHandler {
 	return &SettingHandler{
-		settingService:       settingService,
-		emailService:         emailService,
-		turnstileService:     turnstileService,
-		opsService:           opsService,
+		settingService:        settingService,
+		emailService:          emailService,
+		turnstileService:      turnstileService,
+		opsService:            opsService,
 		adminActionLogService: adminActionLogService,
 	}
 }
@@ -50,6 +50,9 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		RegistrationEnabled:                  settings.RegistrationEnabled,
 		EmailVerifyEnabled:                   settings.EmailVerifyEnabled,
 		PromoCodeEnabled:                     settings.PromoCodeEnabled,
+		PasswordResetEnabled:                 settings.PasswordResetEnabled,
+		TotpEnabled:                          settings.TotpEnabled,
+		TotpEncryptionKeyConfigured:          h.settingService.IsTotpEncryptionKeyConfigured(),
 		SMTPHost:                             settings.SMTPHost,
 		SMTPPort:                             settings.SMTPPort,
 		SMTPUsername:                         settings.SMTPUsername,
@@ -72,6 +75,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		CustomerServiceQR:                    settings.CustomerServiceQR,
 		AfterSalesGroupQR:                    settings.AfterSalesGroupQR,
 		DocURL:                               settings.DocURL,
+		HomeContent:                          settings.HomeContent,
 		HideCcsImportButton:                  settings.HideCcsImportButton,
 		DefaultConcurrency:                   settings.DefaultConcurrency,
 		DefaultBalance:                       settings.DefaultBalance,
@@ -92,9 +96,11 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 // UpdateSettingsRequest 更新设置请求
 type UpdateSettingsRequest struct {
 	// 注册设置
-	RegistrationEnabled bool `json:"registration_enabled"`
-	EmailVerifyEnabled  bool `json:"email_verify_enabled"`
-	PromoCodeEnabled    bool `json:"promo_code_enabled"`
+	RegistrationEnabled  bool `json:"registration_enabled"`
+	EmailVerifyEnabled   bool `json:"email_verify_enabled"`
+	PromoCodeEnabled     bool `json:"promo_code_enabled"`
+	PasswordResetEnabled bool `json:"password_reset_enabled"`
+	TotpEnabled          bool `json:"totp_enabled"` // TOTP 双因素认证
 
 	// 邮件服务设置
 	SMTPHost     string `json:"smtp_host"`
@@ -125,6 +131,7 @@ type UpdateSettingsRequest struct {
 	CustomerServiceQR   string `json:"customer_service_qr"`
 	AfterSalesGroupQR   string `json:"after_sales_group_qr"`
 	DocURL              string `json:"doc_url"`
+	HomeContent         string `json:"home_content"`
 	HideCcsImportButton bool   `json:"hide_ccs_import_button"`
 
 	// 默认配置
@@ -202,6 +209,16 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		}
 	}
 
+	// TOTP 双因素认证参数验证
+	// 只有手动配置了加密密钥才允许启用 TOTP 功能
+	if req.TotpEnabled && !previousSettings.TotpEnabled {
+		// 尝试启用 TOTP，检查加密密钥是否已手动配置
+		if !h.settingService.IsTotpEncryptionKeyConfigured() {
+			response.BadRequest(c, "Cannot enable TOTP: TOTP_ENCRYPTION_KEY environment variable must be configured first. Generate a key with 'openssl rand -hex 32' and set it in your environment.")
+			return
+		}
+	}
+
 	// LinuxDo Connect 参数验证
 	if req.LinuxDoConnectEnabled {
 		req.LinuxDoConnectClientID = strings.TrimSpace(req.LinuxDoConnectClientID)
@@ -247,6 +264,8 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		RegistrationEnabled:        req.RegistrationEnabled,
 		EmailVerifyEnabled:         req.EmailVerifyEnabled,
 		PromoCodeEnabled:           req.PromoCodeEnabled,
+		PasswordResetEnabled:       req.PasswordResetEnabled,
+		TotpEnabled:                req.TotpEnabled,
 		SMTPHost:                   req.SMTPHost,
 		SMTPPort:                   req.SMTPPort,
 		SMTPUsername:               req.SMTPUsername,
@@ -269,6 +288,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomerServiceQR:          req.CustomerServiceQR,
 		AfterSalesGroupQR:          req.AfterSalesGroupQR,
 		DocURL:                     req.DocURL,
+		HomeContent:                req.HomeContent,
 		HideCcsImportButton:        req.HideCcsImportButton,
 		DefaultConcurrency:         req.DefaultConcurrency,
 		DefaultBalance:             req.DefaultBalance,
@@ -323,6 +343,9 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		RegistrationEnabled:                  updatedSettings.RegistrationEnabled,
 		EmailVerifyEnabled:                   updatedSettings.EmailVerifyEnabled,
 		PromoCodeEnabled:                     updatedSettings.PromoCodeEnabled,
+		PasswordResetEnabled:                 updatedSettings.PasswordResetEnabled,
+		TotpEnabled:                          updatedSettings.TotpEnabled,
+		TotpEncryptionKeyConfigured:          h.settingService.IsTotpEncryptionKeyConfigured(),
 		SMTPHost:                             updatedSettings.SMTPHost,
 		SMTPPort:                             updatedSettings.SMTPPort,
 		SMTPUsername:                         updatedSettings.SMTPUsername,
@@ -342,7 +365,10 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteSubtitle:                         updatedSettings.SiteSubtitle,
 		APIBaseURL:                           updatedSettings.APIBaseURL,
 		ContactInfo:                          updatedSettings.ContactInfo,
+		CustomerServiceQR:                    updatedSettings.CustomerServiceQR,
+		AfterSalesGroupQR:                    updatedSettings.AfterSalesGroupQR,
 		DocURL:                               updatedSettings.DocURL,
+		HomeContent:                          updatedSettings.HomeContent,
 		HideCcsImportButton:                  updatedSettings.HideCcsImportButton,
 		DefaultConcurrency:                   updatedSettings.DefaultConcurrency,
 		DefaultBalance:                       updatedSettings.DefaultBalance,
@@ -402,6 +428,12 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	if before.EmailVerifyEnabled != after.EmailVerifyEnabled {
 		changed = append(changed, "email_verify_enabled")
 	}
+	if before.PasswordResetEnabled != after.PasswordResetEnabled {
+		changed = append(changed, "password_reset_enabled")
+	}
+	if before.TotpEnabled != after.TotpEnabled {
+		changed = append(changed, "totp_enabled")
+	}
 	if before.SMTPHost != after.SMTPHost {
 		changed = append(changed, "smtp_host")
 	}
@@ -459,8 +491,17 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	if before.ContactInfo != after.ContactInfo {
 		changed = append(changed, "contact_info")
 	}
+	if before.CustomerServiceQR != after.CustomerServiceQR {
+		changed = append(changed, "customer_service_qr")
+	}
+	if before.AfterSalesGroupQR != after.AfterSalesGroupQR {
+		changed = append(changed, "after_sales_group_qr")
+	}
 	if before.DocURL != after.DocURL {
 		changed = append(changed, "doc_url")
+	}
+	if before.HomeContent != after.HomeContent {
+		changed = append(changed, "home_content")
 	}
 	if before.HideCcsImportButton != after.HideCcsImportButton {
 		changed = append(changed, "hide_ccs_import_button")

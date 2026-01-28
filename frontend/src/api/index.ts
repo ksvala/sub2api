@@ -7,7 +7,7 @@
 export { apiClient } from './client'
 
 // Auth API
-export { authAPI } from './auth'
+export { authAPI, isTotp2FARequired, type LoginResponse } from './auth'
 
 // User APIs
 export { keysAPI } from './keys'
@@ -17,6 +17,7 @@ export { redeemAPI, type RedeemHistoryItem } from './redeem'
 export { userGroupsAPI } from './groups'
 export { inviteAPI } from './invites'
 export { plansAPI } from './plans'
+export { totpAPI } from './totp'
 
 // Admin APIs
 export { adminAPI } from './admin'

@@ -28,6 +28,11 @@ type User struct {
 	InviteConfirmedAt  *time.Time
 	InviteRewardAmount *float64
 
+	// TOTP 双因素认证字段
+	TotpSecretEncrypted *string    // AES-256-GCM 加密的 TOTP 密钥
+	TotpEnabled         bool       // 是否启用 TOTP
+	TotpEnabledAt       *time.Time // TOTP 启用时间
+
 	APIKeys       []APIKey
 	Subscriptions []UserSubscription
 }

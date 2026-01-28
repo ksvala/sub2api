@@ -41,6 +41,11 @@ type UserRepository interface {
 	ExistsByInviteCode(ctx context.Context, code string) (bool, error)
 	SetInviteCode(ctx context.Context, id int64, code string) error
 	RemoveGroupFromAllowedGroups(ctx context.Context, groupID int64) (int64, error)
+
+	// TOTP 相关方法
+	UpdateTotpSecret(ctx context.Context, userID int64, encryptedSecret *string) error
+	EnableTotp(ctx context.Context, userID int64) error
+	DisableTotp(ctx context.Context, userID int64) error
 }
 
 // UpdateProfileRequest 更新用户资料请求
