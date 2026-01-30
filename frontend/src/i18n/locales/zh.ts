@@ -251,6 +251,7 @@ export default {
     github: 'GitHub',
     mySubscriptions: '我的订阅',
     plans: '套餐',
+    buySubscription: '购买订阅',
     docs: '文档'
   },
 
@@ -3108,36 +3109,52 @@ export default {
         defaultConcurrency: '默认并发数',
         defaultConcurrencyHint: '新用户的最大并发请求数'
       },
-    site: {
-      title: '站点设置',
-      description: '配置站点基本信息',
-      siteName: '站点名称',
-      siteNamePlaceholder: '请输入站点名称',
-      siteNameHint: '将显示在浏览器标题和页面头部',
-      siteSubtitle: '站点副标题',
-      siteSubtitlePlaceholder: '请输入站点副标题',
-      siteSubtitleHint: '显示在登录页等位置',
-      apiBaseUrl: 'API 基础地址',
-      apiBaseUrlPlaceholder: '例如：https://api.example.com',
-      apiBaseUrlHint: '用户复制 API Key 时使用的基础地址',
-      contactInfo: '联系方式',
-      contactInfoPlaceholder: '例如：Telegram (at)xxx',
-      contactInfoHint: '显示在页脚或帮助页面',
-      docUrl: '文档地址',
-      docUrlPlaceholder: '例如：https://docs.example.com',
-      docUrlHint: '文档链接地址',
-      siteLogo: '站点 Logo',
-      uploadImage: '上传图片',
-      remove: '移除',
-      logoHint: '建议尺寸 200x200px，支持 PNG/JPG/SVG，最大 300KB',
-      logoSizeError: '图片大小不能超过 {size}KB',
-      logoTypeError: '请上传图片文件',
-      customerServiceQr: '客服二维码',
-      afterSalesGroupQr: '售后群二维码',
-      qrHint: '用户扫描联系客服或加入售后群',
-      hideCcsImportButton: '隐藏 CCS 导入按钮',
-      hideCcsImportButtonHint: '在 API Key 列表中隐藏导入到 CC-Switch 的按钮'
-    },
+      site: {
+        title: '站点设置',
+        description: '自定义站点品牌',
+        siteName: '站点名称',
+        siteNameHint: '显示在邮件和页面标题中',
+        siteNamePlaceholder: 'Sub2API',
+        siteSubtitle: '站点副标题',
+        siteSubtitleHint: '显示在登录和注册页面',
+        siteSubtitlePlaceholder: '订阅转 API 转换平台',
+        apiBaseUrl: 'API 端点地址',
+        apiBaseUrlHint: '用于"使用密钥"和"导入到 CC Switch"功能，留空则使用当前站点地址',
+        apiBaseUrlPlaceholder: 'https://api.example.com',
+        contactInfo: '客服联系方式',
+        contactInfoPlaceholder: '例如：QQ: 123456789',
+        contactInfoHint: '填写客服联系方式，将展示在兑换页面、个人资料等位置',
+        docUrl: '文档链接',
+        docUrlHint: '文档网站的链接。留空则隐藏文档链接。',
+        docUrlPlaceholder: 'https://docs.example.com',
+        siteLogo: '站点Logo',
+        uploadImage: '上传图片',
+        remove: '移除',
+        logoHint: 'PNG、JPG 或 SVG 格式，最大 300KB。建议：80x80px 正方形图片。',
+        logoSizeError: '图片大小超过 300KB 限制（{size}KB）',
+        logoTypeError: '请选择图片文件',
+        logoReadError: '读取图片文件失败',
+        customerServiceQr: '客服二维码',
+        afterSalesGroupQr: '售后群二维码',
+        qrHint: '用户扫描联系客服或加入售后群',
+        homeContent: '首页内容',
+        homeContentPlaceholder: '在此输入首页内容，支持 Markdown & HTML 代码。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性。',
+        homeContentHint: '自定义首页内容，支持 Markdown/HTML。如果输入的是链接（以 http:// 或 https:// 开头），则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为首页。设置后首页的状态信息将不再显示。',
+        homeContentIframeWarning: '⚠️ iframe 模式提示：部分网站设置了 X-Frame-Options 或 CSP 安全策略，禁止被嵌入到 iframe 中。如果页面显示空白或报错，请确认目标网站允许被嵌入，或考虑使用 HTML 模式自行构建页面内容。',
+        hideCcsImportButton: '隐藏 CCS 导入按钮',
+        hideCcsImportButtonHint: '启用后将在 API Keys 页面隐藏"导入 CCS"按钮'
+      },
+      purchase: {
+        title: '购买订阅页面',
+        description: '在侧边栏展示“购买订阅”入口，并在页面内通过 iframe 打开指定链接',
+        enabled: '显示购买订阅入口',
+        enabledHint: '仅在标准模式（非简单模式）下展示',
+        url: '购买页面 URL',
+        urlPlaceholder: 'https://example.com/purchase',
+        urlHint: '必须是完整的 http(s) 链接',
+        iframeWarning:
+          '⚠️ iframe 提示：部分网站会通过 X-Frame-Options 或 CSP（frame-ancestors）禁止被 iframe 嵌入，出现空白时可引导用户使用“新窗口打开”。'
+      },
       smtp: {
         title: 'SMTP 设置',
         description: '配置用于发送验证码的邮件服务',
@@ -3280,6 +3297,17 @@ export default {
     restartNow: '立即重启',
     restarting: '正在重启...',
     retry: '重试'
+  },
+
+  // Purchase Subscription Page
+  purchase: {
+    title: '购买订阅',
+    description: '通过内嵌页面完成订阅购买',
+    openInNewTab: '新窗口打开',
+    notEnabledTitle: '该功能未开启',
+    notEnabledDesc: '管理员暂未开启购买订阅入口，请联系管理员。',
+    notConfiguredTitle: '购买链接未配置',
+    notConfiguredDesc: '管理员已开启入口，但尚未配置购买订阅链接，请联系管理员。'
   },
 
   // User Subscriptions Page

@@ -28,16 +28,18 @@ type SystemSettings struct {
 	LinuxDoConnectClientSecretConfigured bool
 	LinuxDoConnectRedirectURL            string
 
-	SiteName            string
-	SiteLogo            string
-	SiteSubtitle        string
-	APIBaseURL          string
-	ContactInfo         string
-	CustomerServiceQR   string
-	AfterSalesGroupQR   string
-	DocURL              string
-	HomeContent         string
-	HideCcsImportButton bool
+	SiteName                    string
+	SiteLogo                    string
+	SiteSubtitle                string
+	APIBaseURL                  string
+	ContactInfo                 string
+	CustomerServiceQR           string
+	AfterSalesGroupQR           string
+	DocURL                      string
+	HomeContent                 string
+	HideCcsImportButton         bool
+	PurchaseSubscriptionEnabled bool
+	PurchaseSubscriptionURL     string
 
 	DefaultConcurrency int
 	DefaultBalance     float64
@@ -78,8 +80,12 @@ type PublicSettings struct {
 	DocURL               string
 	HomeContent          string
 	HideCcsImportButton  bool
-	LinuxDoOAuthEnabled  bool
-	Version              string
+
+	PurchaseSubscriptionEnabled bool
+	PurchaseSubscriptionURL     string
+
+	LinuxDoOAuthEnabled bool
+	Version             string
 }
 
 // StreamTimeoutSettings 流超时处理配置（仅控制超时后的处理方式，超时判定由网关配置控制）

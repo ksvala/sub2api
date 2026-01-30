@@ -254,6 +254,7 @@ export default {
     github: 'GitHub',
     mySubscriptions: 'My Subscriptions',
     plans: 'Plans',
+    buySubscription: 'Purchase Subscription',
     docs: 'Docs'
   },
 
@@ -2926,36 +2927,53 @@ export default {
         defaultConcurrency: 'Default Concurrency',
         defaultConcurrencyHint: 'Maximum concurrent requests for new users'
       },
-    site: {
-      title: 'Site Settings',
-      description: 'Configure basic site information',
-      siteName: 'Site Name',
-      siteNamePlaceholder: 'Enter site name',
-      siteNameHint: 'Displayed in browser title and page header',
-      siteSubtitle: 'Site Subtitle',
-      siteSubtitlePlaceholder: 'Enter site subtitle',
-      siteSubtitleHint: 'Displayed on login page and other places',
-      apiBaseUrl: 'API Base URL',
-      apiBaseUrlPlaceholder: 'e.g., https://api.example.com',
-      apiBaseUrlHint: 'Base URL used when users copy API Keys',
-      contactInfo: 'Contact Info',
-      contactInfoPlaceholder: 'e.g., Telegram (at)xxx',
-      contactInfoHint: 'Displayed in footer or help page',
-      docUrl: 'Documentation URL',
-      docUrlPlaceholder: 'e.g., https://docs.example.com',
-      docUrlHint: 'Link to documentation',
-      siteLogo: 'Site Logo',
-      uploadImage: 'Upload Image',
-      remove: 'Remove',
-      logoHint: 'Recommended size 200x200px, supports PNG/JPG/SVG, max 300KB',
-      logoSizeError: 'Image size cannot exceed {size}KB',
-      logoTypeError: 'Please upload an image file',
-      customerServiceQr: 'Customer Service QR',
-      afterSalesGroupQr: 'After-Sales Group QR',
-      qrHint: 'Users scan to contact support or join group',
-      hideCcsImportButton: 'Hide CCS Import Button',
-      hideCcsImportButtonHint: 'Hide the Import to CC-Switch button in API Key list'
-    },
+      site: {
+        title: 'Site Settings',
+        description: 'Customize site branding',
+        siteName: 'Site Name',
+        siteNamePlaceholder: 'Sub2API',
+        siteNameHint: 'Displayed in emails and page titles',
+        siteSubtitle: 'Site Subtitle',
+        siteSubtitlePlaceholder: 'Subscription to API Conversion Platform',
+        siteSubtitleHint: 'Displayed on login and register pages',
+        apiBaseUrl: 'API Base URL',
+        apiBaseUrlPlaceholder: 'https://api.example.com',
+        apiBaseUrlHint:
+          'Used for "Use Key" and "Import to CC Switch" features. Leave empty to use current site URL.',
+        contactInfo: 'Contact Info',
+        contactInfoPlaceholder: 'e.g., QQ: 123456789',
+        contactInfoHint: 'Customer support contact info, displayed on redeem page, profile, etc.',
+        docUrl: 'Documentation URL',
+        docUrlPlaceholder: 'https://docs.example.com',
+        docUrlHint: 'Link to your documentation site. Leave empty to hide the documentation link.',
+        siteLogo: 'Site Logo',
+        uploadImage: 'Upload Image',
+        remove: 'Remove',
+        logoHint: 'PNG, JPG, or SVG. Max 300KB. Recommended: 80x80px square image.',
+        logoSizeError: 'Image size exceeds 300KB limit ({size}KB)',
+        logoTypeError: 'Please select an image file',
+        logoReadError: 'Failed to read the image file',
+        customerServiceQr: 'Customer Service QR',
+        afterSalesGroupQr: 'After-Sales Group QR',
+        qrHint: 'Users scan to contact support or join group',
+        homeContent: 'Home Page Content',
+        homeContentPlaceholder: 'Enter custom content for the home page. Supports Markdown & HTML. If a URL is entered, it will be displayed as an iframe.',
+        homeContentHint: 'Customize the home page content. Supports Markdown/HTML. If you enter a URL (starting with http:// or https://), it will be used as an iframe src to embed an external page. When set, the default status information will no longer be displayed.',
+        homeContentIframeWarning: '⚠️ iframe mode note: Some websites have X-Frame-Options or CSP security policies that prevent embedding in iframes. If the page appears blank or shows an error, please verify the target website allows embedding, or consider using HTML mode to build your own content.',
+        hideCcsImportButton: 'Hide CCS Import Button',
+        hideCcsImportButtonHint: 'When enabled, the "Import to CCS" button will be hidden on the API Keys page'
+      },
+      purchase: {
+        title: 'Purchase Page',
+        description: 'Show a "Purchase Subscription" entry in the sidebar and open the configured URL in an iframe',
+        enabled: 'Show Purchase Entry',
+        enabledHint: 'Only shown in standard mode (not simple mode)',
+        url: 'Purchase URL',
+        urlPlaceholder: 'https://example.com/purchase',
+        urlHint: 'Must be an absolute http(s) URL',
+        iframeWarning:
+          '⚠️ iframe note: Some websites block embedding via X-Frame-Options or CSP (frame-ancestors). If the page is blank, provide an "Open in new tab" alternative.'
+      },
       smtp: {
         title: 'SMTP Settings',
         description: 'Configure email sending for verification codes',
@@ -3099,6 +3117,18 @@ export default {
     restartNow: 'Restart Now',
     restarting: 'Restarting...',
     retry: 'Retry'
+  },
+
+  // Purchase Subscription Page
+  purchase: {
+    title: 'Purchase Subscription',
+    description: 'Purchase a subscription via the embedded page',
+    openInNewTab: 'Open in new tab',
+    notEnabledTitle: 'Feature not enabled',
+    notEnabledDesc: 'The administrator has not enabled the purchase page. Please contact admin.',
+    notConfiguredTitle: 'Purchase URL not configured',
+    notConfiguredDesc:
+      'The administrator enabled the entry but has not configured a purchase URL. Please contact admin.'
   },
 
   // User Subscriptions Page
