@@ -5,6 +5,7 @@ import Toast from '@/components/common/Toast.vue'
 import NavigationProgress from '@/components/common/NavigationProgress.vue'
 import { useAppStore, useAuthStore, useSubscriptionStore } from '@/stores'
 import { getSetupStatus } from '@/api/setup'
+import { showSubscriptionRemindersOncePerDay } from '@/composables/useSubscriptionReminders'
 
 const router = useRouter()
 const route = useRoute()
@@ -63,6 +64,17 @@ watch(
       // User logged out: clear data and stop polling
       subscriptionStore.clear()
     }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => subscriptionStore.activeSubscriptions,
+  (subs) => {
+    if (!authStore.isAuthenticated) return
+    showSubscriptionRemindersOncePerDay(subs, appStore.showWarning, {
+      isAdminRoute: route.meta.requiresAdmin === true
+    })
   },
   { immediate: true }
 )
