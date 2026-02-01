@@ -1004,6 +1004,14 @@ export default {
       }
     },
 
+    // Invites Management
+    invites: {
+      logs: {
+        title: 'Invite Logs',
+        description: 'View invite system logs'
+      }
+    },
+
     // Groups
     groups: {
       title: 'Group Management',

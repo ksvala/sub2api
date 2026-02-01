@@ -841,6 +841,14 @@ export default {
       }
     },
 
+    // Invites Management
+    invites: {
+      logs: {
+        title: '邀请日志',
+        description: '查看邀请系统日志'
+      }
+    },
+
     // Users Management
     users: {
       title: '用户管理',
