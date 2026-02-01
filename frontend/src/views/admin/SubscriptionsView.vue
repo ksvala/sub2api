@@ -93,6 +93,14 @@
             >
               <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
             </button>
+            <button
+              type="button"
+              class="btn"
+              :class="isDailyUsageSort ? 'btn-primary' : 'btn-secondary'"
+              @click="toggleDailyUsageSort"
+            >
+              {{ t('admin.subscriptions.rankByDailyUsage') }}
+            </button>
             <!-- Column Settings Dropdown -->
             <div class="relative" ref="columnDropdownRef">
               <button
@@ -815,6 +823,9 @@ const showRevokeDialog = ref(false)
 const submitting = ref(false)
 const extendingSubscription = ref<UserSubscription | null>(null)
 const revokingSubscription = ref<UserSubscription | null>(null)
+const isDailyUsageSort = computed(
+  () => sortState.sort_by === 'daily_usage_usd' && sortState.sort_order === 'desc'
+)
 
 const assignForm = reactive({
   user_id: null as number | null,
@@ -1013,6 +1024,18 @@ const handlePageSizeChange = (pageSize: number) => {
 const handleSort = (key: string, order: 'asc' | 'desc') => {
   sortState.sort_by = key
   sortState.sort_order = order
+  pagination.page = 1
+  loadSubscriptions()
+}
+
+const toggleDailyUsageSort = () => {
+  if (isDailyUsageSort.value) {
+    sortState.sort_by = 'created_at'
+    sortState.sort_order = 'desc'
+  } else {
+    sortState.sort_by = 'daily_usage_usd'
+    sortState.sort_order = 'desc'
+  }
   pagination.page = 1
   loadSubscriptions()
 }

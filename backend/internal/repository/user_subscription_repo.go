@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/usersubscription"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
@@ -242,15 +243,39 @@ func (r *userSubscriptionRepository) List(ctx context.Context, params pagination
 		field = usersubscription.FieldExpiresAt
 	case "status":
 		field = usersubscription.FieldStatus
+	case "daily_usage_usd":
+		field = usersubscription.FieldDailyUsageUsd
 	default:
 		field = usersubscription.FieldCreatedAt
 	}
 
-	// Determine sort order (default: desc)
-	if sortOrder == "asc" && sortBy != "" {
-		q = q.Order(dbent.Asc(field))
+	if sortBy == "daily_usage_usd" {
+		q = q.Order(func(s *sql.Selector) {
+			cutoff := time.Now().Add(-24 * time.Hour)
+			expr := sql.ExprFunc(func(b *sql.Builder) {
+				b.WriteString("CASE WHEN ")
+				b.WriteString(s.C(usersubscription.FieldDailyWindowStart))
+				b.WriteString(" IS NULL OR ")
+				b.WriteString(s.C(usersubscription.FieldDailyWindowStart))
+				b.WriteString(" < ")
+				b.Arg(cutoff)
+				b.WriteString(" THEN 0 ELSE ")
+				b.WriteString(s.C(usersubscription.FieldDailyUsageUsd))
+				b.WriteString(" END")
+			})
+			if sortOrder == "asc" {
+				s.OrderExpr(expr)
+			} else {
+				s.OrderExpr(sql.DescExpr(expr))
+			}
+		})
 	} else {
-		q = q.Order(dbent.Desc(field))
+		// Determine sort order (default: desc)
+		if sortOrder == "asc" && sortBy != "" {
+			q = q.Order(dbent.Asc(field))
+		} else {
+			q = q.Order(dbent.Desc(field))
+		}
 	}
 
 	subs, err := q.
