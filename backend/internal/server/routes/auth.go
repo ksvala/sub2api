@@ -18,31 +18,25 @@ func RegisterAuthRoutes(
 	jwtAuth servermiddleware.JWTAuthMiddleware,
 	redisClient *redis.Client,
 ) {
-	// 创建速率限制器与封禁限制器
+	// 创建速率限制器
 	rateLimiter := middleware.NewRateLimiter(redisClient)
-	banLimiter := middleware.NewBanLimiter(redisClient)
-	banWindow := 10 * time.Minute
-	banDuration := 5 * time.Hour
 
 	// 公开接口
 	auth := v1.Group("/auth")
 	{
 		auth.POST("/register",
-			banLimiter.BanOnFailure("register", 5, banWindow, banDuration),
 			rateLimiter.LimitWithOptions("register", 3, time.Minute, middleware.RateLimitOptions{
 				FailureMode: middleware.RateLimitFailClose,
 			}),
 			h.Auth.Register,
 		)
 		auth.POST("/login",
-			banLimiter.BanOnFailure("login", 5, banWindow, banDuration),
 			rateLimiter.LimitWithOptions("login", 5, time.Minute, middleware.RateLimitOptions{
 				FailureMode: middleware.RateLimitFailClose,
 			}),
 			h.Auth.Login,
 		)
 		auth.POST("/login/2fa",
-			banLimiter.BanOnFailure("login-2fa", 5, banWindow, banDuration),
 			rateLimiter.LimitWithOptions("login-2fa", 5, time.Minute, middleware.RateLimitOptions{
 				FailureMode: middleware.RateLimitFailClose,
 			}),
