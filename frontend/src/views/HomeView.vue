@@ -48,15 +48,13 @@
             >
               {{ t('nav.plans') }}
             </button>
-            <a
-              v-if="docUrl"
-              :href="docUrl"
-              target="_blank"
-              rel="noopener noreferrer"
+            <router-link
+              v-if="hasDocs"
+              to="/docs"
               class="text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
             >
               {{ t('nav.docs') }}
-            </a>
+            </router-link>
           </div>
         </div>
 
@@ -401,15 +399,13 @@
             >
                 {{ t('nav.plans') }}
             </button>
-          <a
-            v-if="docUrl"
-            :href="docUrl"
-            target="_blank"
-            rel="noopener noreferrer"
+          <router-link
+            v-if="hasDocs"
+            to="/docs"
             class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
           >
             {{ t('home.docs') }}
-          </a>
+          </router-link>
           
         </div>
       </div>
@@ -485,7 +481,8 @@ const appStore = useAppStore()
 const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
 const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'AI API Gateway Platform')
-const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
+const docMarkdown = computed(() => appStore.cachedPublicSettings?.doc_markdown || appStore.docMarkdown || '')
+const hasDocs = computed(() => !!docMarkdown.value)
 
 // Theme
 const isDark = ref(document.documentElement.classList.contains('dark'))

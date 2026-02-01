@@ -742,19 +742,19 @@
               </p>
             </div>
 
-            <!-- Doc URL -->
+            <!-- Doc Markdown -->
             <div>
               <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {{ t('admin.settings.site.docUrl') }}
+                {{ t('admin.settings.site.docMarkdown') }}
               </label>
-              <input
-                v-model="form.doc_url"
-                type="url"
-                class="input font-mono text-sm"
-                :placeholder="t('admin.settings.site.docUrlPlaceholder')"
-              />
+              <textarea
+                v-model="form.doc_markdown"
+                class="input min-h-[220px] font-mono text-sm"
+                rows="10"
+                :placeholder="t('admin.settings.site.docMarkdownPlaceholder')"
+              ></textarea>
               <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                {{ t('admin.settings.site.docUrlHint') }}
+                {{ t('admin.settings.site.docMarkdownHint') }}
               </p>
             </div>
 
@@ -1309,6 +1309,7 @@ const form = reactive<SettingsForm>({
   api_base_url: '',
   contact_info: '',
   doc_url: '',
+  doc_markdown: '',
   hide_ccs_import_button: false,
   customer_service_qr: '',
   after_sales_group_qr: '',
@@ -1489,6 +1490,7 @@ async function saveSettings() {
       api_base_url: form.api_base_url,
       contact_info: form.contact_info,
       doc_url: form.doc_url,
+      doc_markdown: form.doc_markdown,
       hide_ccs_import_button: form.hide_ccs_import_button,
       customer_service_qr: form.customer_service_qr,
       after_sales_group_qr: form.after_sales_group_qr,

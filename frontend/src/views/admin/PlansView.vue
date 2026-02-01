@@ -9,6 +9,57 @@
         </button>
       </div>
 
+      <!-- Group Sorting -->
+      <div v-if="groupOrder.length > 1" class="rounded-2xl border border-gray-200/70 bg-white/80 p-5 shadow-sm dark:border-dark-700/70 dark:bg-dark-900/50">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="text-sm font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.plans.groupSorting.title') }}
+            </div>
+            <p class="text-xs text-gray-500 dark:text-dark-400">
+              {{ t('admin.plans.groupSorting.description') }}
+            </p>
+          </div>
+          <div v-if="savingGroupSort" class="text-xs text-gray-500 dark:text-dark-400">
+            {{ t('common.saving') }}
+          </div>
+        </div>
+
+        <div class="mt-4 space-y-2">
+          <div
+            v-for="(group, index) in groupOrder"
+            :key="group.name"
+            class="flex items-center justify-between rounded-xl border border-gray-200/70 bg-gray-50/60 px-4 py-3 text-sm transition dark:border-dark-700/70 dark:bg-dark-900/40"
+            :class="{
+              'border-primary-400/70 bg-primary-50/60 dark:border-primary-400/40 dark:bg-primary-900/20': dragOverIndex === index,
+              'opacity-60': draggingGroupIndex === index
+            }"
+            draggable="true"
+            @dragstart="onGroupDragStart(index)"
+            @dragover.prevent="onGroupDragOver(index)"
+            @drop.prevent="onGroupDrop(index)"
+            @dragend="onGroupDragEnd"
+          >
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-gray-400 shadow-sm dark:bg-dark-800">
+                <Icon name="sort" size="sm" />
+              </div>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">
+                  {{ group.label }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-dark-400">
+                  {{ group.count }} {{ t('admin.plans.groupSorting.items') }}
+                </div>
+              </div>
+            </div>
+            <div class="text-xs font-medium text-gray-500 dark:text-dark-400">
+              #{{ index + 1 }}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600"></div>
@@ -51,24 +102,33 @@
                     :class="[plan.enabled ? 'translate-x-4' : 'translate-x-0']"
                   />
                 </button>
-                <div class="dropdown dropdown-end">
-                  <button class="btn btn-icon btn-sm btn-ghost">
+                <div class="relative">
+                  <button
+                    class="btn btn-icon btn-sm btn-ghost"
+                    :aria-expanded="openMenuId === plan.id"
+                    @click.stop="toggleMenu(plan.id)"
+                  >
                     <Icon name="more" class="h-5 w-5" />
                   </button>
-                  <ul class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 shadow-xl dark:bg-dark-800">
-                    <li>
-                      <button @click="openEditModal(plan)" class="text-left hover:bg-gray-100 dark:hover:bg-dark-700">
-                        <Icon name="edit" class="h-4 w-4" />
-                        {{ t('common.edit') }}
-                      </button>
-                    </li>
-                    <li>
-                      <button @click="confirmDelete(plan)" class="text-left text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20">
-                        <Icon name="trash" class="h-4 w-4" />
-                        {{ t('common.delete') }}
-                      </button>
-                    </li>
-                  </ul>
+                  <div
+                    v-if="openMenuId === plan.id"
+                    class="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-xl dark:border-dark-700 dark:bg-dark-800"
+                  >
+                    <button
+                      class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-700"
+                      @click="openEditModal(plan); closeMenu()"
+                    >
+                      <Icon name="edit" class="h-4 w-4" />
+                      {{ t('common.edit') }}
+                    </button>
+                    <button
+                      class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                      @click="confirmDelete(plan); closeMenu()"
+                    >
+                      <Icon name="trash" class="h-4 w-4" />
+                      {{ t('common.delete') }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -85,11 +145,11 @@
             </p>
             
             <div class="space-y-3 text-sm">
-              <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-dark-700">
+              <div class="flex justify-between">
                 <span class="text-gray-500 dark:text-gray-400">{{ t('admin.plans.dailyQuota') }}</span>
                 <span class="font-medium text-gray-900 dark:text-white">${{ plan.daily_quota }}</span>
               </div>
-              <div class="flex justify-between border-b border-gray-100 pb-2 dark:border-dark-700">
+              <div class="flex justify-between">
                 <span class="text-gray-500 dark:text-gray-400">{{ t('admin.plans.totalQuota') }}</span>
                 <span class="font-medium text-gray-900 dark:text-white">${{ plan.total_quota }}</span>
               </div>
@@ -104,75 +164,79 @@
 
       <!-- Create/Edit Modal -->
       <BaseDialog :show="showModal" :title="isEditing ? t('admin.plans.editPlan') : t('admin.plans.createPlan')" @close="showModal = false">
-        <form @submit.prevent="savePlan" class="space-y-4">
+        <form @submit.prevent="savePlan" class="space-y-6">
           <!-- Basic Info -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <label class="label">{{ t('admin.plans.form.title') }}</label>
-              <input v-model="form.title" type="text" class="input w-full" required />
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="md:col-span-2">
+              <label class="label mb-2 block" for="plan-title">{{ t('admin.plans.form.title') }}</label>
+              <input id="plan-title" v-model="form.title" type="text" class="input w-full" required />
             </div>
             
-            <div class="col-span-2">
-              <label class="label">{{ t('admin.plans.form.description') }}</label>
-              <textarea v-model="form.description" class="input w-full" rows="3"></textarea>
+            <div class="md:col-span-2">
+              <label class="label mb-2 block" for="plan-description">{{ t('admin.plans.form.description') }}</label>
+              <textarea id="plan-description" v-model="form.description" class="input w-full" rows="3"></textarea>
             </div>
 
             <div>
-              <label class="label">{{ t('admin.plans.form.price') }}</label>
+              <label class="label mb-2 block" for="plan-price">{{ t('admin.plans.form.price') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-2 text-gray-500">¥</span>
-                <input v-model.number="form.price" type="number" step="0.01" min="0" class="input w-full pl-7" required />
+                <input id="plan-price" v-model.number="form.price" type="number" step="0.01" min="0" class="input w-full pl-7" required />
               </div>
             </div>
 
             <div>
-              <label class="label">{{ t('admin.plans.form.sortOrder') }}</label>
-              <input v-model.number="form.sort_order" type="number" class="input w-full" required />
+              <label class="label mb-2 block" for="plan-sort-order">{{ t('admin.plans.form.sortOrder') }}</label>
+              <input id="plan-sort-order" v-model.number="form.sort_order" type="number" class="input w-full" required />
             </div>
           </div>
 
           <!-- Group Info -->
-          <div class="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 dark:bg-dark-800">
-            <div class="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div class="grid grid-cols-1 gap-4 rounded-xl border border-gray-200/70 bg-gray-50/60 p-4 md:grid-cols-2 dark:border-dark-700/70 dark:bg-dark-900/40">
+            <div class="md:col-span-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-300">
               {{ t('admin.plans.form.groupSettings') }}
             </div>
             <div>
-              <label class="label">{{ t('admin.plans.form.groupName') }}</label>
-              <input v-model="form.group_name" type="text" class="input w-full" required />
+              <label class="label mb-2 block" for="plan-group-name">{{ t('admin.plans.form.groupName') }}</label>
+              <input id="plan-group-name" v-model="form.group_name" type="text" class="input w-full" required />
             </div>
             <div>
-              <label class="label">{{ t('admin.plans.form.groupSort') }}</label>
-              <input v-model.number="form.group_sort" type="number" class="input w-full" required />
+              <label class="label mb-2 block" for="plan-group-sort">{{ t('admin.plans.form.groupSort') }}</label>
+              <input id="plan-group-sort" v-model.number="form.group_sort" type="number" class="input w-full" required />
             </div>
           </div>
 
           <!-- Quota Info -->
-          <div class="grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 dark:bg-dark-800">
-            <div class="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div class="grid grid-cols-1 gap-4 rounded-xl border border-gray-200/70 bg-gray-50/60 p-4 md:grid-cols-2 dark:border-dark-700/70 dark:bg-dark-900/40">
+            <div class="md:col-span-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-dark-300">
               {{ t('admin.plans.form.quotaSettings') }}
             </div>
             <div>
-              <label class="label">{{ t('admin.plans.form.dailyQuota') }}</label>
+              <label class="label mb-2 block" for="plan-daily-quota">{{ t('admin.plans.form.dailyQuota') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-2 text-gray-500">$</span>
-                <input v-model.number="form.daily_quota" type="number" step="0.01" min="0" class="input w-full pl-7" required />
+                <input id="plan-daily-quota" v-model.number="form.daily_quota" type="number" step="0.01" min="0" class="input w-full pl-7" required />
               </div>
             </div>
             <div>
-              <label class="label">{{ t('admin.plans.form.totalQuota') }}</label>
+              <label class="label mb-2 block" for="plan-total-quota">{{ t('admin.plans.form.totalQuota') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-2 text-gray-500">$</span>
-                <input v-model.number="form.total_quota" type="number" step="0.01" min="0" class="input w-full pl-7" required />
+                <input id="plan-total-quota" v-model.number="form.total_quota" type="number" step="0.01" min="0" class="input w-full pl-7" required />
               </div>
             </div>
           </div>
 
           <!-- QR Upload -->
-          <div>
-            <label class="label">{{ t('admin.plans.form.purchaseQr') }}</label>
-            <div class="flex items-center gap-4">
+          <div class="rounded-xl border border-gray-200/70 bg-gray-50/60 p-4 dark:border-dark-700/70 dark:bg-dark-900/40">
+            <label class="label mb-2 block" for="plan-purchase-qr">{{ t('admin.plans.form.purchaseQr') }}</label>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div v-if="form.purchase_qr_url" class="relative h-24 w-24 overflow-hidden rounded-lg border border-gray-200 dark:border-dark-700">
-                <img :src="form.purchase_qr_url" class="h-full w-full object-contain" />
+                <img
+                  :src="form.purchase_qr_url"
+                  class="h-full w-full cursor-zoom-in object-contain"
+                  @click="openQrPreview(form.purchase_qr_url)"
+                />
                 <button 
                   type="button" 
                   @click="form.purchase_qr_url = ''"
@@ -182,11 +246,18 @@
                 </button>
               </div>
               <div class="flex-1">
-                <label class="btn btn-secondary cursor-pointer">
+                <input
+                  id="plan-purchase-qr"
+                  ref="purchaseQrInputRef"
+                  type="file"
+                  accept="image/*"
+                  class="sr-only"
+                  @change="handleUpload"
+                />
+                <button type="button" class="btn btn-secondary" @click="triggerPurchaseQrUpload">
                   <Icon name="upload" class="mr-2 h-4 w-4" />
                   {{ t('common.upload') }}
-                  <input type="file" accept="image/*" class="hidden" @change="handleUpload" />
-                </label>
+                </button>
                 <div v-if="uploading" class="mt-2 text-sm text-gray-500">
                   {{ t('common.uploading') }}...
                 </div>
@@ -195,9 +266,9 @@
           </div>
 
           <!-- Enabled Toggle -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between rounded-xl border border-gray-200/70 bg-gray-50/60 px-4 py-3 dark:border-dark-700/70 dark:bg-dark-900/40">
+             <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('admin.plans.form.enabled') }}</span>
              <Toggle v-model="form.enabled" />
-             <span class="text-sm font-medium">{{ t('admin.plans.form.enabled') }}</span>
           </div>
 
           <!-- Footer -->
@@ -211,6 +282,26 @@
           </div>
         </form>
       </BaseDialog>
+
+      <Teleport to="body">
+        <div
+          v-if="showQrPreview"
+          class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4"
+          @click="closeQrPreview"
+        >
+          <div class="relative max-h-full max-w-3xl" @click.stop>
+            <img :src="qrPreviewUrl" class="max-h-[85vh] w-auto rounded-lg bg-white object-contain" />
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-full bg-black/70 p-2 text-white hover:bg-black"
+              aria-label="Close"
+              @click="closeQrPreview"
+            >
+              <Icon name="x" class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </Teleport>
 
       <!-- Delete Confirmation Modal -->
       <ConfirmDialog
@@ -226,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import { useAppStore } from '@/stores'
@@ -246,7 +337,23 @@ const saving = ref(false)
 const uploading = ref(false)
 const showModal = ref(false)
 const showDeleteModal = ref(false)
+const showQrPreview = ref(false)
+const qrPreviewUrl = ref('')
 const selectedPlan = ref<Plan | null>(null)
+const purchaseQrInputRef = ref<HTMLInputElement | null>(null)
+const openMenuId = ref<number | null>(null)
+const savingGroupSort = ref(false)
+const draggingGroupIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+
+type PlanGroupItem = {
+  name: string
+  label: string
+  sort: number
+  count: number
+}
+
+const groupOrder = ref<PlanGroupItem[]>([])
 
 const form = reactive({
   title: '',
@@ -272,14 +379,101 @@ const sortedPlans = computed(() => {
   })
 })
 
+function buildGroupOrder(items: Plan[]) {
+  const groups = new Map<string, PlanGroupItem>()
+  items.forEach((plan) => {
+    const name = plan.group_name || 'default'
+    const label = name === 'default' ? t('plans.defaultGroup') : name
+    if (!groups.has(name)) {
+      groups.set(name, {
+        name,
+        label,
+        sort: plan.group_sort || 0,
+        count: 0
+      })
+    }
+    const group = groups.get(name)
+    if (!group) return
+    group.count += 1
+    if ((plan.group_sort || 0) < group.sort) {
+      group.sort = plan.group_sort || 0
+    }
+  })
+
+  groupOrder.value = Array.from(groups.values()).sort((a, b) => {
+    if (a.sort !== b.sort) return a.sort - b.sort
+    return a.label.localeCompare(b.label)
+  })
+}
+
 async function fetchPlans() {
   loading.value = true
   try {
     plans.value = await adminAPI.plans.getPlans()
+    buildGroupOrder(plans.value)
   } catch (error: any) {
     appStore.showError(error.message)
   } finally {
     loading.value = false
+  }
+}
+
+function onGroupDragStart(index: number) {
+  draggingGroupIndex.value = index
+}
+
+function onGroupDragOver(index: number) {
+  dragOverIndex.value = index
+}
+
+function onGroupDragEnd() {
+  draggingGroupIndex.value = null
+  dragOverIndex.value = null
+}
+
+function moveGroup(from: number, to: number) {
+  if (from === to) return
+  const next = [...groupOrder.value]
+  const [item] = next.splice(from, 1)
+  if (!item) return
+  next.splice(to, 0, item)
+  groupOrder.value = next
+}
+
+async function onGroupDrop(index: number) {
+  if (draggingGroupIndex.value === null) return
+  moveGroup(draggingGroupIndex.value, index)
+  onGroupDragEnd()
+  await saveGroupSorts()
+}
+
+async function saveGroupSorts() {
+  if (savingGroupSort.value) return
+  if (groupOrder.value.length === 0) return
+
+  savingGroupSort.value = true
+  const updates = groupOrder.value.map((group, index) => ({
+    group_name: group.name,
+    group_sort: index
+  }))
+
+  try {
+    await adminAPI.plans.updateGroupSorts({ groups: updates })
+    const sortMap = new Map(updates.map((item) => [item.group_name, item.group_sort]))
+    plans.value = plans.value.map((plan) => ({
+      ...plan,
+      group_sort: sortMap.get(plan.group_name || 'default') ?? plan.group_sort
+    }))
+    groupOrder.value = groupOrder.value.map((group, index) => ({
+      ...group,
+      sort: index
+    }))
+    appStore.showSuccess(t('admin.plans.groupSorting.saved'))
+  } catch (error: any) {
+    appStore.showError(error.message)
+    fetchPlans()
+  } finally {
+    savingGroupSort.value = false
   }
 }
 
@@ -334,11 +528,26 @@ async function handleUpload(event: Event) {
   }
 }
 
+function triggerPurchaseQrUpload() {
+  purchaseQrInputRef.value?.click()
+}
+
+function openQrPreview(url: string) {
+  if (!url) return
+  qrPreviewUrl.value = url
+  showQrPreview.value = true
+}
+
+function closeQrPreview() {
+  showQrPreview.value = false
+  qrPreviewUrl.value = ''
+}
+
 async function savePlan() {
   saving.value = true
   try {
-    if (isEditing) {
-      await adminAPI.plans.updatePlan(selectedPlan.value!.id, form)
+    if (isEditing.value && selectedPlan.value) {
+      await adminAPI.plans.updatePlan(selectedPlan.value.id, form)
       appStore.showSuccess(t('common.updated'))
     } else {
       await adminAPI.plans.createPlan(form)
@@ -379,7 +588,20 @@ async function toggleEnabled(plan: Plan) {
   }
 }
 
+function toggleMenu(planId: number) {
+  openMenuId.value = openMenuId.value === planId ? null : planId
+}
+
+function closeMenu() {
+  openMenuId.value = null
+}
+
 onMounted(() => {
   fetchPlans()
+  document.addEventListener('click', closeMenu)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenu)
 })
 </script>

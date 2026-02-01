@@ -200,6 +200,8 @@ export default {
     noGroupsAvailable: '无可用分组',
     unknownError: '发生未知错误',
     saving: '保存中...',
+    upload: '上传',
+    uploading: '上传中...',
     selectedCount: '（已选 {count} 个）',
     refresh: '刷新',
     settings: '设置',
@@ -817,6 +819,12 @@ export default {
       createPlan: '创建套餐',
       deleteTitle: '删除套餐',
       deleteConfirm: "确定要删除套餐 '{title}' 吗？",
+      groupSorting: {
+        title: '分组排序',
+        description: '拖拽调整套餐分组显示顺序',
+        saved: '分组排序已更新',
+        items: '个套餐'
+      },
       form: {
         title: '标题',
         description: '描述',
@@ -1261,7 +1269,8 @@ export default {
       pleaseSelectUser: '请选择用户',
       pleaseSelectGroup: '请选择分组',
       validityDaysRequired: '请输入有效的天数（至少1天）',
-      revokeConfirm: "确定要撤销 '{user}' 的订阅吗？此操作无法撤销。"
+      revokeConfirm: "确定要撤销 '{user}' 的订阅吗？此操作无法撤销。",
+      rankByDailyUsage: '按今日用量排行'
     },
 
     // Accounts Management
@@ -2108,7 +2117,8 @@ export default {
         subscription: '订阅',
         // 管理员在用户管理页面调整余额/并发时产生的记录
         admin_balance: '余额（管理员）',
-        admin_concurrency: '并发数（管理员）'
+        admin_concurrency: '并发数（管理员）',
+        invite_reward: '邀请奖励'
       },
       // 用于选择器和筛选器的直接键
       balance: '余额',
@@ -3127,6 +3137,9 @@ export default {
         docUrl: '文档链接',
         docUrlHint: '文档网站的链接。留空则隐藏文档链接。',
         docUrlPlaceholder: 'https://docs.example.com',
+        docMarkdown: '文档内容',
+        docMarkdownHint: '支持 Markdown，留空将隐藏文档入口。',
+        docMarkdownPlaceholder: '在此输入文档内容，支持 Markdown。',
         siteLogo: '站点Logo',
         uploadImage: '上传图片',
         remove: '移除',

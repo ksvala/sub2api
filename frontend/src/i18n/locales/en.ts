@@ -203,6 +203,8 @@ export default {
     noGroupsAvailable: 'No groups available',
     unknownError: 'Unknown error occurred',
     saving: 'Saving...',
+    upload: 'Upload',
+    uploading: 'Uploading...',
     selectedCount: '({count} selected)',
     refresh: 'Refresh',
     settings: 'Settings',
@@ -966,6 +968,42 @@ export default {
       }
     },
 
+    // Plans
+    plans: {
+      title: 'Plans Management',
+      description: 'Manage subscription plans and quotas',
+      create: 'Create Plan',
+      noPlans: 'No plans available',
+      createFirst: 'Create your first plan to start selling subscriptions.',
+      dailyQuota: 'Daily Quota',
+      totalQuota: 'Total Quota',
+      sortOrder: 'Sort Order',
+      editPlan: 'Edit Plan',
+      createPlan: 'Create Plan',
+      deleteTitle: 'Delete Plan',
+      deleteConfirm: "Are you sure you want to delete plan '{title}'?",
+      groupSorting: {
+        title: 'Group Sorting',
+        description: 'Drag to reorder plan groups',
+        saved: 'Group order updated',
+        items: 'plans'
+      },
+      form: {
+        title: 'Title',
+        description: 'Description',
+        price: 'Price (CNY)',
+        sortOrder: 'Sort Order',
+        groupSettings: 'Group Settings',
+        groupName: 'Group Name',
+        groupSort: 'Group Sort',
+        quotaSettings: 'Quota Settings',
+        dailyQuota: 'Daily Quota ($)',
+        totalQuota: 'Total Quota ($)',
+        purchaseQr: 'Purchase QR',
+        enabled: 'Enabled'
+      }
+    },
+
     // Groups
     groups: {
       title: 'Group Management',
@@ -1157,7 +1195,8 @@ export default {
       pleaseSelectGroup: 'Please select a group',
       validityDaysRequired: 'Please enter a valid number of days (at least 1)',
       revokeConfirm:
-        "Are you sure you want to revoke the subscription for '{user}'? This action cannot be undone."
+        "Are you sure you want to revoke the subscription for '{user}'? This action cannot be undone.",
+      rankByDailyUsage: 'Rank by Today Usage'
     },
 
     // Accounts
@@ -2946,6 +2985,9 @@ export default {
         docUrl: 'Documentation URL',
         docUrlPlaceholder: 'https://docs.example.com',
         docUrlHint: 'Link to your documentation site. Leave empty to hide the documentation link.',
+        docMarkdown: 'Documentation Content',
+        docMarkdownPlaceholder: 'Write your documentation here (Markdown supported).',
+        docMarkdownHint: 'Markdown supported. Leave empty to hide the documentation link.',
         siteLogo: 'Site Logo',
         uploadImage: 'Upload Image',
         remove: 'Remove',

@@ -30,6 +30,7 @@ export const useAppStore = defineStore('app', () => {
   const contactInfo = ref<string>('')
   const apiBaseUrl = ref<string>('')
   const docUrl = ref<string>('')
+  const docMarkdown = ref<string>('')
   const cachedPublicSettings = ref<PublicSettings | null>(null)
 
   // Version cache state
@@ -290,6 +291,7 @@ export const useAppStore = defineStore('app', () => {
     contactInfo.value = config.contact_info || ''
     apiBaseUrl.value = config.api_base_url || ''
     docUrl.value = config.doc_url || ''
+    docMarkdown.value = config.doc_markdown || ''
     publicSettingsLoaded.value = true
   }
 
@@ -324,6 +326,7 @@ export const useAppStore = defineStore('app', () => {
         customer_service_qr: '',
         after_sales_group_qr: '',
         doc_url: docUrl.value,
+        doc_markdown: docMarkdown.value,
         hide_ccs_import_button: false,
         purchase_subscription_enabled: false,
         purchase_subscription_url: '',
@@ -388,6 +391,7 @@ export const useAppStore = defineStore('app', () => {
     contactInfo,
     apiBaseUrl,
     docUrl,
+    docMarkdown,
     cachedPublicSettings,
 
     // Version state

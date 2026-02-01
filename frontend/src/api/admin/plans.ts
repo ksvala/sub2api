@@ -18,6 +18,10 @@ export interface UpdatePlanRequest extends Partial<CreatePlanRequest> {
   id: number
 }
 
+export interface UpdateGroupSortsRequest {
+  groups: Array<{ group_name: string; group_sort: number }>
+}
+
 export const plansAPI = {
   async getPlans() {
     const { data } = await apiClient.get<PaginatedResponse<Plan>>('/admin/plans', {
@@ -33,6 +37,11 @@ export const plansAPI = {
 
   async updatePlan(id: number, plan: Partial<CreatePlanRequest>) {
     const { data } = await apiClient.put<Plan>(`/admin/plans/${id}`, plan)
+    return data
+  },
+
+  async updateGroupSorts(payload: UpdateGroupSortsRequest) {
+    const { data } = await apiClient.put<{ message: string }>('/admin/plans/group-sorts', payload)
     return data
   },
 

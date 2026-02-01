@@ -26,6 +26,7 @@ export interface SystemSettings {
   api_base_url: string
   contact_info: string
   doc_url: string
+  doc_markdown: string
   hide_ccs_import_button: boolean
   customer_service_qr?: string
   after_sales_group_qr?: string
@@ -82,6 +83,7 @@ export interface UpdateSettingsRequest {
   api_base_url?: string
   contact_info?: string
   doc_url?: string
+  doc_markdown?: string
   hide_ccs_import_button?: boolean
   customer_service_qr?: string
   after_sales_group_qr?: string
