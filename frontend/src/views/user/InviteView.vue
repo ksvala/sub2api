@@ -91,7 +91,7 @@
                   <td class="px-6 py-3 text-gray-900 dark:text-white">{{ record.invitee_email }}</td>
                   <td class="px-6 py-3">
                     <span
-                      class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium"
+                      class="inline-flex min-w-[64px] items-center justify-center rounded-md px-2 py-1 text-xs font-medium"
                       :class="record.status === 'confirmed' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'"
                     >
                       {{ record.status === 'confirmed' ? t('invites.statusConfirmed') : t('invites.statusPending') }}
@@ -157,12 +157,12 @@ import { AppLayout } from '@/components/layout'
 import Icon from '@/components/icons/Icon.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { inviteAPI } from '@/api/invites'
-import { useAppStore } from '@/stores/app'
+import { useClipboard } from '@/composables/useClipboard'
 import { formatDateTime } from '@/utils/format'
 import type { InviteSummary, InviteRecord, InviteRewardRecord } from '@/types'
 
 const { t } = useI18n()
-const appStore = useAppStore()
+const { copyToClipboard } = useClipboard()
 
 const summary = ref<InviteSummary | null>(null)
 const inviteRecords = ref<InviteRecord[]>([])
@@ -212,14 +212,6 @@ const copyInviteLink = () => {
   }
 }
 
-const copyToClipboard = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    appStore.showSuccess(t('common.copiedToClipboard'))
-  } catch (err) {
-    appStore.showError(t('common.copyFailed'))
-  }
-}
 
 onMounted(() => {
   loadSummary()
