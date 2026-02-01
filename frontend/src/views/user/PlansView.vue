@@ -1,18 +1,6 @@
 <template>
   <AppLayout>
     <div class="space-y-8">
-      <!-- Header -->
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('plans.title') }}
-          </h1>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {{ t('plans.description') }}
-          </p>
-        </div>
-      </div>
-
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600"></div>
@@ -147,7 +135,7 @@ const planGroups = computed<PlanGroup[]>(() => {
   
   // Group plans
   plans.value.forEach(plan => {
-    if (!plan.enabled) return
+    if (plan.enabled === false) return
     const groupName = plan.group_name || t('plans.defaultGroup')
     if (!groups[groupName]) {
       groups[groupName] = []
