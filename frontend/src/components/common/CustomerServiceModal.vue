@@ -51,10 +51,6 @@
         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ contactInfo }}</p>
       </div>
 
-      <p class="text-center text-xs text-gray-400 max-w-[80%]">
-        {{ t('plans.purchaseNote') }}
-      </p>
-
       <button @click="isOpen = false" class="btn btn-primary w-full shadow-lg shadow-primary-600/20 transition-all hover:shadow-primary-600/40 hover:-translate-y-0.5">
         {{ t('common.close') }}
       </button>
