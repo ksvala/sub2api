@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	stdsql "database/sql"
 
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/Wei-Shaw/sub2api/ent"
@@ -131,18 +130,14 @@ func (r *inviteRepository) GetSummaryByInviter(ctx context.Context, inviterID in
 	if confirmed == 0 {
 		return total, pending, confirmed, 0, nil
 	}
-	var rewardSum stdsql.NullFloat64
-	if err := base.Clone().
+	rewardSum, err := base.Clone().
 		Where(invitation.StatusEQ(service.InviteStatusConfirmed)).
 		Aggregate(ent.Sum(invitation.FieldRewardAmount)).
-		Scan(ctx, &rewardSum); err != nil {
+		Float64(ctx)
+	if err != nil {
 		return 0, 0, 0, 0, err
 	}
-
-	if rewardSum.Valid {
-		return total, pending, confirmed, rewardSum.Float64, nil
-	}
-	return total, pending, confirmed, 0, nil
+	return total, pending, confirmed, rewardSum, nil
 }
 
 func inviteEntityToService(m *ent.Invitation) *service.Invite {
