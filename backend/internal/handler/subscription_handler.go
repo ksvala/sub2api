@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"context"
+	"time"
+
 	"github.com/Wei-Shaw/sub2api/internal/handler/dto"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
 	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
@@ -33,13 +36,33 @@ type SubscriptionProgressInfo struct {
 // SubscriptionHandler handles user subscription operations
 type SubscriptionHandler struct {
 	subscriptionService *service.SubscriptionService
+	reminderService     *service.SubscriptionReminderService
 }
 
 // NewSubscriptionHandler creates a new user subscription handler
-func NewSubscriptionHandler(subscriptionService *service.SubscriptionService) *SubscriptionHandler {
+func NewSubscriptionHandler(
+	subscriptionService *service.SubscriptionService,
+	reminderService *service.SubscriptionReminderService,
+) *SubscriptionHandler {
 	return &SubscriptionHandler{
 		subscriptionService: subscriptionService,
+		reminderService:     reminderService,
 	}
+}
+
+func (h *SubscriptionHandler) triggerRemindersAsync(c *gin.Context, userID int64) {
+	if h == nil || h.reminderService == nil {
+		return
+	}
+	if userID <= 0 {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	go func() {
+		defer cancel()
+		h.reminderService.CheckAndNotify(ctx, userID)
+	}()
 }
 
 // List handles listing current user's subscriptions
@@ -50,6 +73,8 @@ func (h *SubscriptionHandler) List(c *gin.Context) {
 		response.Unauthorized(c, "User not found in context")
 		return
 	}
+
+	h.triggerRemindersAsync(c, subject.UserID)
 
 	subscriptions, err := h.subscriptionService.ListUserSubscriptions(c.Request.Context(), subject.UserID)
 	if err != nil {
@@ -73,6 +98,8 @@ func (h *SubscriptionHandler) GetActive(c *gin.Context) {
 		return
 	}
 
+	h.triggerRemindersAsync(c, subject.UserID)
+
 	subscriptions, err := h.subscriptionService.ListActiveUserSubscriptions(c.Request.Context(), subject.UserID)
 	if err != nil {
 		response.ErrorFrom(c, err)
@@ -94,6 +121,8 @@ func (h *SubscriptionHandler) GetProgress(c *gin.Context) {
 		response.Unauthorized(c, "User not found in context")
 		return
 	}
+
+	h.triggerRemindersAsync(c, subject.UserID)
 
 	// Get all active subscriptions with progress
 	subscriptions, err := h.subscriptionService.ListActiveUserSubscriptions(c.Request.Context(), subject.UserID)
@@ -127,6 +156,8 @@ func (h *SubscriptionHandler) GetSummary(c *gin.Context) {
 		response.Unauthorized(c, "User not found in context")
 		return
 	}
+
+	h.triggerRemindersAsync(c, subject.UserID)
 
 	// Get all active subscriptions
 	subscriptions, err := h.subscriptionService.ListActiveUserSubscriptions(c.Request.Context(), subject.UserID)
