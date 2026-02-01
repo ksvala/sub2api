@@ -53,6 +53,15 @@ type UpdatePlanRequest struct {
 	SortOrder     *int     `json:"sort_order"`
 }
 
+type UpdatePlanGroupSortRequest struct {
+	Groups []PlanGroupSortItem `json:"groups" binding:"required"`
+}
+
+type PlanGroupSortItem struct {
+	GroupName string `json:"group_name" binding:"required"`
+	GroupSort int    `json:"group_sort"`
+}
+
 // List handles listing plans (admin)
 // GET /api/v1/admin/plans
 func (h *PlanHandler) List(c *gin.Context) {
@@ -129,15 +138,15 @@ func (h *PlanHandler) Create(c *gin.Context) {
 
 	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
 		payload := service.MarshalAdminActionPayload(map[string]any{
-			"title":        plan.Title,
-			"price":        plan.Price,
-			"group_name":   plan.GroupName,
-			"group_sort":   plan.GroupSort,
-			"daily_quota":  plan.DailyQuota,
-			"total_quota":  plan.TotalQuota,
-			"enabled":      plan.Enabled,
-			"sort_order":   plan.SortOrder,
-			"purchase_qr":  plan.PurchaseQRURL,
+			"title":       plan.Title,
+			"price":       plan.Price,
+			"group_name":  plan.GroupName,
+			"group_sort":  plan.GroupSort,
+			"daily_quota": plan.DailyQuota,
+			"total_quota": plan.TotalQuota,
+			"enabled":     plan.Enabled,
+			"sort_order":  plan.SortOrder,
+			"purchase_qr": plan.PurchaseQRURL,
 		})
 		planID := plan.ID
 		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
@@ -188,15 +197,15 @@ func (h *PlanHandler) Update(c *gin.Context) {
 
 	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
 		payload := service.MarshalAdminActionPayload(map[string]any{
-			"title":        plan.Title,
-			"price":        plan.Price,
-			"group_name":   plan.GroupName,
-			"group_sort":   plan.GroupSort,
-			"daily_quota":  plan.DailyQuota,
-			"total_quota":  plan.TotalQuota,
-			"enabled":      plan.Enabled,
-			"sort_order":   plan.SortOrder,
-			"purchase_qr":  plan.PurchaseQRURL,
+			"title":       plan.Title,
+			"price":       plan.Price,
+			"group_name":  plan.GroupName,
+			"group_sort":  plan.GroupSort,
+			"daily_quota": plan.DailyQuota,
+			"total_quota": plan.TotalQuota,
+			"enabled":     plan.Enabled,
+			"sort_order":  plan.SortOrder,
+			"purchase_qr": plan.PurchaseQRURL,
 		})
 		planID := plan.ID
 		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
@@ -211,6 +220,57 @@ func (h *PlanHandler) Update(c *gin.Context) {
 	}
 
 	response.Success(c, dto.PlanFromService(plan))
+}
+
+// UpdateGroupSorts handles updating group order for plans
+// PUT /api/v1/admin/plans/group-sorts
+func (h *PlanHandler) UpdateGroupSorts(c *gin.Context) {
+	var req UpdatePlanGroupSortRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	if len(req.Groups) == 0 {
+		response.BadRequest(c, "Group sorts are required")
+		return
+	}
+
+	updates := make([]service.PlanGroupSort, 0, len(req.Groups))
+	for _, item := range req.Groups {
+		name := strings.TrimSpace(item.GroupName)
+		if name == "" {
+			continue
+		}
+		updates = append(updates, service.PlanGroupSort{
+			GroupName: name,
+			GroupSort: item.GroupSort,
+		})
+	}
+	if len(updates) == 0 {
+		response.BadRequest(c, "Group sorts are required")
+		return
+	}
+
+	if err := h.planService.UpdateGroupSorts(c.Request.Context(), updates); err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	if subject, ok := middleware.GetAuthSubjectFromContext(c); ok {
+		payload := service.MarshalAdminActionPayload(map[string]any{
+			"groups": updates,
+		})
+		h.adminActionLogService.Log(c.Request.Context(), service.AdminActionLogInput{
+			AdminID:      &subject.UserID,
+			Action:       "update_plan_group_sort",
+			ResourceType: "plan",
+			Payload:      payload,
+			IPAddress:    c.ClientIP(),
+			UserAgent:    c.GetHeader("User-Agent"),
+		})
+	}
+
+	response.Success(c, gin.H{"message": "Plan group sort updated"})
 }
 
 // Delete handles deleting a plan

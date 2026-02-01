@@ -47,6 +47,7 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 		CustomerServiceQR:           settings.CustomerServiceQR,
 		AfterSalesGroupQR:           settings.AfterSalesGroupQR,
 		DocURL:                      settings.DocURL,
+		DocMarkdown:                 settings.DocMarkdown,
 		HomeContent:                 settings.HomeContent,
 		HideCcsImportButton:         settings.HideCcsImportButton,
 		PurchaseSubscriptionEnabled: settings.PurchaseSubscriptionEnabled,

@@ -19,11 +19,8 @@ func RegisterAdminRoutes(
 	adminAuth servermiddleware.AdminAuthMiddleware,
 	redisClient *redis.Client,
 ) {
-	// Create rate limiter and ban limiter for admin endpoints that require protection
+	// Create rate limiter for admin endpoints that require protection
 	rateLimiter := middleware.NewRateLimiter(redisClient)
-	banLimiter := middleware.NewBanLimiter(redisClient)
-	banWindow := 10 * time.Minute
-	banDuration := 5 * time.Hour
 
 	admin := v1.Group("/admin")
 	admin.Use(gin.HandlerFunc(adminAuth))
@@ -65,7 +62,7 @@ func RegisterAdminRoutes(
 		registerSettingsRoutes(admin, h)
 
 		// 上传
-		registerUploadRoutes(admin, h, rateLimiter, banLimiter, banWindow, banDuration)
+		registerUploadRoutes(admin, h, rateLimiter)
 
 		// 运维监控（Ops）
 		registerOpsRoutes(admin, h)
@@ -83,15 +80,14 @@ func RegisterAdminRoutes(
 		registerUserAttributeRoutes(admin, h)
 
 		// 邀请管理
-		registerInviteRoutes(admin, h, rateLimiter, banLimiter, banWindow, banDuration)
+		registerInviteRoutes(admin, h, rateLimiter)
 	}
 }
 
-func registerUploadRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter, banLimiter *middleware.BanLimiter, banWindow time.Duration, banDuration time.Duration) {
+func registerUploadRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter) {
 	uploads := admin.Group("/uploads")
 	{
 		uploads.POST("/image",
-			banLimiter.BanOnFailure("admin-upload", 5, banWindow, banDuration),
 			rateLimiter.LimitWithOptions("admin-upload", 10, time.Minute, middleware.RateLimitOptions{
 				FailureMode: middleware.RateLimitFailClose,
 			}),
@@ -106,6 +102,7 @@ func registerPlanRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		plans.GET("", h.Admin.Plan.List)
 		plans.GET("/:id", h.Admin.Plan.GetByID)
 		plans.POST("", h.Admin.Plan.Create)
+		plans.PUT("/group-sorts", h.Admin.Plan.UpdateGroupSorts)
 		plans.PUT("/:id", h.Admin.Plan.Update)
 		plans.DELETE("/:id", h.Admin.Plan.Delete)
 	}
@@ -223,14 +220,13 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerInviteRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter, banLimiter *middleware.BanLimiter, banWindow time.Duration, banDuration time.Duration) {
+func registerInviteRoutes(admin *gin.RouterGroup, h *handler.Handlers, rateLimiter *middleware.RateLimiter) {
 	invites := admin.Group("/invites")
 	{
 		invites.GET("/settings", h.Admin.Invite.GetSettings)
 		invites.PUT("/settings", h.Admin.Invite.UpdateSettings)
 		invites.GET("/logs", h.Admin.Invite.ListLogs)
 		invites.POST("/:invitee_id/confirm",
-			banLimiter.BanOnFailure("admin-invite-confirm", 5, banWindow, banDuration),
 			rateLimiter.LimitWithOptions("admin-invite-confirm", 10, time.Minute, middleware.RateLimitOptions{
 				FailureMode: middleware.RateLimitFailClose,
 			}),

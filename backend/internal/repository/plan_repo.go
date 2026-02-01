@@ -118,6 +118,28 @@ func (r *planRepository) List(ctx context.Context, params pagination.PaginationP
 	return plans, paginationResultFromTotal(int64(total), params), nil
 }
 
+func (r *planRepository) UpdateGroupSorts(ctx context.Context, updates []service.PlanGroupSort) error {
+	if len(updates) == 0 {
+		return nil
+	}
+
+	client := clientFromContext(ctx, r.client)
+	for _, update := range updates {
+		if update.GroupName == "" {
+			continue
+		}
+		_, err := client.Plan.Update().
+			Where(plan.GroupNameEQ(update.GroupName)).
+			SetGroupSort(update.GroupSort).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func planEntityToService(m *ent.Plan) *service.Plan {
 	if m == nil {
 		return nil

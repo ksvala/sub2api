@@ -13,6 +13,7 @@ type PlanRepository interface {
 	Delete(ctx context.Context, id int64) error
 	GetByID(ctx context.Context, id int64) (*Plan, error)
 	List(ctx context.Context, params pagination.PaginationParams, enabled *bool) ([]Plan, *pagination.PaginationResult, error)
+	UpdateGroupSorts(ctx context.Context, updates []PlanGroupSort) error
 }
 
 type PlanService struct {
@@ -101,6 +102,32 @@ func (s *PlanService) GetByID(ctx context.Context, id int64) (*Plan, error) {
 
 func (s *PlanService) List(ctx context.Context, params pagination.PaginationParams, enabled *bool) ([]Plan, *pagination.PaginationResult, error) {
 	return s.planRepo.List(ctx, params, enabled)
+}
+
+func (s *PlanService) UpdateGroupSorts(ctx context.Context, updates []PlanGroupSort) error {
+	if len(updates) == 0 {
+		return nil
+	}
+
+	normalized := make([]PlanGroupSort, 0, len(updates))
+	seen := make(map[string]struct{}, len(updates))
+	for _, update := range updates {
+		name := normalizeGroupName(update.GroupName)
+		if _, exists := seen[name]; exists {
+			continue
+		}
+		seen[name] = struct{}{}
+		normalized = append(normalized, PlanGroupSort{
+			GroupName: name,
+			GroupSort: update.GroupSort,
+		})
+	}
+
+	if len(normalized) == 0 {
+		return nil
+	}
+
+	return s.planRepo.UpdateGroupSorts(ctx, normalized)
 }
 
 func normalizeGroupName(value string) string {

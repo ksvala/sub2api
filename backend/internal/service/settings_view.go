@@ -36,6 +36,7 @@ type SystemSettings struct {
 	CustomerServiceQR           string
 	AfterSalesGroupQR           string
 	DocURL                      string
+	DocMarkdown                 string
 	HomeContent                 string
 	HideCcsImportButton         bool
 	PurchaseSubscriptionEnabled bool
@@ -78,6 +79,7 @@ type PublicSettings struct {
 	CustomerServiceQR    string
 	AfterSalesGroupQR    string
 	DocURL               string
+	DocMarkdown          string
 	HomeContent          string
 	HideCcsImportButton  bool
 

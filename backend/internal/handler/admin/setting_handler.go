@@ -75,6 +75,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		CustomerServiceQR:                    settings.CustomerServiceQR,
 		AfterSalesGroupQR:                    settings.AfterSalesGroupQR,
 		DocURL:                               settings.DocURL,
+		DocMarkdown:                          settings.DocMarkdown,
 		HomeContent:                          settings.HomeContent,
 		HideCcsImportButton:                  settings.HideCcsImportButton,
 		PurchaseSubscriptionEnabled:          settings.PurchaseSubscriptionEnabled,
@@ -133,6 +134,7 @@ type UpdateSettingsRequest struct {
 	CustomerServiceQR           string  `json:"customer_service_qr"`
 	AfterSalesGroupQR           string  `json:"after_sales_group_qr"`
 	DocURL                      string  `json:"doc_url"`
+	DocMarkdown                 string  `json:"doc_markdown"`
 	HomeContent                 string  `json:"home_content"`
 	HideCcsImportButton         bool    `json:"hide_ccs_import_button"`
 	PurchaseSubscriptionEnabled *bool   `json:"purchase_subscription_enabled"`
@@ -320,6 +322,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomerServiceQR:           req.CustomerServiceQR,
 		AfterSalesGroupQR:           req.AfterSalesGroupQR,
 		DocURL:                      req.DocURL,
+		DocMarkdown:                 req.DocMarkdown,
 		HomeContent:                 req.HomeContent,
 		HideCcsImportButton:         req.HideCcsImportButton,
 		PurchaseSubscriptionEnabled: purchaseEnabled,
@@ -402,6 +405,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		CustomerServiceQR:                    updatedSettings.CustomerServiceQR,
 		AfterSalesGroupQR:                    updatedSettings.AfterSalesGroupQR,
 		DocURL:                               updatedSettings.DocURL,
+		DocMarkdown:                          updatedSettings.DocMarkdown,
 		HomeContent:                          updatedSettings.HomeContent,
 		HideCcsImportButton:                  updatedSettings.HideCcsImportButton,
 		PurchaseSubscriptionEnabled:          updatedSettings.PurchaseSubscriptionEnabled,
@@ -535,6 +539,9 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	}
 	if before.DocURL != after.DocURL {
 		changed = append(changed, "doc_url")
+	}
+	if before.DocMarkdown != after.DocMarkdown {
+		changed = append(changed, "doc_markdown")
 	}
 	if before.HomeContent != after.HomeContent {
 		changed = append(changed, "home_content")

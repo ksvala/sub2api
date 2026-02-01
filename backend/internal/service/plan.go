@@ -51,3 +51,8 @@ type UpdatePlanInput struct {
 	Enabled       *bool
 	SortOrder     *int
 }
+
+type PlanGroupSort struct {
+	GroupName string
+	GroupSort int
+}

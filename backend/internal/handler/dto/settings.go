@@ -34,6 +34,7 @@ type SystemSettings struct {
 	CustomerServiceQR           string `json:"customer_service_qr"`
 	AfterSalesGroupQR           string `json:"after_sales_group_qr"`
 	DocURL                      string `json:"doc_url"`
+	DocMarkdown                 string `json:"doc_markdown"`
 	HomeContent                 string `json:"home_content"`
 	HideCcsImportButton         bool   `json:"hide_ccs_import_button"`
 	PurchaseSubscriptionEnabled bool   `json:"purchase_subscription_enabled"`
@@ -76,6 +77,7 @@ type PublicSettings struct {
 	CustomerServiceQR           string `json:"customer_service_qr"`
 	AfterSalesGroupQR           string `json:"after_sales_group_qr"`
 	DocURL                      string `json:"doc_url"`
+	DocMarkdown                 string `json:"doc_markdown"`
 	HomeContent                 string `json:"home_content"`
 	HideCcsImportButton         bool   `json:"hide_ccs_import_button"`
 	PurchaseSubscriptionEnabled bool   `json:"purchase_subscription_enabled"`

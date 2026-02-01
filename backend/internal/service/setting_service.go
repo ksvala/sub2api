@@ -19,6 +19,46 @@ var (
 	ErrSettingNotFound      = infraerrors.NotFound("SETTING_NOT_FOUND", "setting not found")
 )
 
+const defaultDocMarkdown = `# Sub2API 使用教程
+
+## 1. 登录与首页
+- 访问站点首页，点击右上角登录或注册。
+- 登录后进入仪表盘查看余额、用量与快捷入口。
+
+## 2. 获取 API Key
+- 进入 API Keys 页面。
+- 点击创建密钥，系统会生成新的 API Key。
+- 复制并妥善保存，避免泄露。
+
+## 3. 调用方式
+- API Base URL 以页面显示为准（如已配置）。
+- 在请求中携带 Authorization 头。
+
+    POST /v1/messages
+    Authorization: Bearer YOUR_API_KEY
+    Content-Type: application/json
+
+## 4. 套餐与购买
+- 进入套餐页面查看可用分组与套餐。
+- 点击购买并扫码完成支付（如管理员已配置二维码）。
+- 购买后额度会自动发放到账号。
+
+## 5. 余额与配额
+- 仪表盘展示当前余额与并发限制等信息。
+- 套餐包含每日额度和总额度，超出后请求将受限。
+
+## 6. 使用记录
+- 进入使用记录查看请求和消耗明细。
+- 可按时间范围筛选。
+
+## 7. 常见问题
+- 401 Unauthorized：API Key 无效或已禁用。
+- 403 Forbidden：账号无权限或分组不可用。
+- 429 Too Many Requests：并发或速率超限。
+- 402 Payment Required：余额或配额不足。
+
+如需帮助，请联系站点客服。`
+
 type SettingRepository interface {
 	Get(ctx context.Context, key string) (*Setting, error)
 	GetValue(ctx context.Context, key string) (string, error)
@@ -73,6 +113,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyCustomerServiceQR,
 		SettingKeyAfterSalesGroupQR,
 		SettingKeyDocURL,
+		SettingKeyDocMarkdown,
 		SettingKeyHomeContent,
 		SettingKeyHideCcsImportButton,
 		SettingKeyPurchaseSubscriptionEnabled,
@@ -112,6 +153,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		CustomerServiceQR:           settings[SettingKeyCustomerServiceQR],
 		AfterSalesGroupQR:           settings[SettingKeyAfterSalesGroupQR],
 		DocURL:                      settings[SettingKeyDocURL],
+		DocMarkdown:                 settings[SettingKeyDocMarkdown],
 		HomeContent:                 settings[SettingKeyHomeContent],
 		HideCcsImportButton:         settings[SettingKeyHideCcsImportButton] == "true",
 		PurchaseSubscriptionEnabled: settings[SettingKeyPurchaseSubscriptionEnabled] == "true",
@@ -156,6 +198,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		CustomerServiceQR           string `json:"customer_service_qr,omitempty"`
 		AfterSalesGroupQR           string `json:"after_sales_group_qr,omitempty"`
 		DocURL                      string `json:"doc_url,omitempty"`
+		DocMarkdown                 string `json:"doc_markdown,omitempty"`
 		HomeContent                 string `json:"home_content,omitempty"`
 		HideCcsImportButton         bool   `json:"hide_ccs_import_button"`
 		PurchaseSubscriptionEnabled bool   `json:"purchase_subscription_enabled"`
@@ -178,6 +221,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		CustomerServiceQR:           settings.CustomerServiceQR,
 		AfterSalesGroupQR:           settings.AfterSalesGroupQR,
 		DocURL:                      settings.DocURL,
+		DocMarkdown:                 settings.DocMarkdown,
 		HomeContent:                 settings.HomeContent,
 		HideCcsImportButton:         settings.HideCcsImportButton,
 		PurchaseSubscriptionEnabled: settings.PurchaseSubscriptionEnabled,
@@ -233,6 +277,7 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	updates[SettingKeyCustomerServiceQR] = settings.CustomerServiceQR
 	updates[SettingKeyAfterSalesGroupQR] = settings.AfterSalesGroupQR
 	updates[SettingKeyDocURL] = settings.DocURL
+	updates[SettingKeyDocMarkdown] = settings.DocMarkdown
 	updates[SettingKeyHomeContent] = settings.HomeContent
 	updates[SettingKeyHideCcsImportButton] = strconv.FormatBool(settings.HideCcsImportButton)
 	updates[SettingKeyPurchaseSubscriptionEnabled] = strconv.FormatBool(settings.PurchaseSubscriptionEnabled)
@@ -397,6 +442,7 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyPromoCodeEnabled:            "true", // 默认启用优惠码功能
 		SettingKeySiteName:                    "YesCodex",
 		SettingKeySiteLogo:                    "",
+		SettingKeyDocMarkdown:                 defaultDocMarkdown,
 		SettingKeyCustomerServiceQR:           "",
 		SettingKeyAfterSalesGroupQR:           "",
 		SettingKeyHomeContent:                 "",
@@ -453,6 +499,7 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		CustomerServiceQR:            settings[SettingKeyCustomerServiceQR],
 		AfterSalesGroupQR:            settings[SettingKeyAfterSalesGroupQR],
 		DocURL:                       settings[SettingKeyDocURL],
+		DocMarkdown:                  s.getStringOrDefault(settings, SettingKeyDocMarkdown, defaultDocMarkdown),
 		HomeContent:                  settings[SettingKeyHomeContent],
 		HideCcsImportButton:          settings[SettingKeyHideCcsImportButton] == "true",
 		PurchaseSubscriptionEnabled:  settings[SettingKeyPurchaseSubscriptionEnabled] == "true",
