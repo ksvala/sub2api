@@ -48,6 +48,19 @@ const (
 const (
 	AdjustmentTypeAdminBalance     = "admin_balance"     // 管理员调整余额
 	AdjustmentTypeAdminConcurrency = "admin_concurrency" // 管理员调整并发数
+	AdjustmentTypeInviteReward     = "invite_reward"     // 邀请奖励
+)
+
+// Invite status constants
+const (
+	InviteStatusPending   = "pending"
+	InviteStatusConfirmed = "confirmed"
+)
+
+// Invite log action constants
+const (
+	InviteLogActionBind    = "bind"
+	InviteLogActionConfirm = "confirm"
 )
 
 // Group subscription type constants
@@ -61,4 +74,9 @@ const (
 	SubscriptionStatusActive    = "active"
 	SubscriptionStatusExpired   = "expired"
 	SubscriptionStatusSuspended = "suspended"
+)
+
+// Setting keys
+const (
+	SettingKeyDocMarkdown = "doc_markdown" // 文档内容（Markdown）
 )
