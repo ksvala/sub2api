@@ -346,6 +346,11 @@ func (s *AntigravityGatewayService) getMappedModel(account *Account, requestedMo
 		return mapped
 	}
 
+	// APIKey 账号不应用前缀映射，避免模型名被截断
+	if account != nil && account.Type == AccountTypeAPIKey && requestedModel != "" {
+		return requestedModel
+	}
+
 	// 2. 直接支持的模型透传
 	if antigravitySupportedModels[requestedModel] {
 		return requestedModel

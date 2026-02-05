@@ -371,6 +371,7 @@ func defaultOpsAdvancedSettings() *OpsAdvancedSettings {
 		IgnoreCountTokensErrors:   false,
 		IgnoreContextCanceled:     true,  // Default to true - client disconnects are not errors
 		IgnoreNoAvailableAccounts: false, // Default to false - this is a real routing issue
+		IgnoreInvalidApiKeyErrors: false,
 		AutoRefreshEnabled:        false,
 		AutoRefreshIntervalSec:    30,
 	}

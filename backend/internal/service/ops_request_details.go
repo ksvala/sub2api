@@ -37,6 +37,10 @@ type OpsRequestDetail struct {
 	AccountID *int64 `json:"account_id,omitempty"`
 	GroupID   *int64 `json:"group_id,omitempty"`
 
+	UserEmail  string  `json:"user_email,omitempty"`
+	APIKeyName string  `json:"api_key_name,omitempty"`
+	ClientIP   *string `json:"client_ip,omitempty"`
+
 	Stream bool `json:"stream"`
 }
 
@@ -53,6 +57,7 @@ type OpsRequestDetailFilter struct {
 	UserID    *int64
 	APIKeyID  *int64
 	AccountID *int64
+	ClientIP  string
 
 	Model     string
 	RequestID string
