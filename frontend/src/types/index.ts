@@ -874,6 +874,7 @@ export interface RedeemCode {
   used_at: string | null
   created_at: string
   updated_at?: string
+  notes?: string
   group_id?: number | null // 订阅类型专用
   validity_days?: number // 订阅类型专用
   user?: User

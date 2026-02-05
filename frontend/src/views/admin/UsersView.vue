@@ -209,6 +209,14 @@
                 <Icon name="cog" size="sm" class="md:mr-1.5" />
                 <span class="hidden md:inline">{{ t('admin.users.attributes.configButton') }}</span>
               </button>
+              <button
+                @click="showBulkConcurrencyModal = true"
+                class="btn btn-secondary px-2 md:px-3"
+                :title="t('admin.users.bulkConcurrency')"
+              >
+                <Icon name="users" size="sm" class="md:mr-1.5" />
+                <span class="hidden md:inline">{{ t('admin.users.bulkConcurrency') }}</span>
+              </button>
             </div>
 
             <!-- Create User Button (full width on mobile, auto width on desktop) -->
@@ -513,6 +521,7 @@
     <UserApiKeysModal :show="showApiKeysModal" :user="viewingUser" @close="closeApiKeysModal" />
     <UserAllowedGroupsModal :show="showAllowedGroupsModal" :user="allowedGroupsUser" @close="closeAllowedGroupsModal" @success="loadUsers" />
     <UserBalanceModal :show="showBalanceModal" :user="balanceUser" :operation="balanceOperation" @close="closeBalanceModal" @success="loadUsers" />
+    <UserBulkConcurrencyModal :show="showBulkConcurrencyModal" @close="showBulkConcurrencyModal = false" @success="loadUsers" />
     <UserAttributesConfigModal :show="showAttributesModal" @close="handleAttributesModalClose" />
     <ConfirmDialog :show="showConfirmInviteDialog" :title="t('invites.admin.confirmInvite')" :message="t('invites.admin.confirmConfirm')" @confirm="confirmInviteAction" @cancel="showConfirmInviteDialog = false" />
   </AppLayout>
@@ -545,6 +554,7 @@ import UserEditModal from '@/components/admin/user/UserEditModal.vue'
 import UserApiKeysModal from '@/components/admin/user/UserApiKeysModal.vue'
 import UserAllowedGroupsModal from '@/components/admin/user/UserAllowedGroupsModal.vue'
 import UserBalanceModal from '@/components/admin/user/UserBalanceModal.vue'
+import UserBulkConcurrencyModal from '@/components/admin/user/UserBulkConcurrencyModal.vue'
 
 const appStore = useAppStore()
 
@@ -776,6 +786,7 @@ const showEditModal = ref(false)
 const showDeleteDialog = ref(false)
 const showApiKeysModal = ref(false)
 const showAttributesModal = ref(false)
+const showBulkConcurrencyModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)

@@ -39,6 +39,9 @@ const items = ref<OpsRequestDetail[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+const userIdInput = ref('')
+const apiKeyIdInput = ref('')
+const clientIpInput = ref('')
 
 const close = () => emit('update:modelValue', false)
 
@@ -76,6 +79,15 @@ const fetchData = async () => {
 
     if (typeof props.preset.min_duration_ms === 'number') params.min_duration_ms = props.preset.min_duration_ms
     if (typeof props.preset.max_duration_ms === 'number') params.max_duration_ms = props.preset.max_duration_ms
+
+    const userIdVal = Number.parseInt(userIdInput.value, 10)
+    if (Number.isFinite(userIdVal) && userIdVal > 0) params.user_id = userIdVal
+
+    const apiKeyIdVal = Number.parseInt(apiKeyIdInput.value, 10)
+    if (Number.isFinite(apiKeyIdVal) && apiKeyIdVal > 0) params.api_key_id = apiKeyIdVal
+
+    const clientIpVal = clientIpInput.value.trim()
+    if (clientIpVal) params.client_ip = clientIpVal
 
     const res = await opsAPI.listRequestDetails(params)
     items.value = res.items || []
@@ -118,6 +130,19 @@ watch(
   }
 )
 
+let filterTimeout: number | null = null
+watch(
+  () => [userIdInput.value, apiKeyIdInput.value, clientIpInput.value] as const,
+  () => {
+    if (!props.modelValue) return
+    if (filterTimeout) window.clearTimeout(filterTimeout)
+    filterTimeout = window.setTimeout(() => {
+      page.value = 1
+      fetchData()
+    }, 300)
+  }
+)
+
 function handlePageChange(next: number) {
   page.value = next
   fetchData()
@@ -125,6 +150,14 @@ function handlePageChange(next: number) {
 
 function handlePageSizeChange(next: number) {
   pageSize.value = next
+  page.value = 1
+  fetchData()
+}
+
+function resetFilters() {
+  userIdInput.value = ''
+  apiKeyIdInput.value = ''
+  clientIpInput.value = ''
   page.value = 1
   fetchData()
 }
@@ -165,6 +198,36 @@ const kindBadgeClass = (kind: string) => {
           </button>
         </div>
 
+        <div class="mb-3 flex flex-shrink-0 flex-wrap items-center gap-2">
+          <input
+            v-model="userIdInput"
+            type="text"
+            inputmode="numeric"
+            class="w-[140px] rounded-lg border-gray-200 bg-gray-50/50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-dark-700 dark:bg-dark-900 dark:text-gray-300 dark:focus:bg-dark-800"
+            :placeholder="t('admin.ops.requestDetails.filters.userIdPlaceholder')"
+          />
+          <input
+            v-model="apiKeyIdInput"
+            type="text"
+            inputmode="numeric"
+            class="w-[140px] rounded-lg border-gray-200 bg-gray-50/50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-dark-700 dark:bg-dark-900 dark:text-gray-300 dark:focus:bg-dark-800"
+            :placeholder="t('admin.ops.requestDetails.filters.apiKeyIdPlaceholder')"
+          />
+          <input
+            v-model="clientIpInput"
+            type="text"
+            class="w-[160px] rounded-lg border-gray-200 bg-gray-50/50 px-3 py-1.5 text-xs font-medium text-gray-700 transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 dark:border-dark-700 dark:bg-dark-900 dark:text-gray-300 dark:focus:bg-dark-800"
+            :placeholder="t('admin.ops.requestDetails.filters.clientIpPlaceholder')"
+          />
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            @click="resetFilters"
+          >
+            {{ t('common.reset') }}
+          </button>
+        </div>
+
         <!-- Loading -->
         <div v-if="loading" class="flex flex-1 items-center justify-center py-16">
           <div class="flex flex-col items-center gap-3">
@@ -199,6 +262,15 @@ const kindBadgeClass = (kind: string) => {
                     {{ t('admin.ops.requestDetails.table.kind') }}
                   </th>
                   <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {{ t('admin.ops.requestDetails.table.user') }}
+                  </th>
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {{ t('admin.ops.requestDetails.table.apiKey') }}
+                  </th>
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {{ t('admin.ops.requestDetails.table.clientIp') }}
+                  </th>
+                  <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     {{ t('admin.ops.requestDetails.table.platform') }}
                   </th>
                   <th class="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -227,6 +299,34 @@ const kindBadgeClass = (kind: string) => {
                     <span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="kindBadgeClass(row.kind)">
                       {{ row.kind === 'error' ? t('admin.ops.requestDetails.kind.error') : t('admin.ops.requestDetails.kind.success') }}
                     </span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div v-if="row.user_email || row.user_id != null" class="flex flex-col">
+                      <span
+                        class="max-w-[180px] truncate text-xs font-medium text-gray-700 dark:text-gray-200"
+                        :title="row.user_email || ''"
+                      >
+                        {{ row.user_email || (row.user_id != null ? `#${row.user_id}` : '-') }}
+                      </span>
+                      <span v-if="row.user_email && row.user_id != null" class="text-[10px] text-gray-400">#{{ row.user_id }}</span>
+                    </div>
+                    <span v-else class="text-xs text-gray-400">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div v-if="row.api_key_name || row.api_key_id != null" class="flex flex-col">
+                      <span
+                        class="max-w-[180px] truncate text-xs font-medium text-gray-700 dark:text-gray-200"
+                        :title="row.api_key_name || ''"
+                      >
+                        {{ row.api_key_name || (row.api_key_id != null ? `#${row.api_key_id}` : '-') }}
+                      </span>
+                      <span v-if="row.api_key_name && row.api_key_id != null" class="text-[10px] text-gray-400">#{{ row.api_key_id }}</span>
+                    </div>
+                    <span v-else class="text-xs text-gray-400">-</span>
+                  </td>
+                  <td class="whitespace-nowrap px-4 py-3 text-xs text-gray-600 dark:text-gray-300">
+                    <span v-if="row.client_ip" class="font-mono">{{ row.client_ip }}</span>
+                    <span v-else class="text-gray-400">-</span>
                   </td>
                   <td class="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-700 dark:text-gray-200">
                     {{ (row.platform || 'unknown').toUpperCase() }}
