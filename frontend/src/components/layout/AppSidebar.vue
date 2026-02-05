@@ -613,6 +613,7 @@ const adminNavSections = computed(() => {
   // 2. Operations Group (运营)
   const opsItems: NavItem[] = [
     { path: '/admin/plans', label: t('nav.plans'), icon: GridIcon },
+    { path: '/admin/announcements', label: t('nav.announcements'), icon: TicketIcon },
     { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
     { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon, hideInSimpleMode: true },
     { path: '/admin/invites/logs', label: t('nav.inviteLogs'), icon: TicketIcon, hideInSimpleMode: true },
