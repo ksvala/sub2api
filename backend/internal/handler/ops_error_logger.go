@@ -1013,7 +1013,11 @@ func shouldSkipOpsErrorLog(ctx context.Context, ops *service.OpsService, message
 
 	// Check if invalid/missing API key errors should be ignored (user misconfiguration)
 	if settings.IgnoreInvalidApiKeyErrors {
-		if strings.Contains(bodyLower, "invalid_api_key") || strings.Contains(bodyLower, "api_key_required") {
+		if strings.Contains(bodyLower, "invalid_api_key") ||
+			strings.Contains(bodyLower, "api_key_required") ||
+			strings.Contains(bodyLower, "user_inactive") ||
+			strings.Contains(msgLower, "invalid api key") ||
+			strings.Contains(msgLower, "user inactive") {
 			return true
 		}
 	}
