@@ -54,6 +54,10 @@ type UpdateBalanceRequest struct {
 	Notes     string  `json:"notes"`
 }
 
+type BulkUpdateConcurrencyRequest struct {
+	Concurrency int `json:"concurrency" binding:"required,gt=0"`
+}
+
 // List handles listing all users with pagination
 // GET /api/v1/admin/users
 // Query params:
@@ -232,6 +236,24 @@ func (h *UserHandler) UpdateBalance(c *gin.Context) {
 	}
 
 	response.Success(c, dto.UserFromServiceAdmin(user))
+}
+
+// BulkUpdateConcurrency handles bulk updating concurrency for all users
+// POST /api/v1/admin/users/bulk-concurrency
+func (h *UserHandler) BulkUpdateConcurrency(c *gin.Context) {
+	var req BulkUpdateConcurrencyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	result, err := h.adminService.BulkUpdateUsersConcurrency(c.Request.Context(), req.Concurrency)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, result)
 }
 
 // GetUserAPIKeys handles getting user's API keys
