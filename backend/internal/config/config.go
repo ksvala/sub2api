@@ -404,6 +404,8 @@ type RedisConfig struct {
 	Port     int    `mapstructure:"port"`
 	Password string `mapstructure:"password"`
 	DB       int    `mapstructure:"db"`
+	// EnableTLS: 是否启用 TLS/SSL 连接
+	EnableTLS bool `mapstructure:"enable_tls"`
 	// 连接池与超时配置（性能优化：可配置化连接池参数）
 	// DialTimeoutSeconds: 建立连接超时，防止慢连接阻塞
 	DialTimeoutSeconds int `mapstructure:"dial_timeout_seconds"`
@@ -415,8 +417,6 @@ type RedisConfig struct {
 	PoolSize int `mapstructure:"pool_size"`
 	// MinIdleConns: 最小空闲连接数，保持热连接减少冷启动延迟
 	MinIdleConns int `mapstructure:"min_idle_conns"`
-	// EnableTLS: 是否启用 TLS/SSL 连接
-	EnableTLS bool `mapstructure:"enable_tls"`
 }
 
 func (r *RedisConfig) Address() string {
@@ -759,6 +759,7 @@ func setDefaults() {
 	viper.SetDefault("redis.port", 6379)
 	viper.SetDefault("redis.password", "")
 	viper.SetDefault("redis.db", 0)
+	viper.SetDefault("redis.enable_tls", false)
 	viper.SetDefault("redis.dial_timeout_seconds", 5)
 	viper.SetDefault("redis.read_timeout_seconds", 3)
 	viper.SetDefault("redis.write_timeout_seconds", 3)
