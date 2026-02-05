@@ -359,6 +359,9 @@ func (s *GeminiMessagesCompatService) isModelSupportedByAccount(account *Account
 	if account.Platform == PlatformAntigravity {
 		return IsAntigravityModelSupported(requestedModel)
 	}
+	if account.Type == AccountTypeAPIKey {
+		return true
+	}
 	return account.IsModelSupported(requestedModel)
 }
 
@@ -2523,8 +2526,8 @@ func extractGeminiUsage(geminiResp map[string]any) *ClaudeUsage {
 	prompt, _ := asInt(usageMeta["promptTokenCount"])
 	cand, _ := asInt(usageMeta["candidatesTokenCount"])
 	cached, _ := asInt(usageMeta["cachedContentTokenCount"])
-	// 注意：Gemini 的 promptTokenCount 包含 cachedContentTokenCount，
-	// 但 Claude 的 input_tokens 不包含 cache_read_input_tokens，需要减去
+	// Gemini 的 promptTokenCount 包含 cachedContentTokenCount，
+	// 但 Claude 的 input_tokens 不包含 cache_read_input_tokens，需要减去。
 	return &ClaudeUsage{
 		InputTokens:          prompt - cached,
 		OutputTokens:         cand,
