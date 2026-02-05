@@ -284,6 +284,9 @@
                   <p class="text-xs text-gray-500 dark:text-dark-400">
                     {{ formatDateTime(item.used_at) }}
                   </p>
+                  <p v-if="item.notes" class="text-xs text-gray-500 dark:text-dark-400">
+                    {{ t('redeem.notes') }}: {{ item.notes }}
+                  </p>
                 </div>
               </div>
               <div class="text-right">
