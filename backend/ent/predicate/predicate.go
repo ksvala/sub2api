@@ -18,6 +18,12 @@ type AccountGroup func(*sql.Selector)
 // AdminActionLog is the predicate function for adminactionlog builders.
 type AdminActionLog func(*sql.Selector)
 
+// Announcement is the predicate function for announcement builders.
+type Announcement func(*sql.Selector)
+
+// AnnouncementRead is the predicate function for announcementread builders.
+type AnnouncementRead func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
