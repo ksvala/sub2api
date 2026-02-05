@@ -53,6 +53,9 @@ func (r *opsRepository) ListRequestDetails(ctx context.Context, filter *service.
 		if filter.AccountID != nil && *filter.AccountID > 0 {
 			addCondition(fmt.Sprintf("account_id = $%d", len(args)+1), *filter.AccountID)
 		}
+		if clientIP := strings.TrimSpace(filter.ClientIP); clientIP != "" {
+			addCondition(fmt.Sprintf("client_ip = $%d", len(args)+1), clientIP)
+		}
 
 		if model := strings.TrimSpace(filter.Model); model != "" {
 			addCondition(fmt.Sprintf("model = $%d", len(args)+1), model)
@@ -98,6 +101,9 @@ WITH combined AS (
     NULL::TEXT AS phase,
     NULL::TEXT AS severity,
     NULL::TEXT AS message,
+    COALESCE(u.email, '') AS user_email,
+    COALESCE(k.name, '') AS api_key_name,
+    ul.ip_address AS client_ip,
     ul.user_id AS user_id,
     ul.api_key_id AS api_key_id,
     ul.account_id AS account_id,
@@ -106,6 +112,8 @@ WITH combined AS (
   FROM usage_logs ul
   LEFT JOIN groups g ON g.id = ul.group_id
   LEFT JOIN accounts a ON a.id = ul.account_id
+  LEFT JOIN users u ON u.id = ul.user_id
+  LEFT JOIN api_keys k ON k.id = ul.api_key_id
   WHERE ul.created_at >= $1 AND ul.created_at < $2
 
   UNION ALL
@@ -122,6 +130,9 @@ WITH combined AS (
     o.error_phase AS phase,
     o.severity AS severity,
     o.error_message AS message,
+    COALESCE(u.email, '') AS user_email,
+    COALESCE(k.name, '') AS api_key_name,
+    CASE WHEN o.client_ip IS NULL THEN NULL ELSE o.client_ip::text END AS client_ip,
     o.user_id AS user_id,
     o.api_key_id AS api_key_id,
     o.account_id AS account_id,
@@ -130,6 +141,8 @@ WITH combined AS (
   FROM ops_error_logs o
   LEFT JOIN groups g ON g.id = o.group_id
   LEFT JOIN accounts a ON a.id = o.account_id
+  LEFT JOIN users u ON u.id = o.user_id
+  LEFT JOIN api_keys k ON k.id = o.api_key_id
   WHERE o.created_at >= $1 AND o.created_at < $2
     AND COALESCE(o.status_code, 0) >= 400
 )
@@ -171,6 +184,9 @@ SELECT
   phase,
   severity,
   message,
+  user_email,
+  api_key_name,
+  client_ip,
   user_id,
   api_key_id,
   account_id,
@@ -203,6 +219,16 @@ LIMIT $%d OFFSET $%d
 		i := v.Int64
 		return &i
 	}
+	toStringPtr := func(v sql.NullString) *string {
+		if !v.Valid {
+			return nil
+		}
+		s := strings.TrimSpace(v.String)
+		if s == "" {
+			return nil
+		}
+		return &s
+	}
 
 	out := make([]*service.OpsRequestDetail, 0, pageSize)
 	for rows.Next() {
@@ -217,9 +243,12 @@ LIMIT $%d OFFSET $%d
 			statusCode sql.NullInt64
 			errorID    sql.NullInt64
 
-			phase    sql.NullString
-			severity sql.NullString
-			message  sql.NullString
+			phase      sql.NullString
+			severity   sql.NullString
+			message    sql.NullString
+			userEmail  sql.NullString
+			apiKeyName sql.NullString
+			clientIP   sql.NullString
 
 			userID    sql.NullInt64
 			apiKeyID  sql.NullInt64
@@ -241,6 +270,9 @@ LIMIT $%d OFFSET $%d
 			&phase,
 			&severity,
 			&message,
+			&userEmail,
+			&apiKeyName,
+			&clientIP,
 			&userID,
 			&apiKeyID,
 			&accountID,
@@ -263,6 +295,9 @@ LIMIT $%d OFFSET $%d
 			Phase:      phase.String,
 			Severity:   severity.String,
 			Message:    message.String,
+			UserEmail:  strings.TrimSpace(userEmail.String),
+			APIKeyName: strings.TrimSpace(apiKeyName.String),
+			ClientIP:   toStringPtr(clientIP),
 
 			UserID:    toInt64Ptr(userID),
 			APIKeyID:  toInt64Ptr(apiKeyID),

@@ -226,6 +226,82 @@ func (r *redeemCodeRepository) ListByUserWithFilters(ctx context.Context, userID
 	return redeemCodeEntitiesToService(codes), paginationResultFromTotal(int64(total), params), nil
 }
 
+func (r *redeemCodeRepository) GetStats(ctx context.Context) (*service.RedeemCodeStats, error) {
+	base := r.client.RedeemCode.Query()
+
+	total, err := base.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	unused, err := base.Clone().Where(redeemcode.StatusEQ(service.StatusUnused)).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	used, err := base.Clone().Where(redeemcode.StatusEQ(service.StatusUsed)).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	expired, err := base.Clone().Where(redeemcode.StatusEQ(service.StatusExpired)).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var totalValue float64
+	if total > 0 {
+		if sum, err := base.Clone().Aggregate(dbent.Sum(redeemcode.FieldValue)).Float64(ctx); err == nil {
+			totalValue = sum
+		} else {
+			return nil, err
+		}
+	}
+
+	var usedValue float64
+	if used > 0 {
+		if sum, err := base.Clone().Where(redeemcode.StatusEQ(service.StatusUsed)).Aggregate(dbent.Sum(redeemcode.FieldValue)).Float64(ctx); err == nil {
+			usedValue = sum
+		} else {
+			return nil, err
+		}
+	}
+
+	byType := map[string]int{
+		service.RedeemTypeBalance:          0,
+		service.RedeemTypeConcurrency:      0,
+		service.RedeemTypeSubscription:     0,
+		service.AdjustmentTypeInviteReward: 0,
+	}
+
+	var rows []struct {
+		Type  string `json:"type"`
+		Count int    `json:"count"`
+	}
+
+	err = base.Clone().
+		GroupBy(redeemcode.FieldType).
+		Aggregate(
+			dbent.As(dbent.Count(), "count"),
+		).
+		Scan(ctx, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range rows {
+		row := rows[i]
+		byType[row.Type] += row.Count
+	}
+
+	return &service.RedeemCodeStats{
+		TotalCodes:            total,
+		ActiveCodes:           unused,
+		UsedCodes:             used,
+		ExpiredCodes:          expired,
+		TotalValue:            totalValue,
+		TotalValueDistributed: usedValue,
+		ByType:                byType,
+	}, nil
+}
+
 func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {
 	if m == nil {
 		return nil
