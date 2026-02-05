@@ -12,17 +12,17 @@ func UserFromServiceShallow(u *service.User) *User {
 		return nil
 	}
 	return &User{
-		ID:            u.ID,
-		Email:         u.Email,
-		Username:      u.Username,
-		Role:          u.Role,
-		Balance:       u.Balance,
-		InviteCode:    u.InviteCode,
-		Concurrency:   u.Concurrency,
-		Status:        u.Status,
-		AllowedGroups: u.AllowedGroups,
-		CreatedAt:     u.CreatedAt,
-		UpdatedAt:     u.UpdatedAt,
+		ID:                 u.ID,
+		Email:              u.Email,
+		Username:           u.Username,
+		Role:               u.Role,
+		Balance:            u.Balance,
+		InviteCode:         u.InviteCode,
+		Concurrency:        u.Concurrency,
+		Status:             u.Status,
+		AllowedGroups:      u.AllowedGroups,
+		CreatedAt:          u.CreatedAt,
+		UpdatedAt:          u.UpdatedAt,
 		InviterID:          u.InviterID,
 		InviterEmail:       u.InviterEmail,
 		InviteStatus:       u.InviteStatus,
@@ -315,7 +315,7 @@ func RedeemCodeFromService(rc *service.RedeemCode) *RedeemCode {
 }
 
 // RedeemCodeFromServiceAdmin converts a service RedeemCode to DTO for admin users.
-// It includes notes - user-facing endpoints must not use this.
+// It includes admin-only fields when needed.
 func RedeemCodeFromServiceAdmin(rc *service.RedeemCode) *AdminRedeemCode {
 	if rc == nil {
 		return nil
