@@ -21,6 +21,7 @@ import opsAPI from './ops'
 import invitesAdminAPI from './invites'
 import plansAPI from './plans'
 import uploadsAPI from './uploads'
+import announcementsAPI from './announcements'
 
 /**
  * Unified admin API object for convenient access
@@ -43,7 +44,8 @@ export const adminAPI = {
   antigravity: antigravityAPI,
   userAttributes: userAttributesAPI,
   ops: opsAPI,
-  invites: invitesAdminAPI
+  invites: invitesAdminAPI,
+  announcements: announcementsAPI
 }
 
 export {
@@ -64,7 +66,8 @@ export {
   opsAPI,
   invitesAdminAPI,
   plansAPI,
-  uploadsAPI
+  uploadsAPI,
+  announcementsAPI
 }
 
 export default adminAPI

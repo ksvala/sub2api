@@ -184,6 +184,10 @@ export interface OpsRequestDetail {
   account_id?: number | null
   group_id?: number | null
 
+  user_email?: string
+  api_key_name?: string
+  client_ip?: string | null
+
   stream?: boolean
 }
 
@@ -200,6 +204,7 @@ export interface OpsRequestDetailsParams {
   user_id?: number
   api_key_id?: number
   account_id?: number
+  client_ip?: string
 
   model?: string
   request_id?: string

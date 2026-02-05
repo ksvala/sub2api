@@ -130,6 +130,14 @@ export async function updateConcurrency(id: number, concurrency: number): Promis
   return update(id, { concurrency })
 }
 
+export async function bulkUpdateConcurrency(concurrency: number): Promise<{ total: number, updated: number, skipped: number }> {
+  const { data } = await apiClient.post<{ total: number, updated: number, skipped: number }>(
+    '/admin/users/bulk-concurrency',
+    { concurrency }
+  )
+  return data
+}
+
 /**
  * Toggle user status
  * @param id - User ID
@@ -182,6 +190,7 @@ export const usersAPI = {
   delete: deleteUser,
   updateBalance,
   updateConcurrency,
+  bulkUpdateConcurrency,
   toggleStatus,
   getUserApiKeys,
   getUserUsageStats
