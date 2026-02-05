@@ -30,6 +30,7 @@ func ProvideAdminHandlers(
 	usageHandler *admin.UsageHandler,
 	userAttributeHandler *admin.UserAttributeHandler,
 	inviteHandler *admin.InviteHandler,
+	errorPassthroughHandler *admin.ErrorPassthroughHandler,
 ) *AdminHandlers {
 	return &AdminHandlers{
 		Dashboard:        dashboardHandler,
@@ -53,6 +54,7 @@ func ProvideAdminHandlers(
 		Usage:            usageHandler,
 		UserAttribute:    userAttributeHandler,
 		Invite:           inviteHandler,
+		ErrorPassthrough: errorPassthroughHandler,
 	}
 }
 
@@ -140,6 +142,7 @@ var ProviderSet = wire.NewSet(
 	admin.NewInviteHandler,
 	NewInviteHandler,
 	NewPlanHandler,
+	admin.NewErrorPassthroughHandler,
 
 	// AdminHandlers and Handlers constructors
 	ProvideAdminHandlers,

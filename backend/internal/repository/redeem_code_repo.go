@@ -203,12 +203,19 @@ func (r *redeemCodeRepository) ListByUser(ctx context.Context, userID int64, lim
 }
 
 func (r *redeemCodeRepository) ListByUserWithFilters(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]service.RedeemCode, *pagination.PaginationResult, error) {
-	q := r.client.RedeemCode.Query().Where(redeemcode.UsedByEQ(userID))
+	return r.ListByUserPaginated(ctx, userID, params, codeType)
+}
+
+// ListByUserPaginated returns paginated balance/concurrency history for a user.
+// Supports optional type filter (e.g. "balance", "admin_balance", "concurrency", "admin_concurrency", "subscription").
+func (r *redeemCodeRepository) ListByUserPaginated(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	q := r.client.RedeemCode.Query().
+		Where(redeemcode.UsedByEQ(userID))
 	if codeType != "" {
 		q = q.Where(redeemcode.TypeEQ(codeType))
 	}
 
-	total, err := q.Clone().Count(ctx)
+	total, err := q.Count(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -300,6 +307,28 @@ func (r *redeemCodeRepository) GetStats(ctx context.Context) (*service.RedeemCod
 		TotalValueDistributed: usedValue,
 		ByType:                byType,
 	}, nil
+}
+
+// SumPositiveBalanceByUser returns total recharged amount (sum of value > 0 where type is balance/admin_balance).
+func (r *redeemCodeRepository) SumPositiveBalanceByUser(ctx context.Context, userID int64) (float64, error) {
+	var result []struct {
+		Sum float64 `json:"sum"`
+	}
+	err := r.client.RedeemCode.Query().
+		Where(
+			redeemcode.UsedByEQ(userID),
+			redeemcode.ValueGT(0),
+			redeemcode.TypeIn("balance", "admin_balance"),
+		).
+		Aggregate(dbent.As(dbent.Sum(redeemcode.FieldValue), "sum")).
+		Scan(ctx, &result)
+	if err != nil {
+		return 0, err
+	}
+	if len(result) == 0 {
+		return 0, nil
+	}
+	return result[0].Sum, nil
 }
 
 func redeemCodeEntityToService(m *dbent.RedeemCode) *service.RedeemCode {

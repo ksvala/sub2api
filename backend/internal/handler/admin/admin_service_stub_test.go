@@ -304,5 +304,9 @@ func (s *stubAdminService) GetRedeemCodeStats(ctx context.Context) (*service.Red
 	}, nil
 }
 
+func (s *stubAdminService) GetUserBalanceHistory(ctx context.Context, userID int64, page, pageSize int, codeType string) ([]service.RedeemCode, int64, float64, error) {
+	return s.redeems, int64(len(s.redeems)), 100.0, nil
+}
+
 // Ensure stub implements interface.
 var _ service.AdminService = (*stubAdminService)(nil)

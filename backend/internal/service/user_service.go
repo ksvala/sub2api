@@ -42,7 +42,7 @@ type UserRepository interface {
 	SetInviteCode(ctx context.Context, id int64, code string) error
 	RemoveGroupFromAllowedGroups(ctx context.Context, groupID int64) (int64, error)
 
-	// TOTP 相关方法
+	// TOTP 双因素认证
 	UpdateTotpSecret(ctx context.Context, userID int64, encryptedSecret *string) error
 	EnableTotp(ctx context.Context, userID int64) error
 	DisableTotp(ctx context.Context, userID int64) error

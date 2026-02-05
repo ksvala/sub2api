@@ -22,6 +22,7 @@ import invitesAdminAPI from './invites'
 import plansAPI from './plans'
 import uploadsAPI from './uploads'
 import announcementsAPI from './announcements'
+import errorPassthroughAPI from './errorPassthrough'
 
 /**
  * Unified admin API object for convenient access
@@ -45,7 +46,9 @@ export const adminAPI = {
   userAttributes: userAttributesAPI,
   ops: opsAPI,
   invites: invitesAdminAPI,
-  announcements: announcementsAPI
+  invites: invitesAdminAPI,
+  announcements: announcementsAPI,
+  errorPassthrough: errorPassthroughAPI
 }
 
 export {
@@ -67,7 +70,12 @@ export {
   invitesAdminAPI,
   plansAPI,
   uploadsAPI,
-  announcementsAPI
+  announcementsAPI,
+  errorPassthroughAPI
 }
 
 export default adminAPI
+
+// Re-export types used by components
+export type { BalanceHistoryItem } from './users'
+export type { ErrorPassthroughRule, CreateRuleRequest, UpdateRuleRequest } from './errorPassthrough'

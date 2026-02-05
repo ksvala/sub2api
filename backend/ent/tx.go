@@ -26,6 +26,8 @@ type Tx struct {
 	Announcement *AnnouncementClient
 	// AnnouncementRead is the client for interacting with the AnnouncementRead builders.
 	AnnouncementRead *AnnouncementReadClient
+	// ErrorPassthroughRule is the client for interacting with the ErrorPassthroughRule builders.
+	ErrorPassthroughRule *ErrorPassthroughRuleClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// Invitation is the client for interacting with the Invitation builders.
@@ -195,6 +197,7 @@ func (tx *Tx) init() {
 	tx.AdminActionLog = NewAdminActionLogClient(tx.config)
 	tx.Announcement = NewAnnouncementClient(tx.config)
 	tx.AnnouncementRead = NewAnnouncementReadClient(tx.config)
+	tx.ErrorPassthroughRule = NewErrorPassthroughRuleClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.Invitation = NewInvitationClient(tx.config)
 	tx.InviteLog = NewInviteLogClient(tx.config)
