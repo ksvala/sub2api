@@ -62,19 +62,29 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 		name           string
 		requestedModel string
 		accountMapping map[string]string
+		accountType    string
 		expected       string
 	}{
+		{
+			name:           "APIKey不截断 - claude-3-5-sonnet-20241022",
+			requestedModel: "claude-3-5-sonnet-20241022",
+			accountMapping: nil,
+			accountType:    AccountTypeAPIKey,
+			expected:       "claude-3-5-sonnet-20241022",
+		},
 		// 1. 账户级映射优先（注意：model_mapping 在 credentials 中存储为 map[string]any）
 		{
 			name:           "账户映射优先",
 			requestedModel: "claude-3-5-sonnet-20241022",
 			accountMapping: map[string]string{"claude-3-5-sonnet-20241022": "custom-model"},
+			accountType:    "",
 			expected:       "custom-model",
 		},
 		{
 			name:           "账户映射覆盖系统映射",
 			requestedModel: "claude-opus-4",
 			accountMapping: map[string]string{"claude-opus-4": "my-opus"},
+			accountType:    "",
 			expected:       "my-opus",
 		},
 
@@ -83,54 +93,63 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 			name:           "系统映射 - claude-3-5-sonnet-20241022",
 			requestedModel: "claude-3-5-sonnet-20241022",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-3-5-sonnet-20240620",
 			requestedModel: "claude-3-5-sonnet-20240620",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-opus-4",
 			requestedModel: "claude-opus-4",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-opus-4-5-thinking",
 		},
 		{
 			name:           "系统映射 - claude-opus-4-5-20251101",
 			requestedModel: "claude-opus-4-5-20251101",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-opus-4-5-thinking",
 		},
 		{
 			name:           "系统映射 - claude-haiku-4 → claude-sonnet-4-5",
 			requestedModel: "claude-haiku-4",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-haiku-4-5 → claude-sonnet-4-5",
 			requestedModel: "claude-haiku-4-5",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-3-haiku-20240307 → claude-sonnet-4-5",
 			requestedModel: "claude-3-haiku-20240307",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-haiku-4-5-20251001 → claude-sonnet-4-5",
 			requestedModel: "claude-haiku-4-5-20251001",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "系统映射 - claude-sonnet-4-5-20250929",
 			requestedModel: "claude-sonnet-4-5-20250929",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 
@@ -139,18 +158,21 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 			name:           "Gemini透传 - gemini-2.5-flash",
 			requestedModel: "gemini-2.5-flash",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "gemini-2.5-flash",
 		},
 		{
 			name:           "Gemini透传 - gemini-2.5-pro",
 			requestedModel: "gemini-2.5-pro",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "gemini-2.5-pro",
 		},
 		{
 			name:           "Gemini透传 - gemini-future-model",
 			requestedModel: "gemini-future-model",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "gemini-future-model",
 		},
 
@@ -159,18 +181,21 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 			name:           "直接支持 - claude-sonnet-4-5",
 			requestedModel: "claude-sonnet-4-5",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "直接支持 - claude-opus-4-5-thinking",
 			requestedModel: "claude-opus-4-5-thinking",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-opus-4-5-thinking",
 		},
 		{
 			name:           "直接支持 - claude-sonnet-4-5-thinking",
 			requestedModel: "claude-sonnet-4-5-thinking",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5-thinking",
 		},
 
@@ -179,12 +204,14 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 			name:           "默认值 - claude-unknown",
 			requestedModel: "claude-unknown",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 		{
 			name:           "默认值 - claude-3-opus-20240229",
 			requestedModel: "claude-3-opus-20240229",
 			accountMapping: nil,
+			accountType:    "",
 			expected:       "claude-sonnet-4-5",
 		},
 	}
@@ -193,6 +220,7 @@ func TestAntigravityGatewayService_GetMappedModel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			account := &Account{
 				Platform: PlatformAntigravity,
+				Type:     tt.accountType,
 			}
 			if tt.accountMapping != nil {
 				// GetModelMapping 期望 model_mapping 是 map[string]any 格式
