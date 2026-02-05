@@ -290,6 +290,10 @@ func (s *redeemRepoStub) ListByUserWithFilters(ctx context.Context, userID int64
 	return []RedeemCode{}, &pagination.PaginationResult{Total: 0, Page: params.Page, PageSize: params.PageSize, Pages: 0}, nil
 }
 
+func (s *redeemRepoStub) GetStats(ctx context.Context) (*RedeemCodeStats, error) {
+	return &RedeemCodeStats{ByType: map[string]int{}}, nil
+}
+
 type subscriptionInvalidateCall struct {
 	userID  int64
 	groupID int64
