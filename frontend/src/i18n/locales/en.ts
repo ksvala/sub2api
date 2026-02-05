@@ -109,9 +109,7 @@ export default {
       port: 'Port',
       password: 'Password (optional)',
       database: 'Database',
-      passwordPlaceholder: 'Password',
-      enableTls: 'Enable TLS',
-      enableTlsHint: 'Use TLS when connecting to Redis (public CA certs)'
+      passwordPlaceholder: 'Password'
     },
     admin: {
       title: 'Admin Account',
@@ -236,7 +234,6 @@ export default {
     inviteSettings: 'Invite Settings',
     inviteLogs: 'Invite Logs',
     dashboard: 'Dashboard',
-    announcements: 'Announcements',
     apiKeys: 'API Keys',
     usage: 'Usage',
     redeem: 'Redeem',
@@ -249,6 +246,7 @@ export default {
     redeemCodes: 'Redeem Codes',
     ops: 'Ops',
     promoCodes: 'Promo Codes',
+    announcements: 'Announcements',
     settings: 'Settings',
     myAccount: 'My Account',
     lightMode: 'Light Mode',
@@ -261,6 +259,21 @@ export default {
     plans: 'Plans',
     buySubscription: 'Purchase Subscription',
     docs: 'Docs'
+  },
+
+  // Announcements
+  announcements: {
+    title: 'Announcements',
+    unread: 'unread',
+    read: 'Read',
+    readStatus: 'Read status',
+    markAllRead: 'Mark all as read',
+    markRead: 'Mark as read',
+    markReadHint: 'Click to mark as read',
+    markedAsRead: 'Marked as read',
+    allMarkedAsRead: 'All announcements marked as read',
+    empty: 'No announcements',
+    emptyDescription: 'You are all caught up.'
   },
 
   // Plans
@@ -627,7 +640,8 @@ export default {
     codeRedeemSuccess: 'Code redeemed successfully!',
     failedToRedeem: 'Failed to redeem code. Please check the code and try again.',
     subscriptionRefreshFailed: 'Redeemed successfully, but failed to refresh subscription status.',
-    pleaseEnterCode: 'Please enter a redeem code'
+    pleaseEnterCode: 'Please enter a redeem code',
+    notes: 'Notes'
   },
 
   // Profile
@@ -868,6 +882,12 @@ export default {
       failedToLoadApiKeys: 'Failed to load user API keys',
       emailRequired: 'Please enter email',
       concurrencyMin: 'Concurrency must be at least 1',
+      bulkConcurrency: 'Set All Concurrency',
+      bulkConcurrencyTitle: 'Set Concurrency for All Users',
+      bulkConcurrencyLabel: 'Concurrency limit',
+      bulkConcurrencyHint: 'This will update the concurrency limit for all users.',
+      bulkConcurrencySuccess: 'Updated {updated} users, skipped {skipped}.',
+      bulkConcurrencyFailed: 'Failed to update concurrency for all users',
       amountRequired: 'Please enter a valid amount',
       insufficientBalance: 'Insufficient balance',
       deleteConfirm: "Are you sure you want to delete '{email}'? This action cannot be undone.",
@@ -1012,6 +1032,72 @@ export default {
       logs: {
         title: 'Invite Logs',
         description: 'View invite system logs'
+      }
+    },
+
+    // Announcements
+    announcements: {
+      title: 'Announcements',
+      description: 'Manage user-facing announcements',
+      createAnnouncement: 'Create Announcement',
+      editAnnouncement: 'Edit Announcement',
+      deleteAnnouncement: 'Delete Announcement',
+      deleteConfirm: 'Are you sure you want to delete this announcement?',
+      searchAnnouncements: 'Search announcements...',
+      searchUsers: 'Search users...',
+      readStatus: 'Read Status',
+      eligible: 'Eligible',
+      unread: 'Unread',
+      readAt: 'Read At',
+      allStatus: 'All Status',
+      timeImmediate: 'Immediate',
+      timeNever: 'Never',
+      targetingSummaryAll: 'All users',
+      targetingSummaryCustom: '{groups} group(s)',
+      failedToLoad: 'Failed to load announcements',
+      failedToCreate: 'Failed to create announcement',
+      failedToUpdate: 'Failed to update announcement',
+      failedToDelete: 'Failed to delete announcement',
+      failedToLoadReadStatus: 'Failed to load read status',
+      statusLabels: {
+        draft: 'Draft',
+        active: 'Active',
+        archived: 'Archived'
+      },
+      columns: {
+        title: 'Title',
+        status: 'Status',
+        targeting: 'Targeting',
+        timeRange: 'Time Range',
+        createdAt: 'Created At',
+        actions: 'Actions'
+      },
+      form: {
+        title: 'Title',
+        content: 'Content',
+        status: 'Status',
+        startsAt: 'Starts At',
+        endsAt: 'Ends At',
+        startsAtHint: 'Leave empty to publish immediately',
+        endsAtHint: 'Leave empty for no expiration',
+        targetingMode: 'Targeting',
+        targetingAll: 'All Users',
+        targetingCustom: 'Custom Targeting',
+        addOrGroup: 'Add OR Group',
+        addAndCondition: 'Add AND Condition',
+        conditionType: 'Condition Type',
+        selectPackages: 'Select Packages',
+        operator: 'Operator',
+        balanceValue: 'Balance Value',
+        conditionSubscription: 'Subscription',
+        conditionBalance: 'Balance'
+      },
+      operators: {
+        gt: 'Greater than',
+        gte: 'Greater than or equal',
+        lt: 'Less than',
+        lte: 'Less than or equal',
+        eq: 'Equal to'
       }
     },
 
@@ -2066,73 +2152,6 @@ export default {
       }
     },
 
-    // Announcements
-    announcements: {
-      title: 'Announcements',
-      description: 'Create announcements and target by conditions',
-      createAnnouncement: 'Create Announcement',
-      editAnnouncement: 'Edit Announcement',
-      deleteAnnouncement: 'Delete Announcement',
-      searchAnnouncements: 'Search announcements...',
-      status: 'Status',
-      allStatus: 'All Status',
-      columns: {
-        title: 'Title',
-        status: 'Status',
-        targeting: 'Targeting',
-        timeRange: 'Schedule',
-        createdAt: 'Created At',
-        actions: 'Actions'
-      },
-      statusLabels: {
-        draft: 'Draft',
-        active: 'Active',
-        archived: 'Archived'
-      },
-      form: {
-        title: 'Title',
-        content: 'Content (Markdown supported)',
-        status: 'Status',
-        startsAt: 'Starts At',
-        endsAt: 'Ends At',
-        startsAtHint: 'Leave empty to start immediately',
-        endsAtHint: 'Leave empty to never expire',
-        targetingMode: 'Targeting',
-        targetingAll: 'All users',
-        targetingCustom: 'Custom rules',
-        addOrGroup: 'Add OR group',
-        addAndCondition: 'Add AND condition',
-        conditionType: 'Condition type',
-        conditionSubscription: 'Subscription',
-        conditionBalance: 'Balance',
-        operator: 'Operator',
-        balanceValue: 'Balance threshold',
-        selectPackages: 'Select packages'
-      },
-      operators: {
-        gt: '>',
-        gte: '≥',
-        lt: '<',
-        lte: '≤',
-        eq: '='
-      },
-      targetingSummaryAll: 'All users',
-      targetingSummaryCustom: 'Custom ({groups} groups)',
-      timeImmediate: 'Immediate',
-      timeNever: 'Never',
-      readStatus: 'Read Status',
-      eligible: 'Eligible',
-      readAt: 'Read at',
-      unread: 'Unread',
-      searchUsers: 'Search users...',
-      failedToLoad: 'Failed to load announcements',
-      failedToCreate: 'Failed to create announcement',
-      failedToUpdate: 'Failed to update announcement',
-      failedToDelete: 'Failed to delete announcement',
-      failedToLoadReadStatus: 'Failed to load read status',
-      deleteConfirm: 'Are you sure you want to delete this announcement? This action cannot be undone.'
-    },
-
     // Promo Codes
     promo: {
       title: 'Promo Code Management',
@@ -2604,12 +2623,20 @@ export default {
         table: {
           time: 'Time',
           kind: 'Kind',
+          user: 'User',
+          apiKey: 'API Key',
+          clientIp: 'Source IP',
           platform: 'Platform',
           model: 'Model',
           duration: 'Duration',
           status: 'Status',
           requestId: 'Request ID',
           actions: 'Actions'
+        },
+        filters: {
+          userIdPlaceholder: 'User ID',
+          apiKeyIdPlaceholder: 'API Key ID',
+          clientIpPlaceholder: 'Source IP'
         }
       },
       alertEvents: {
@@ -2905,7 +2932,7 @@ export default {
         ignoreNoAvailableAccounts: 'Ignore no available accounts errors',
         ignoreNoAvailableAccountsHint: 'When enabled, "No available accounts" errors will not be written to the error log (not recommended; usually a config issue).',
         ignoreInvalidApiKeyErrors: 'Ignore invalid API key errors',
-        ignoreInvalidApiKeyErrorsHint: 'When enabled, invalid or missing API key errors (INVALID_API_KEY, API_KEY_REQUIRED) will not be written to the error log.',
+        ignoreInvalidApiKeyErrorsHint: 'When enabled, invalid API key or inactive user errors will not be written to the error log.',
         autoRefresh: 'Auto Refresh',
         enableAutoRefresh: 'Enable auto refresh',
         enableAutoRefreshHint: 'Automatically refresh dashboard data at a fixed interval.',
@@ -3251,30 +3278,6 @@ export default {
     notConfiguredTitle: 'Purchase URL not configured',
     notConfiguredDesc:
       'The administrator enabled the entry but has not configured a purchase URL. Please contact admin.'
-  },
-
-  // Announcements Page
-  announcements: {
-    title: 'Announcements',
-    description: 'View system announcements',
-    unreadOnly: 'Show unread only',
-    markRead: 'Mark as read',
-    markAllRead: 'Mark all as read',
-    viewAll: 'View all announcements',
-    markedAsRead: 'Marked as read',
-    allMarkedAsRead: 'All announcements marked as read',
-    newCount: '{count} new announcement | {count} new announcements',
-    readAt: 'Read at',
-    read: 'Read',
-    unread: 'Unread',
-    startsAt: 'Starts at',
-    endsAt: 'Ends at',
-    empty: 'No announcements',
-    emptyUnread: 'No unread announcements',
-    total: 'announcements',
-    emptyDescription: 'There are no system announcements at this time',
-    readStatus: 'You have read this announcement',
-    markReadHint: 'Click "Mark as read" to mark this announcement'
   },
 
   // User Subscriptions Page

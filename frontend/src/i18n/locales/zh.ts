@@ -106,9 +106,7 @@ export default {
       port: '端口',
       password: '密码（可选）',
       database: '数据库',
-      passwordPlaceholder: '密码',
-      enableTls: '启用 TLS',
-      enableTlsHint: '连接 Redis 时使用 TLS（公共 CA 证书）'
+      passwordPlaceholder: '密码'
     },
     admin: {
       title: '管理员账户',
@@ -233,7 +231,6 @@ export default {
     inviteSettings: '邀请设置',
     inviteLogs: '邀请日志',
     dashboard: '仪表盘',
-    announcements: '公告',
     apiKeys: 'API 密钥',
     usage: '使用记录',
     redeem: '兑换',
@@ -246,6 +243,7 @@ export default {
     redeemCodes: '兑换码',
     ops: '运维监控',
     promoCodes: '优惠码',
+    announcements: '公告管理',
     settings: '系统设置',
     myAccount: '我的账户',
     lightMode: '浅色模式',
@@ -258,6 +256,21 @@ export default {
     plans: '套餐',
     buySubscription: '购买订阅',
     docs: '文档'
+  },
+
+  // Announcements
+  announcements: {
+    title: '公告',
+    unread: '未读',
+    read: '已读',
+    readStatus: '阅读状态',
+    markAllRead: '全部标记为已读',
+    markRead: '标记为已读',
+    markReadHint: '点击标记为已读',
+    markedAsRead: '已标记为已读',
+    allMarkedAsRead: '全部公告已标记为已读',
+    empty: '暂无公告',
+    emptyDescription: '已是最新状态。'
   },
 
   // Plans
@@ -623,7 +636,8 @@ export default {
     codeRedeemSuccess: '兑换成功！',
     failedToRedeem: '兑换失败，请检查兑换码后重试。',
     subscriptionRefreshFailed: '兑换成功，但订阅状态刷新失败。',
-    pleaseEnterCode: '请输入兑换码'
+    pleaseEnterCode: '请输入兑换码',
+    notes: '备注'
   },
 
   // Profile
@@ -852,6 +866,72 @@ export default {
       }
     },
 
+    // Announcements
+    announcements: {
+      title: '公告管理',
+      description: '管理站内公告',
+      createAnnouncement: '创建公告',
+      editAnnouncement: '编辑公告',
+      deleteAnnouncement: '删除公告',
+      deleteConfirm: '确定要删除这条公告吗？',
+      searchAnnouncements: '搜索公告...',
+      searchUsers: '搜索用户...',
+      readStatus: '阅读状态',
+      eligible: '可读',
+      unread: '未读',
+      readAt: '阅读时间',
+      allStatus: '全部状态',
+      timeImmediate: '立即发布',
+      timeNever: '永久有效',
+      targetingSummaryAll: '全部用户',
+      targetingSummaryCustom: '{groups} 个分组',
+      failedToLoad: '加载公告失败',
+      failedToCreate: '创建公告失败',
+      failedToUpdate: '更新公告失败',
+      failedToDelete: '删除公告失败',
+      failedToLoadReadStatus: '加载阅读状态失败',
+      statusLabels: {
+        draft: '草稿',
+        active: '已发布',
+        archived: '已归档'
+      },
+      columns: {
+        title: '标题',
+        status: '状态',
+        targeting: '投放对象',
+        timeRange: '时间范围',
+        createdAt: '创建时间',
+        actions: '操作'
+      },
+      form: {
+        title: '标题',
+        content: '内容',
+        status: '状态',
+        startsAt: '开始时间',
+        endsAt: '结束时间',
+        startsAtHint: '留空则立即发布',
+        endsAtHint: '留空则不过期',
+        targetingMode: '投放对象',
+        targetingAll: '全部用户',
+        targetingCustom: '自定义筛选',
+        addOrGroup: '添加 OR 组',
+        addAndCondition: '添加 AND 条件',
+        conditionType: '条件类型',
+        selectPackages: '选择套餐',
+        operator: '运算符',
+        balanceValue: '余额值',
+        conditionSubscription: '订阅',
+        conditionBalance: '余额'
+      },
+      operators: {
+        gt: '大于',
+        gte: '大于等于',
+        lt: '小于',
+        lte: '小于等于',
+        eq: '等于'
+      }
+    },
+
     // Users Management
     users: {
       title: '用户管理',
@@ -968,6 +1048,12 @@ export default {
       failedToAdjust: '调整失败',
       emailRequired: '请输入邮箱',
       concurrencyMin: '并发数不能小于1',
+      bulkConcurrency: '批量设置并发',
+      bulkConcurrencyTitle: '批量设置所有用户并发数',
+      bulkConcurrencyLabel: '并发数',
+      bulkConcurrencyHint: '将为所有用户设置相同的并发上限。',
+      bulkConcurrencySuccess: '已更新 {updated} 个用户，跳过 {skipped} 个。',
+      bulkConcurrencyFailed: '批量设置并发失败',
       amountRequired: '请输入有效金额',
       insufficientBalance: '余额不足',
       setAllowedGroups: '设置允许分组',
@@ -2214,73 +2300,6 @@ export default {
       failedToDelete: '删除兑换码失败'
     },
 
-    // Announcements
-    announcements: {
-      title: '公告管理',
-      description: '创建公告并按条件投放',
-      createAnnouncement: '创建公告',
-      editAnnouncement: '编辑公告',
-      deleteAnnouncement: '删除公告',
-      searchAnnouncements: '搜索公告...',
-      status: '状态',
-      allStatus: '全部状态',
-      columns: {
-        title: '标题',
-        status: '状态',
-        targeting: '展示条件',
-        timeRange: '有效期',
-        createdAt: '创建时间',
-        actions: '操作'
-      },
-      statusLabels: {
-        draft: '草稿',
-        active: '展示中',
-        archived: '已归档'
-      },
-      form: {
-        title: '标题',
-        content: '内容（支持 Markdown）',
-        status: '状态',
-        startsAt: '开始时间',
-        endsAt: '结束时间',
-        startsAtHint: '留空表示立即生效',
-        endsAtHint: '留空表示永久生效',
-        targetingMode: '展示条件',
-        targetingAll: '所有用户',
-        targetingCustom: '按条件',
-        addOrGroup: '添加 OR 条件组',
-        addAndCondition: '添加 AND 条件',
-        conditionType: '条件类型',
-        conditionSubscription: '订阅套餐',
-        conditionBalance: '余额',
-        operator: '运算符',
-        balanceValue: '余额阈值',
-        selectPackages: '选择套餐'
-      },
-      operators: {
-        gt: '>',
-        gte: '≥',
-        lt: '<',
-        lte: '≤',
-        eq: '='
-      },
-      targetingSummaryAll: '全部用户',
-      targetingSummaryCustom: '自定义（{groups} 组）',
-      timeImmediate: '立即',
-      timeNever: '永久',
-      readStatus: '已读情况',
-      eligible: '符合条件',
-      readAt: '已读时间',
-      unread: '未读',
-      searchUsers: '搜索用户...',
-      failedToLoad: '加载公告失败',
-      failedToCreate: '创建公告失败',
-      failedToUpdate: '更新公告失败',
-      failedToDelete: '删除公告失败',
-      failedToLoadReadStatus: '加载已读情况失败',
-      deleteConfirm: '确定要删除该公告吗？此操作无法撤销。'
-    },
-
     // Promo Codes
     promo: {
       title: '优惠码管理',
@@ -2758,12 +2777,20 @@ export default {
         table: {
           time: '时间',
           kind: '类型',
+          user: '用户',
+          apiKey: 'API Key',
+          clientIp: '来源IP',
           platform: '平台',
           model: '模型',
           duration: '耗时',
           status: '状态码',
           requestId: '请求ID',
           actions: '操作'
+        },
+        filters: {
+          userIdPlaceholder: '用户ID',
+          apiKeyIdPlaceholder: 'API Key ID',
+          clientIpPlaceholder: '来源IP'
         }
       },
       alertEvents: {
@@ -3057,9 +3084,9 @@ export default {
         ignoreContextCanceled: '忽略客户端断连错误',
         ignoreContextCanceledHint: '启用后，客户端主动断开连接（context canceled）的错误将不会写入错误日志。',
         ignoreNoAvailableAccounts: '忽略无可用账号错误',
-        ignoreNoAvailableAccountsHint: '启用后，"No available accounts" 错误将不会写入错误日志（不推荐，这通常是配置问题）。',
+        ignoreNoAvailableAccountsHint: '启用后，“No available accounts” 错误将不会写入错误日志（不推荐，这通常是配置问题）。',
         ignoreInvalidApiKeyErrors: '忽略无效 API Key 错误',
-        ignoreInvalidApiKeyErrorsHint: '启用后，无效或缺失 API Key 的错误（INVALID_API_KEY、API_KEY_REQUIRED）将不会写入错误日志。',
+        ignoreInvalidApiKeyErrorsHint: '启用后，无效 API Key 或用户停用相关错误将不会写入错误日志。',
         autoRefresh: '自动刷新',
         enableAutoRefresh: '启用自动刷新',
         enableAutoRefreshHint: '自动刷新仪表板数据，启用后会定期拉取最新数据。',
@@ -3401,30 +3428,6 @@ export default {
     notEnabledDesc: '管理员暂未开启购买订阅入口，请联系管理员。',
     notConfiguredTitle: '购买链接未配置',
     notConfiguredDesc: '管理员已开启入口，但尚未配置购买订阅链接，请联系管理员。'
-  },
-
-  // Announcements Page
-  announcements: {
-    title: '公告',
-    description: '查看系统公告',
-    unreadOnly: '仅显示未读',
-    markRead: '标记已读',
-    markAllRead: '全部已读',
-    viewAll: '查看全部公告',
-    markedAsRead: '已标记为已读',
-    allMarkedAsRead: '所有公告已标记为已读',
-    newCount: '有 {count} 条新公告',
-    readAt: '已读时间',
-    read: '已读',
-    unread: '未读',
-    startsAt: '开始时间',
-    endsAt: '结束时间',
-    empty: '暂无公告',
-    emptyUnread: '暂无未读公告',
-    total: '条公告',
-    emptyDescription: '暂时没有任何系统公告',
-    readStatus: '您已阅读此公告',
-    markReadHint: '点击"已读"标记此公告'
   },
 
   // User Subscriptions Page
