@@ -1132,6 +1132,10 @@ func (stubRedeemCodeRepo) ListWithFilters(ctx context.Context, params pagination
 	return nil, nil, errors.New("not implemented")
 }
 
+func (stubRedeemCodeRepo) GetStats(ctx context.Context) (*service.RedeemCodeStats, error) {
+	return &service.RedeemCodeStats{ByType: map[string]int{}}, nil
+}
+
 func (r *stubRedeemCodeRepo) ListByUser(ctx context.Context, userID int64, limit int) ([]service.RedeemCode, error) {
 	if r.byUser == nil {
 		return nil, nil
