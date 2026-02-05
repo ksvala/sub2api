@@ -316,6 +316,7 @@ func (s *AnnouncementService) ListUserReadStatus(
 	if err != nil {
 		return nil, nil, err
 	}
+	requiresSubscription := announcementTargetingRequiresSubscription(ann.Targeting)
 
 	filters := UserListFilters{
 		Search: strings.TrimSpace(search),
@@ -339,13 +340,16 @@ func (s *AnnouncementService) ListUserReadStatus(
 	out := make([]AnnouncementUserReadStatus, 0, len(users))
 	for i := range users {
 		u := users[i]
-		subs, err := s.userSubRepo.ListActiveByUserID(ctx, u.ID)
-		if err != nil {
-			return nil, nil, fmt.Errorf("list active subscriptions: %w", err)
-		}
-		activeGroupIDs := make(map[int64]struct{}, len(subs))
-		for j := range subs {
-			activeGroupIDs[subs[j].GroupID] = struct{}{}
+		activeGroupIDs := map[int64]struct{}{}
+		if requiresSubscription {
+			subs, err := s.userSubRepo.ListActiveByUserID(ctx, u.ID)
+			if err != nil {
+				return nil, nil, fmt.Errorf("list active subscriptions: %w", err)
+			}
+			activeGroupIDs = make(map[int64]struct{}, len(subs))
+			for j := range subs {
+				activeGroupIDs[subs[j].GroupID] = struct{}{}
+			}
 		}
 
 		readAt, ok := readMap[u.ID]
@@ -366,6 +370,17 @@ func (s *AnnouncementService) ListUserReadStatus(
 	}
 
 	return out, page, nil
+}
+
+func announcementTargetingRequiresSubscription(targeting AnnouncementTargeting) bool {
+	for _, group := range targeting.AnyOf {
+		for _, cond := range group.AllOf {
+			if strings.EqualFold(strings.TrimSpace(cond.Type), AnnouncementConditionTypeSubscription) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func isValidAnnouncementStatus(status string) bool {
