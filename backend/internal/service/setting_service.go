@@ -425,17 +425,7 @@ func (s *SettingService) SetInviteRewardAmount(ctx context.Context, amount float
 
 // InitializeDefaultSettings 初始化默认设置
 func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
-	// 检查是否已有设置
-	_, err := s.settingRepo.GetValue(ctx, SettingKeyRegistrationEnabled)
-	if err == nil {
-		// 已有设置，不需要初始化
-		return nil
-	}
-	if !errors.Is(err, ErrSettingNotFound) {
-		return fmt.Errorf("check existing settings: %w", err)
-	}
-
-	// 初始化默认设置
+	// 默认设置（用于首次初始化或补齐缺失项）
 	defaults := map[string]string{
 		SettingKeyRegistrationEnabled:         "true",
 		SettingKeyEmailVerifyEnabled:          "false",
@@ -470,6 +460,30 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyOpsMetricsIntervalSeconds:    "60",
 	}
 
+	// 检查是否已有设置
+	_, err := s.settingRepo.GetValue(ctx, SettingKeyRegistrationEnabled)
+	if err == nil {
+		// 已有设置，补齐缺失项
+		settings, err := s.settingRepo.GetAll(ctx)
+		if err != nil {
+			return fmt.Errorf("get settings: %w", err)
+		}
+		missing := make(map[string]string)
+		for key, value := range defaults {
+			if _, ok := settings[key]; !ok {
+				missing[key] = value
+			}
+		}
+		if len(missing) == 0 {
+			return nil
+		}
+		return s.settingRepo.SetMultiple(ctx, missing)
+	}
+	if !errors.Is(err, ErrSettingNotFound) {
+		return fmt.Errorf("check existing settings: %w", err)
+	}
+
+	// 初始化默认设置
 	return s.settingRepo.SetMultiple(ctx, defaults)
 }
 
