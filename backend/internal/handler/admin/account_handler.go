@@ -132,6 +132,13 @@ type BulkUpdateAccountsRequest struct {
 	ConfirmMixedChannelRisk *bool          `json:"confirm_mixed_channel_risk"` // 用户确认混合渠道风险
 }
 
+// BatchAddAccountGroupsRequest represents batch add account groups request
+type BatchAddAccountGroupsRequest struct {
+	AccountIDs              []int64 `json:"account_ids" binding:"required,min=1"`
+	GroupIDs                []int64 `json:"group_ids" binding:"required,min=1"`
+	ConfirmMixedChannelRisk *bool   `json:"confirm_mixed_channel_risk"` // 用户确认混合渠道风险
+}
+
 // AccountWithConcurrency extends Account with real-time concurrency info
 type AccountWithConcurrency struct {
 	*dto.Account
@@ -836,6 +843,39 @@ func (h *AccountHandler) BulkUpdate(c *gin.Context) {
 		GroupIDs:              req.GroupIDs,
 		Credentials:           req.Credentials,
 		Extra:                 req.Extra,
+		SkipMixedChannelCheck: skipCheck,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, result)
+}
+
+// BatchAddGroups handles batch adding groups to accounts without removing existing groups.
+// POST /api/v1/admin/accounts/batch-add-groups
+func (h *AccountHandler) BatchAddGroups(c *gin.Context) {
+	var req BatchAddAccountGroupsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	if len(req.AccountIDs) == 0 {
+		response.BadRequest(c, "account_ids is required")
+		return
+	}
+	if len(req.GroupIDs) == 0 {
+		response.BadRequest(c, "group_ids is required")
+		return
+	}
+
+	// 确定是否跳过混合渠道检查
+	skipCheck := req.ConfirmMixedChannelRisk != nil && *req.ConfirmMixedChannelRisk
+
+	result, err := h.adminService.BatchAddAccountGroups(c.Request.Context(), &service.BatchAddAccountGroupsInput{
+		AccountIDs:            req.AccountIDs,
+		GroupIDs:              req.GroupIDs,
 		SkipMixedChannelCheck: skipCheck,
 	})
 	if err != nil {

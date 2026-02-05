@@ -115,6 +115,10 @@ func (s *stubAdminService) UpdateUserBalance(ctx context.Context, userID int64, 
 	return &user, nil
 }
 
+func (s *stubAdminService) BulkUpdateUsersConcurrency(ctx context.Context, concurrency int) (*service.BulkUpdateUsersConcurrencyResult, error) {
+	return &service.BulkUpdateUsersConcurrencyResult{Total: len(s.users), Updated: len(s.users), Skipped: 0}, nil
+}
+
 func (s *stubAdminService) GetUserAPIKeys(ctx context.Context, userID int64, page, pageSize int) ([]service.APIKey, int64, error) {
 	return s.apiKeys, int64(len(s.apiKeys)), nil
 }
@@ -213,6 +217,10 @@ func (s *stubAdminService) BulkUpdateAccounts(ctx context.Context, input *servic
 	return &service.BulkUpdateAccountsResult{Success: 1, Failed: 0, SuccessIDs: []int64{1}}, nil
 }
 
+func (s *stubAdminService) BatchAddAccountGroups(ctx context.Context, input *service.BatchAddAccountGroupsInput) (*service.BulkUpdateAccountsResult, error) {
+	return &service.BulkUpdateAccountsResult{Success: 1, Failed: 0, SuccessIDs: []int64{1}}, nil
+}
+
 func (s *stubAdminService) ListProxies(ctx context.Context, page, pageSize int, protocol, status, search string) ([]service.Proxy, int64, error) {
 	return s.proxies, int64(len(s.proxies)), nil
 }
@@ -288,6 +296,12 @@ func (s *stubAdminService) BatchDeleteRedeemCodes(ctx context.Context, ids []int
 func (s *stubAdminService) ExpireRedeemCode(ctx context.Context, id int64) (*service.RedeemCode, error) {
 	code := service.RedeemCode{ID: id, Code: "R-TEST", Status: service.StatusUsed}
 	return &code, nil
+}
+
+func (s *stubAdminService) GetRedeemCodeStats(ctx context.Context) (*service.RedeemCodeStats, error) {
+	return &service.RedeemCodeStats{
+		ByType: map[string]int{},
+	}, nil
 }
 
 // Ensure stub implements interface.
