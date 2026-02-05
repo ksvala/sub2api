@@ -109,7 +109,9 @@ export default {
       port: 'Port',
       password: 'Password (optional)',
       database: 'Database',
-      passwordPlaceholder: 'Password'
+      passwordPlaceholder: 'Password',
+      enableTls: 'Enable TLS',
+      enableTlsHint: 'Use TLS when connecting to Redis (public CA certs)'
     },
     admin: {
       title: 'Admin Account',
@@ -234,6 +236,7 @@ export default {
     inviteSettings: 'Invite Settings',
     inviteLogs: 'Invite Logs',
     dashboard: 'Dashboard',
+    announcements: 'Announcements',
     apiKeys: 'API Keys',
     usage: 'Usage',
     redeem: 'Redeem',
@@ -2063,6 +2066,73 @@ export default {
       }
     },
 
+    // Announcements
+    announcements: {
+      title: 'Announcements',
+      description: 'Create announcements and target by conditions',
+      createAnnouncement: 'Create Announcement',
+      editAnnouncement: 'Edit Announcement',
+      deleteAnnouncement: 'Delete Announcement',
+      searchAnnouncements: 'Search announcements...',
+      status: 'Status',
+      allStatus: 'All Status',
+      columns: {
+        title: 'Title',
+        status: 'Status',
+        targeting: 'Targeting',
+        timeRange: 'Schedule',
+        createdAt: 'Created At',
+        actions: 'Actions'
+      },
+      statusLabels: {
+        draft: 'Draft',
+        active: 'Active',
+        archived: 'Archived'
+      },
+      form: {
+        title: 'Title',
+        content: 'Content (Markdown supported)',
+        status: 'Status',
+        startsAt: 'Starts At',
+        endsAt: 'Ends At',
+        startsAtHint: 'Leave empty to start immediately',
+        endsAtHint: 'Leave empty to never expire',
+        targetingMode: 'Targeting',
+        targetingAll: 'All users',
+        targetingCustom: 'Custom rules',
+        addOrGroup: 'Add OR group',
+        addAndCondition: 'Add AND condition',
+        conditionType: 'Condition type',
+        conditionSubscription: 'Subscription',
+        conditionBalance: 'Balance',
+        operator: 'Operator',
+        balanceValue: 'Balance threshold',
+        selectPackages: 'Select packages'
+      },
+      operators: {
+        gt: '>',
+        gte: '≥',
+        lt: '<',
+        lte: '≤',
+        eq: '='
+      },
+      targetingSummaryAll: 'All users',
+      targetingSummaryCustom: 'Custom ({groups} groups)',
+      timeImmediate: 'Immediate',
+      timeNever: 'Never',
+      readStatus: 'Read Status',
+      eligible: 'Eligible',
+      readAt: 'Read at',
+      unread: 'Unread',
+      searchUsers: 'Search users...',
+      failedToLoad: 'Failed to load announcements',
+      failedToCreate: 'Failed to create announcement',
+      failedToUpdate: 'Failed to update announcement',
+      failedToDelete: 'Failed to delete announcement',
+      failedToLoadReadStatus: 'Failed to load read status',
+      deleteConfirm: 'Are you sure you want to delete this announcement? This action cannot be undone.'
+    },
+
     // Promo Codes
     promo: {
       title: 'Promo Code Management',
@@ -2834,6 +2904,8 @@ export default {
         ignoreContextCanceledHint: 'When enabled, client disconnect (context canceled) errors will not be written to the error log.',
         ignoreNoAvailableAccounts: 'Ignore no available accounts errors',
         ignoreNoAvailableAccountsHint: 'When enabled, "No available accounts" errors will not be written to the error log (not recommended; usually a config issue).',
+        ignoreInvalidApiKeyErrors: 'Ignore invalid API key errors',
+        ignoreInvalidApiKeyErrorsHint: 'When enabled, invalid or missing API key errors (INVALID_API_KEY, API_KEY_REQUIRED) will not be written to the error log.',
         autoRefresh: 'Auto Refresh',
         enableAutoRefresh: 'Enable auto refresh',
         enableAutoRefreshHint: 'Automatically refresh dashboard data at a fixed interval.',
@@ -3179,6 +3251,30 @@ export default {
     notConfiguredTitle: 'Purchase URL not configured',
     notConfiguredDesc:
       'The administrator enabled the entry but has not configured a purchase URL. Please contact admin.'
+  },
+
+  // Announcements Page
+  announcements: {
+    title: 'Announcements',
+    description: 'View system announcements',
+    unreadOnly: 'Show unread only',
+    markRead: 'Mark as read',
+    markAllRead: 'Mark all as read',
+    viewAll: 'View all announcements',
+    markedAsRead: 'Marked as read',
+    allMarkedAsRead: 'All announcements marked as read',
+    newCount: '{count} new announcement | {count} new announcements',
+    readAt: 'Read at',
+    read: 'Read',
+    unread: 'Unread',
+    startsAt: 'Starts at',
+    endsAt: 'Ends at',
+    empty: 'No announcements',
+    emptyUnread: 'No unread announcements',
+    total: 'announcements',
+    emptyDescription: 'There are no system announcements at this time',
+    readStatus: 'You have read this announcement',
+    markReadHint: 'Click "Mark as read" to mark this announcement'
   },
 
   // User Subscriptions Page
