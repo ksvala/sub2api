@@ -20,6 +20,7 @@ type AdminService interface {
 	UpdateUser(ctx context.Context, id int64, input *UpdateUserInput) (*User, error)
 	DeleteUser(ctx context.Context, id int64) error
 	UpdateUserBalance(ctx context.Context, userID int64, balance float64, operation string, notes string) (*User, error)
+	BulkUpdateUsersConcurrency(ctx context.Context, concurrency int) (*BulkUpdateUsersConcurrencyResult, error)
 	GetUserAPIKeys(ctx context.Context, userID int64, page, pageSize int) ([]APIKey, int64, error)
 	GetUserUsageStats(ctx context.Context, userID int64, period string) (any, error)
 
@@ -45,6 +46,7 @@ type AdminService interface {
 	SetAccountError(ctx context.Context, id int64, errorMsg string) error
 	SetAccountSchedulable(ctx context.Context, id int64, schedulable bool) (*Account, error)
 	BulkUpdateAccounts(ctx context.Context, input *BulkUpdateAccountsInput) (*BulkUpdateAccountsResult, error)
+	BatchAddAccountGroups(ctx context.Context, input *BatchAddAccountGroupsInput) (*BulkUpdateAccountsResult, error)
 
 	// Proxy management
 	ListProxies(ctx context.Context, page, pageSize int, protocol, status, search string) ([]Proxy, int64, error)
@@ -67,6 +69,7 @@ type AdminService interface {
 	DeleteRedeemCode(ctx context.Context, id int64) error
 	BatchDeleteRedeemCodes(ctx context.Context, ids []int64) (int64, error)
 	ExpireRedeemCode(ctx context.Context, id int64) (*RedeemCode, error)
+	GetRedeemCodeStats(ctx context.Context) (*RedeemCodeStats, error)
 }
 
 // CreateUserInput represents input for creating a new user via admin operations.
@@ -89,6 +92,12 @@ type UpdateUserInput struct {
 	Concurrency   *int     // 使用指针区分"未提供"和"设置为0"
 	Status        string
 	AllowedGroups *[]int64 // 使用指针区分"未提供"和"设置为空数组"
+}
+
+type BulkUpdateUsersConcurrencyResult struct {
+	Total   int `json:"total"`
+	Updated int `json:"updated"`
+	Skipped int `json:"skipped"`
 }
 
 type CreateGroupInput struct {
@@ -202,6 +211,15 @@ type BulkUpdateAccountsResult struct {
 	SuccessIDs []int64                   `json:"success_ids"`
 	FailedIDs  []int64                   `json:"failed_ids"`
 	Results    []BulkUpdateAccountResult `json:"results"`
+}
+
+// BatchAddAccountGroupsInput describes the payload for adding groups to accounts.
+type BatchAddAccountGroupsInput struct {
+	AccountIDs []int64
+	GroupIDs   []int64
+	// SkipMixedChannelCheck skips the mixed channel risk check when binding groups.
+	// This should only be set when the caller has explicitly confirmed the risk.
+	SkipMixedChannelCheck bool
 }
 
 type CreateProxyInput struct {
@@ -508,6 +526,90 @@ func (s *adminServiceImpl) UpdateUserBalance(ctx context.Context, userID int64, 
 	}
 
 	return user, nil
+}
+
+func (s *adminServiceImpl) BulkUpdateUsersConcurrency(ctx context.Context, concurrency int) (*BulkUpdateUsersConcurrencyResult, error) {
+	if concurrency < 1 {
+		return nil, fmt.Errorf("concurrency must be at least 1")
+	}
+
+	page := 1
+	pageSize := 100
+	result := &BulkUpdateUsersConcurrencyResult{}
+	var redeemBatch []RedeemCode
+
+	flushRedeemBatch := func() {
+		if len(redeemBatch) == 0 {
+			return
+		}
+		if err := s.redeemCodeRepo.CreateBatch(ctx, redeemBatch); err != nil {
+			log.Printf("failed to create concurrency adjustment redeem codes: %v", err)
+		}
+		redeemBatch = redeemBatch[:0]
+	}
+
+	for {
+		params := pagination.PaginationParams{Page: page, PageSize: pageSize}
+		users, paginationResult, err := s.userRepo.ListWithFilters(ctx, params, UserListFilters{})
+		if err != nil {
+			return nil, err
+		}
+		if result.Total == 0 {
+			if paginationResult != nil {
+				result.Total = int(paginationResult.Total)
+			}
+		}
+		if len(users) == 0 {
+			break
+		}
+
+		for i := range users {
+			user := users[i]
+			if user.Concurrency == concurrency {
+				result.Skipped++
+				continue
+			}
+			oldConcurrency := user.Concurrency
+			user.Concurrency = concurrency
+			if err := s.userRepo.Update(ctx, &user); err != nil {
+				return nil, err
+			}
+			result.Updated++
+
+			if s.authCacheInvalidator != nil {
+				s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, user.ID)
+			}
+
+			diff := concurrency - oldConcurrency
+			if diff != 0 {
+				code, err := GenerateRedeemCode()
+				if err != nil {
+					log.Printf("failed to generate adjustment redeem code: %v", err)
+					continue
+				}
+				now := time.Now()
+				redeemBatch = append(redeemBatch, RedeemCode{
+					Code:   code,
+					Type:   AdjustmentTypeAdminConcurrency,
+					Value:  float64(diff),
+					Status: StatusUsed,
+					UsedBy: &user.ID,
+					UsedAt: &now,
+				})
+				if len(redeemBatch) >= 200 {
+					flushRedeemBatch()
+				}
+			}
+		}
+
+		if len(users) < pageSize {
+			break
+		}
+		page++
+	}
+
+	flushRedeemBatch()
+	return result, nil
 }
 
 func (s *adminServiceImpl) GetUserAPIKeys(ctx context.Context, userID int64, page, pageSize int) ([]APIKey, int64, error) {
@@ -1084,6 +1186,115 @@ func (s *adminServiceImpl) BulkUpdateAccounts(ctx context.Context, input *BulkUp
 	return result, nil
 }
 
+// BatchAddAccountGroups adds groups to accounts without removing existing bindings.
+func (s *adminServiceImpl) BatchAddAccountGroups(ctx context.Context, input *BatchAddAccountGroupsInput) (*BulkUpdateAccountsResult, error) {
+	result := &BulkUpdateAccountsResult{
+		SuccessIDs: make([]int64, 0, len(input.AccountIDs)),
+		FailedIDs:  make([]int64, 0, len(input.AccountIDs)),
+		Results:    make([]BulkUpdateAccountResult, 0, len(input.AccountIDs)),
+	}
+	if input == nil || len(input.AccountIDs) == 0 {
+		return result, nil
+	}
+
+	groupIDs := uniquePositiveIDs(input.GroupIDs)
+	if len(groupIDs) == 0 {
+		return nil, errors.New("group_ids is required")
+	}
+
+	accounts, err := s.accountRepo.GetByIDs(ctx, input.AccountIDs)
+	if err != nil {
+		return nil, err
+	}
+	accountByID := make(map[int64]*Account, len(accounts))
+	for _, account := range accounts {
+		if account != nil {
+			accountByID[account.ID] = account
+		}
+	}
+
+	for _, accountID := range input.AccountIDs {
+		entry := BulkUpdateAccountResult{AccountID: accountID}
+		account := accountByID[accountID]
+		if account == nil {
+			entry.Success = false
+			entry.Error = "account not found"
+			result.Failed++
+			result.FailedIDs = append(result.FailedIDs, accountID)
+			result.Results = append(result.Results, entry)
+			continue
+		}
+
+		existing := make(map[int64]struct{}, len(account.GroupIDs))
+		for _, id := range account.GroupIDs {
+			existing[id] = struct{}{}
+		}
+
+		merged := make([]int64, 0, len(account.GroupIDs)+len(groupIDs))
+		merged = append(merged, account.GroupIDs...)
+		for _, gid := range groupIDs {
+			if _, ok := existing[gid]; ok {
+				continue
+			}
+			merged = append(merged, gid)
+		}
+
+		if len(merged) == len(account.GroupIDs) {
+			entry.Success = true
+			result.Success++
+			result.SuccessIDs = append(result.SuccessIDs, accountID)
+			result.Results = append(result.Results, entry)
+			continue
+		}
+
+		if !input.SkipMixedChannelCheck {
+			if err := s.checkMixedChannelRisk(ctx, accountID, account.Platform, merged); err != nil {
+				entry.Success = false
+				entry.Error = err.Error()
+				result.Failed++
+				result.FailedIDs = append(result.FailedIDs, accountID)
+				result.Results = append(result.Results, entry)
+				continue
+			}
+		}
+
+		if err := s.accountRepo.BindGroups(ctx, accountID, merged); err != nil {
+			entry.Success = false
+			entry.Error = err.Error()
+			result.Failed++
+			result.FailedIDs = append(result.FailedIDs, accountID)
+			result.Results = append(result.Results, entry)
+			continue
+		}
+
+		entry.Success = true
+		result.Success++
+		result.SuccessIDs = append(result.SuccessIDs, accountID)
+		result.Results = append(result.Results, entry)
+	}
+
+	return result, nil
+}
+
+func uniquePositiveIDs(values []int64) []int64 {
+	if len(values) == 0 {
+		return nil
+	}
+	seen := make(map[int64]struct{}, len(values))
+	result := make([]int64, 0, len(values))
+	for _, v := range values {
+		if v <= 0 {
+			continue
+		}
+		if _, ok := seen[v]; ok {
+			continue
+		}
+		seen[v] = struct{}{}
+		result = append(result, v)
+	}
+	return result
+}
+
 func (s *adminServiceImpl) DeleteAccount(ctx context.Context, id int64) error {
 	return s.accountRepo.Delete(ctx, id)
 }
@@ -1346,6 +1557,13 @@ func (s *adminServiceImpl) ExpireRedeemCode(ctx context.Context, id int64) (*Red
 		return nil, err
 	}
 	return code, nil
+}
+
+func (s *adminServiceImpl) GetRedeemCodeStats(ctx context.Context) (*RedeemCodeStats, error) {
+	if s.redeemCodeRepo == nil {
+		return &RedeemCodeStats{ByType: map[string]int{}}, nil
+	}
+	return s.redeemCodeRepo.GetStats(ctx)
 }
 
 func (s *adminServiceImpl) TestProxy(ctx context.Context, id int64) (*ProxyTestResult, error) {

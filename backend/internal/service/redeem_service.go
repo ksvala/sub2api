@@ -45,6 +45,7 @@ type RedeemCodeRepository interface {
 	Update(ctx context.Context, code *RedeemCode) error
 	Delete(ctx context.Context, id int64) error
 	Use(ctx context.Context, id, userID int64) error
+	GetStats(ctx context.Context) (*RedeemCodeStats, error)
 
 	List(ctx context.Context, params pagination.PaginationParams) ([]RedeemCode, *pagination.PaginationResult, error)
 	ListWithFilters(ctx context.Context, params pagination.PaginationParams, codeType, status, search string) ([]RedeemCode, *pagination.PaginationResult, error)
@@ -65,6 +66,16 @@ type RedeemCodeResponse struct {
 	Value     float64   `json:"value"`
 	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type RedeemCodeStats struct {
+	TotalCodes            int            `json:"total_codes"`
+	ActiveCodes           int            `json:"active_codes"`
+	UsedCodes             int            `json:"used_codes"`
+	ExpiredCodes          int            `json:"expired_codes"`
+	TotalValue            float64        `json:"total_value"`
+	TotalValueDistributed float64        `json:"total_value_distributed"`
+	ByType                map[string]int `json:"by_type"`
 }
 
 // RedeemService 兑换码服务
@@ -341,6 +352,18 @@ func (s *RedeemService) invalidateRedeemCaches(ctx context.Context, userID int64
 			defer cancel()
 			_ = s.billingCacheService.InvalidateUserBalance(cacheCtx, userID)
 		}()
+	case AdjustmentTypeInviteReward:
+		if s.authCacheInvalidator != nil {
+			s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
+		}
+		if s.billingCacheService == nil {
+			return
+		}
+		go func() {
+			cacheCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			_ = s.billingCacheService.InvalidateUserBalance(cacheCtx, userID)
+		}()
 	case RedeemTypeConcurrency:
 		if s.authCacheInvalidator != nil {
 			s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
@@ -414,18 +437,14 @@ func (s *RedeemService) Delete(ctx context.Context, id int64) error {
 }
 
 // GetStats 获取兑换码统计信息
-func (s *RedeemService) GetStats(ctx context.Context) (map[string]any, error) {
-	// TODO: 实现统计逻辑
-	// 统计未使用、已使用的兑换码数量
-	// 统计总面值等
-
-	stats := map[string]any{
-		"total_codes":  0,
-		"unused_codes": 0,
-		"used_codes":   0,
-		"total_value":  0.0,
+func (s *RedeemService) GetStats(ctx context.Context) (*RedeemCodeStats, error) {
+	if s.redeemRepo == nil {
+		return &RedeemCodeStats{ByType: map[string]int{}}, nil
 	}
-
+	stats, err := s.redeemRepo.GetStats(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return stats, nil
 }
 
