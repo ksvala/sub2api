@@ -22,6 +22,10 @@ type Tx struct {
 	AccountGroup *AccountGroupClient
 	// AdminActionLog is the client for interacting with the AdminActionLog builders.
 	AdminActionLog *AdminActionLogClient
+	// Announcement is the client for interacting with the Announcement builders.
+	Announcement *AnnouncementClient
+	// AnnouncementRead is the client for interacting with the AnnouncementRead builders.
+	AnnouncementRead *AnnouncementReadClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// Invitation is the client for interacting with the Invitation builders.
@@ -189,6 +193,8 @@ func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.AccountGroup = NewAccountGroupClient(tx.config)
 	tx.AdminActionLog = NewAdminActionLogClient(tx.config)
+	tx.Announcement = NewAnnouncementClient(tx.config)
+	tx.AnnouncementRead = NewAnnouncementReadClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.Invitation = NewInvitationClient(tx.config)
 	tx.InviteLog = NewInviteLogClient(tx.config)
