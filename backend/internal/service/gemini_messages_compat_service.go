@@ -943,7 +943,7 @@ func (s *GeminiMessagesCompatService) Forward(ctx context.Context, c *gin.Contex
 	// 图片生成计费
 	imageCount := 0
 	imageSize := s.extractImageSize(body)
-	if isImageGenerationModel(originalModel) {
+	if isImageGenerationModel(mappedModel) {
 		imageCount = 1
 	}
 
@@ -951,6 +951,7 @@ func (s *GeminiMessagesCompatService) Forward(ctx context.Context, c *gin.Contex
 		RequestID:    requestID,
 		Usage:        *usage,
 		Model:        originalModel,
+		BillingModel: mappedModel,
 		Stream:       req.Stream,
 		Duration:     time.Since(startTime),
 		FirstTokenMs: firstTokenMs,
@@ -1170,6 +1171,7 @@ func (s *GeminiMessagesCompatService) ForwardNative(ctx context.Context, c *gin.
 					RequestID:    "",
 					Usage:        ClaudeUsage{},
 					Model:        originalModel,
+					BillingModel: originalModel,
 					Stream:       false,
 					Duration:     time.Since(startTime),
 					FirstTokenMs: nil,
@@ -1231,6 +1233,7 @@ func (s *GeminiMessagesCompatService) ForwardNative(ctx context.Context, c *gin.
 					RequestID:    "",
 					Usage:        ClaudeUsage{},
 					Model:        originalModel,
+					BillingModel: originalModel,
 					Stream:       false,
 					Duration:     time.Since(startTime),
 					FirstTokenMs: nil,
@@ -1276,6 +1279,7 @@ func (s *GeminiMessagesCompatService) ForwardNative(ctx context.Context, c *gin.
 				RequestID:    requestID,
 				Usage:        ClaudeUsage{},
 				Model:        originalModel,
+				BillingModel: originalModel,
 				Stream:       false,
 				Duration:     time.Since(startTime),
 				FirstTokenMs: nil,
@@ -1401,7 +1405,7 @@ func (s *GeminiMessagesCompatService) ForwardNative(ctx context.Context, c *gin.
 	// 图片生成计费
 	imageCount := 0
 	imageSize := s.extractImageSize(body)
-	if isImageGenerationModel(originalModel) {
+	if isImageGenerationModel(mappedModel) {
 		imageCount = 1
 	}
 
@@ -1409,6 +1413,7 @@ func (s *GeminiMessagesCompatService) ForwardNative(ctx context.Context, c *gin.
 		RequestID:    requestID,
 		Usage:        *usage,
 		Model:        originalModel,
+		BillingModel: mappedModel,
 		Stream:       stream,
 		Duration:     time.Since(startTime),
 		FirstTokenMs: firstTokenMs,

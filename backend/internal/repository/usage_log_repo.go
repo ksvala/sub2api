@@ -22,11 +22,25 @@ import (
 	"github.com/lib/pq"
 )
 
-const usageLogSelectColumns = "id, user_id, api_key_id, account_id, request_id, model, group_id, subscription_id, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens, cache_creation_5m_tokens, cache_creation_1h_tokens, input_cost, output_cost, cache_creation_cost, cache_read_cost, total_cost, actual_cost, rate_multiplier, account_rate_multiplier, billing_type, stream, duration_ms, first_token_ms, user_agent, ip_address, image_count, image_size, reasoning_effort, created_at"
+const usageLogSelectColumns = "id, user_id, api_key_id, account_id, request_id, model, provider, billing_model, price_version, price_source, group_id, subscription_id, input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens, cache_creation_5m_tokens, cache_creation_1h_tokens, input_cost, output_cost, cache_creation_cost, cache_read_cost, total_cost, actual_cost, rate_multiplier, account_rate_multiplier, billing_type, stream, duration_ms, first_token_ms, user_agent, ip_address, image_count, image_size, reasoning_effort, created_at"
 
 type usageLogRepository struct {
 	client *dbent.Client
 	sql    sqlExecutor
+}
+
+func wrapUsageLogSchemaError(err error) error {
+	if err == nil {
+		return nil
+	}
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) && string(pqErr.Code) == "42703" {
+		msg := strings.ToLower(strings.TrimSpace(pqErr.Message))
+		if strings.Contains(msg, "provider") || strings.Contains(msg, "billing_model") || strings.Contains(msg, "price_version") || strings.Contains(msg, "price_source") {
+			return fmt.Errorf("usage_logs schema is outdated (missing billing metadata columns); run latest migrations first: %w", err)
+		}
+	}
+	return err
 }
 
 func NewUsageLogRepository(client *dbent.Client, sqlDB *sql.DB) service.UsageLogRepository {
@@ -90,6 +104,10 @@ func (r *usageLogRepository) Create(ctx context.Context, log *service.UsageLog) 
 			account_id,
 			request_id,
 			model,
+			provider,
+			billing_model,
+			price_version,
+			price_source,
 			group_id,
 			subscription_id,
 			input_tokens,
@@ -118,11 +136,12 @@ func (r *usageLogRepository) Create(ctx context.Context, log *service.UsageLog) 
 				created_at
 			) VALUES (
 				$1, $2, $3, $4, $5,
-				$6, $7,
-				$8, $9, $10, $11,
-				$12, $13,
-				$14, $15, $16, $17, $18, $19,
-				$20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31
+				$6, $7, $8, $9,
+				$10, $11,
+				$12, $13, $14, $15,
+				$16, $17,
+				$18, $19, $20, $21, $22, $23,
+				$24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35
 			)
 			ON CONFLICT (request_id, api_key_id) DO NOTHING
 			RETURNING id, created_at
@@ -148,6 +167,10 @@ func (r *usageLogRepository) Create(ctx context.Context, log *service.UsageLog) 
 		log.AccountID,
 		requestIDArg,
 		log.Model,
+		log.Provider,
+		log.BillingModel,
+		log.PriceVersion,
+		log.PriceSource,
 		groupID,
 		subscriptionID,
 		log.InputTokens,
@@ -179,12 +202,12 @@ func (r *usageLogRepository) Create(ctx context.Context, log *service.UsageLog) 
 		if errors.Is(err, sql.ErrNoRows) && requestID != "" {
 			selectQuery := "SELECT id, created_at FROM usage_logs WHERE request_id = $1 AND api_key_id = $2"
 			if err := scanSingleRow(ctx, sqlq, selectQuery, []any{requestID, log.APIKeyID}, &log.ID, &log.CreatedAt); err != nil {
-				return false, err
+				return false, wrapUsageLogSchemaError(err)
 			}
 			log.RateMultiplier = rateMultiplier
 			return false, nil
 		} else {
-			return false, err
+			return false, wrapUsageLogSchemaError(err)
 		}
 	}
 	log.RateMultiplier = rateMultiplier
@@ -195,7 +218,7 @@ func (r *usageLogRepository) GetByID(ctx context.Context, id int64) (log *servic
 	query := "SELECT " + usageLogSelectColumns + " FROM usage_logs WHERE id = $1"
 	rows, err := r.sql.QueryContext(ctx, query, id)
 	if err != nil {
-		return nil, err
+		return nil, wrapUsageLogSchemaError(err)
 	}
 	defer func() {
 		// 保持主错误优先；仅在无错误时回传 Close 失败。
@@ -207,16 +230,16 @@ func (r *usageLogRepository) GetByID(ctx context.Context, id int64) (log *servic
 	}()
 	if !rows.Next() {
 		if err = rows.Err(); err != nil {
-			return nil, err
+			return nil, wrapUsageLogSchemaError(err)
 		}
 		return nil, service.ErrUsageLogNotFound
 	}
 	log, err = scanUsageLog(rows)
 	if err != nil {
-		return nil, err
+		return nil, wrapUsageLogSchemaError(err)
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, wrapUsageLogSchemaError(err)
 	}
 	return log, nil
 }
@@ -1572,7 +1595,7 @@ func (r *usageLogRepository) GetUsageTrendWithFilters(ctx context.Context, start
 
 	rows, err := r.sql.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, wrapUsageLogSchemaError(err)
 	}
 	defer func() {
 		// 保持主错误优先；仅在无错误时回传 Close 失败。
@@ -1995,12 +2018,12 @@ func (r *usageLogRepository) queryUsageLogs(ctx context.Context, query string, a
 		var log *service.UsageLog
 		log, err = scanUsageLog(rows)
 		if err != nil {
-			return nil, err
+			return nil, wrapUsageLogSchemaError(err)
 		}
 		logs = append(logs, *log)
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, wrapUsageLogSchemaError(err)
 	}
 	return logs, nil
 }
@@ -2178,6 +2201,10 @@ func scanUsageLog(scanner interface{ Scan(...any) error }) (*service.UsageLog, e
 		accountID             int64
 		requestID             sql.NullString
 		model                 string
+		provider              sql.NullString
+		billingModel          sql.NullString
+		priceVersion          sql.NullString
+		priceSource           sql.NullString
 		groupID               sql.NullInt64
 		subscriptionID        sql.NullInt64
 		inputTokens           int
@@ -2213,6 +2240,10 @@ func scanUsageLog(scanner interface{ Scan(...any) error }) (*service.UsageLog, e
 		&accountID,
 		&requestID,
 		&model,
+		&provider,
+		&billingModel,
+		&priceVersion,
+		&priceSource,
 		&groupID,
 		&subscriptionID,
 		&inputTokens,
@@ -2249,6 +2280,10 @@ func scanUsageLog(scanner interface{ Scan(...any) error }) (*service.UsageLog, e
 		APIKeyID:              apiKeyID,
 		AccountID:             accountID,
 		Model:                 model,
+		Provider:              provider.String,
+		BillingModel:          billingModel.String,
+		PriceVersion:          priceVersion.String,
+		PriceSource:           priceSource.String,
 		InputTokens:           inputTokens,
 		OutputTokens:          outputTokens,
 		CacheCreationTokens:   cacheCreationTokens,

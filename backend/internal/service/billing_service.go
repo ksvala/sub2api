@@ -34,6 +34,8 @@ type ModelPricing struct {
 	CacheCreation5mPrice       float64 // 5分钟缓存创建价格（每百万token）- 仅用于硬编码回退
 	CacheCreation1hPrice       float64 // 1小时缓存创建价格（每百万token）- 仅用于硬编码回退
 	SupportsCacheBreakdown     bool    // 是否支持详细的缓存分类
+	PriceVersion               string  // 价格快照版本（通常为价格文件哈希）
+	PriceSource                string  // dynamic/fallback
 }
 
 // UsageTokens 使用的token数量
@@ -54,6 +56,8 @@ type CostBreakdown struct {
 	CacheReadCost     float64
 	TotalCost         float64
 	ActualCost        float64 // 应用倍率后的实际费用
+	PriceVersion      string
+	PriceSource       string
 }
 
 // BillingService 计费服务
@@ -172,12 +176,18 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 	if s.pricingService != nil {
 		litellmPricing := s.pricingService.GetModelPricing(model)
 		if litellmPricing != nil {
+			priceVersion := s.pricingService.CurrentVersion()
+			if strings.TrimSpace(priceVersion) == "" {
+				priceVersion = "pricing:unknown"
+			}
 			return &ModelPricing{
 				InputPricePerToken:         litellmPricing.InputCostPerToken,
 				OutputPricePerToken:        litellmPricing.OutputCostPerToken,
 				CacheCreationPricePerToken: litellmPricing.CacheCreationInputTokenCost,
 				CacheReadPricePerToken:     litellmPricing.CacheReadInputTokenCost,
 				SupportsCacheBreakdown:     false,
+				PriceVersion:               priceVersion,
+				PriceSource:                "dynamic",
 			}, nil
 		}
 	}
@@ -186,6 +196,8 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 	fallback := s.getFallbackPricing(model)
 	if fallback != nil {
 		log.Printf("[Billing] Using fallback pricing for model: %s", model)
+		fallback.PriceVersion = "pricing:fallback"
+		fallback.PriceSource = "fallback"
 		return fallback, nil
 	}
 
@@ -200,6 +212,8 @@ func (s *BillingService) CalculateCost(model string, tokens UsageTokens, rateMul
 	}
 
 	breakdown := &CostBreakdown{}
+	breakdown.PriceVersion = pricing.PriceVersion
+	breakdown.PriceSource = pricing.PriceSource
 
 	// 计算输入token费用（使用per-token价格）
 	breakdown.InputCost = float64(tokens.InputTokens) * pricing.InputPricePerToken
@@ -358,6 +372,16 @@ func (s *BillingService) GetPricingServiceStatus() map[string]any {
 	}
 }
 
+func (s *BillingService) CurrentPriceVersion() string {
+	if s.pricingService != nil {
+		version := strings.TrimSpace(s.pricingService.CurrentVersion())
+		if version != "" {
+			return version
+		}
+	}
+	return "pricing:fallback"
+}
+
 // ForceUpdatePricing 强制更新价格数据
 func (s *BillingService) ForceUpdatePricing() error {
 	if s.pricingService != nil {
@@ -385,7 +409,7 @@ func (s *BillingService) CalculateImageCost(model string, imageSize string, imag
 	}
 
 	// 获取单价
-	unitPrice := s.getImageUnitPrice(model, imageSize, groupConfig)
+	unitPrice, priceSource, priceVersion := s.getImageUnitPrice(model, imageSize, groupConfig)
 
 	// 计算总费用
 	totalCost := unitPrice * float64(imageCount)
@@ -395,29 +419,35 @@ func (s *BillingService) CalculateImageCost(model string, imageSize string, imag
 		rateMultiplier = 1.0
 	}
 	actualCost := totalCost * rateMultiplier
+	if strings.TrimSpace(priceVersion) == "" {
+		priceVersion = "pricing:image-unknown"
+	}
 
 	return &CostBreakdown{
-		TotalCost:  totalCost,
-		ActualCost: actualCost,
+		TotalCost:    totalCost,
+		ActualCost:   actualCost,
+		PriceVersion: priceVersion,
+		PriceSource:  priceSource,
 	}
 }
 
 // getImageUnitPrice 获取图片单价
-func (s *BillingService) getImageUnitPrice(model string, imageSize string, groupConfig *ImagePriceConfig) float64 {
+func (s *BillingService) getImageUnitPrice(model string, imageSize string, groupConfig *ImagePriceConfig) (unitPrice float64, priceSource string, priceVersion string) {
 	// 优先使用分组配置的价格
 	if groupConfig != nil {
+		groupPriceVersion := buildGroupImagePriceVersion(groupConfig, imageSize)
 		switch imageSize {
 		case "1K":
 			if groupConfig.Price1K != nil {
-				return *groupConfig.Price1K
+				return *groupConfig.Price1K, "group_image_price", groupPriceVersion
 			}
 		case "2K":
 			if groupConfig.Price2K != nil {
-				return *groupConfig.Price2K
+				return *groupConfig.Price2K, "group_image_price", groupPriceVersion
 			}
 		case "4K":
 			if groupConfig.Price4K != nil {
-				return *groupConfig.Price4K
+				return *groupConfig.Price4K, "group_image_price", groupPriceVersion
 			}
 		}
 	}
@@ -427,14 +457,21 @@ func (s *BillingService) getImageUnitPrice(model string, imageSize string, group
 }
 
 // getDefaultImagePrice 获取 LiteLLM 默认图片价格
-func (s *BillingService) getDefaultImagePrice(model string, imageSize string) float64 {
+func (s *BillingService) getDefaultImagePrice(model string, imageSize string) (unitPrice float64, priceSource string, priceVersion string) {
 	basePrice := 0.0
+	priceSource = "image_fallback"
+	priceVersion = "pricing:image-hardcoded"
 
 	// 从 PricingService 获取 output_cost_per_image
 	if s.pricingService != nil {
 		pricing := s.pricingService.GetModelPricing(model)
 		if pricing != nil && pricing.OutputCostPerImage > 0 {
 			basePrice = pricing.OutputCostPerImage
+			priceSource = "model_pricing"
+			priceVersion = s.CurrentPriceVersion()
+			if strings.TrimSpace(priceVersion) == "" {
+				priceVersion = "pricing:unknown"
+			}
 		}
 	}
 
@@ -445,8 +482,24 @@ func (s *BillingService) getDefaultImagePrice(model string, imageSize string) fl
 
 	// 4K 尺寸翻倍
 	if imageSize == "4K" {
-		return basePrice * 2
+		return basePrice * 2, priceSource, priceVersion
 	}
 
-	return basePrice
+	return basePrice, priceSource, priceVersion
+}
+
+func buildGroupImagePriceVersion(groupConfig *ImagePriceConfig, imageSize string) string {
+	formatPrice := func(v *float64) string {
+		if v == nil {
+			return "nil"
+		}
+		return fmt.Sprintf("%.6f", *v)
+	}
+	return fmt.Sprintf(
+		"pricing:group-image:size=%s;1k=%s;2k=%s;4k=%s",
+		strings.ToLower(strings.TrimSpace(imageSize)),
+		formatPrice(groupConfig.Price1K),
+		formatPrice(groupConfig.Price2K),
+		formatPrice(groupConfig.Price4K),
+	)
 }

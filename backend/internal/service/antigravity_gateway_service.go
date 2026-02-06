@@ -1148,7 +1148,8 @@ func (s *AntigravityGatewayService) Forward(ctx context.Context, c *gin.Context,
 	return &ForwardResult{
 		RequestID:    requestID,
 		Usage:        *usage,
-		Model:        billingModel, // 计费模型（可按映射模型覆盖）
+		Model:        originalModel,
+		BillingModel: billingModel,
 		Stream:       claudeReq.Stream,
 		Duration:     time.Since(startTime),
 		FirstTokenMs: firstTokenMs,
@@ -1535,7 +1536,8 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 		_, _ = c.Writer.Write(respBody)
 
 		return &ForwardResult{
-			Model: billingModel,
+			Model:        originalModel,
+			BillingModel: billingModel,
 		}, nil
 	}
 
@@ -1572,7 +1574,8 @@ func (s *AntigravityGatewayService) ForwardUpstream(ctx context.Context, c *gin.
 	log.Printf("%s status=success duration_ms=%d", prefix, duration.Milliseconds())
 
 	return &ForwardResult{
-		Model:        billingModel,
+		Model:        originalModel,
+		BillingModel: billingModel,
 		Stream:       claudeReq.Stream,
 		Duration:     duration,
 		FirstTokenMs: firstTokenMs,
@@ -1690,6 +1693,7 @@ func (s *AntigravityGatewayService) ForwardGemini(ctx context.Context, c *gin.Co
 			RequestID:    "",
 			Usage:        ClaudeUsage{},
 			Model:        originalModel,
+			BillingModel: originalModel,
 			Stream:       false,
 			Duration:     time.Since(time.Now()),
 			FirstTokenMs: nil,
@@ -1918,7 +1922,8 @@ handleSuccess:
 	return &ForwardResult{
 		RequestID:    requestID,
 		Usage:        *usage,
-		Model:        billingModel,
+		Model:        originalModel,
+		BillingModel: billingModel,
 		Stream:       stream,
 		Duration:     time.Since(startTime),
 		FirstTokenMs: firstTokenMs,

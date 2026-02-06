@@ -156,9 +156,10 @@ type OpenAIUsage struct {
 
 // OpenAIForwardResult represents the result of forwarding
 type OpenAIForwardResult struct {
-	RequestID string
-	Usage     OpenAIUsage
-	Model     string
+	RequestID    string
+	Usage        OpenAIUsage
+	Model        string // 用户请求模型
+	BillingModel string // 计费模型
 	// ReasoningEffort is extracted from request body (reasoning.effort) or derived from model suffix.
 	// Stored for usage records display; nil means not provided / not applicable.
 	ReasoningEffort *string
@@ -975,6 +976,7 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 		RequestID:       resp.Header.Get("x-request-id"),
 		Usage:           *usage,
 		Model:           originalModel,
+		BillingModel:    mappedModel,
 		ReasoningEffort: reasoningEffort,
 		Stream:          reqStream,
 		Duration:        time.Since(startTime),
@@ -1722,9 +1724,20 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		multiplier = apiKey.Group.RateMultiplier
 	}
 
-	cost, err := s.billingService.CalculateCost(result.Model, tokens, multiplier)
+	billingModel := strings.TrimSpace(result.BillingModel)
+	if billingModel == "" {
+		billingModel = strings.TrimSpace(result.Model)
+	}
+
+	cost, err := s.billingService.CalculateCost(billingModel, tokens, multiplier)
 	if err != nil {
-		cost = &CostBreakdown{ActualCost: 0}
+		cost = &CostBreakdown{ActualCost: 0, PriceVersion: s.billingService.CurrentPriceVersion(), PriceSource: "fallback"}
+	}
+	if strings.TrimSpace(cost.PriceVersion) == "" {
+		cost.PriceVersion = s.billingService.CurrentPriceVersion()
+	}
+	if strings.TrimSpace(cost.PriceSource) == "" {
+		cost.PriceSource = "fallback"
 	}
 
 	// Determine billing type
@@ -1743,6 +1756,10 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		AccountID:             account.ID,
 		RequestID:             result.RequestID,
 		Model:                 result.Model,
+		Provider:              account.Platform,
+		BillingModel:          billingModel,
+		PriceVersion:          cost.PriceVersion,
+		PriceSource:           cost.PriceSource,
 		ReasoningEffort:       result.ReasoningEffort,
 		InputTokens:           actualInputTokens,
 		OutputTokens:          result.Usage.OutputTokens,

@@ -733,6 +733,12 @@ func (s *PricingService) ForceUpdate() error {
 	return s.downloadPricingData()
 }
 
+func (s *PricingService) CurrentVersion() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return strings.TrimSpace(s.localHash)
+}
+
 // getPricingFilePath 获取价格文件路径
 func (s *PricingService) getPricingFilePath() string {
 	return filepath.Join(s.cfg.Pricing.DataDir, "model_pricing.json")

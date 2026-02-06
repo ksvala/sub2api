@@ -245,6 +245,7 @@ func (s *OpenAIGatewayService) ForwardChatCompletions(ctx context.Context, c *gi
 		RequestID:    resp.Header.Get("x-request-id"),
 		Usage:        *usage,
 		Model:        originalModel,
+		BillingModel: mappedModel,
 		Stream:       reqStream,
 		Duration:     time.Since(startTime),
 		FirstTokenMs: firstTokenMs,

@@ -14,6 +14,15 @@ type UsageLog struct {
 	AccountID int64
 	RequestID string
 	Model     string
+
+	// Provider is the upstream platform actually used for this request.
+	Provider string
+	// BillingModel is the canonical model used for pricing lookup/calculation.
+	BillingModel string
+	// PriceVersion is the pricing snapshot version/hash used when billing this request.
+	PriceVersion string
+	// PriceSource marks where pricing data came from (e.g. model_pricing/group_image_price/fallback).
+	PriceSource string
 	// ReasoningEffort is the request's reasoning effort level (OpenAI Responses API),
 	// e.g. "low" / "medium" / "high" / "xhigh". Nil means not provided / not applicable.
 	ReasoningEffort *string

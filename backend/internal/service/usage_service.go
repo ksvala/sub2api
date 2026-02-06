@@ -23,6 +23,10 @@ type CreateUsageLogRequest struct {
 	AccountID             int64   `json:"account_id"`
 	RequestID             string  `json:"request_id"`
 	Model                 string  `json:"model"`
+	Provider              string  `json:"provider"`
+	BillingModel          string  `json:"billing_model"`
+	PriceVersion          string  `json:"price_version"`
+	PriceSource           string  `json:"price_source"`
 	InputTokens           int     `json:"input_tokens"`
 	OutputTokens          int     `json:"output_tokens"`
 	CacheCreationTokens   int     `json:"cache_creation_tokens"`
@@ -97,6 +101,10 @@ func (s *UsageService) Create(ctx context.Context, req CreateUsageLogRequest) (*
 		AccountID:             req.AccountID,
 		RequestID:             req.RequestID,
 		Model:                 req.Model,
+		Provider:              req.Provider,
+		BillingModel:          req.BillingModel,
+		PriceVersion:          req.PriceVersion,
+		PriceSource:           req.PriceSource,
 		InputTokens:           req.InputTokens,
 		OutputTokens:          req.OutputTokens,
 		CacheCreationTokens:   req.CacheCreationTokens,

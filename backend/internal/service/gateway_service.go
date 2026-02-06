@@ -357,7 +357,8 @@ type ClaudeUsage struct {
 type ForwardResult struct {
 	RequestID        string
 	Usage            ClaudeUsage
-	Model            string
+	Model            string // 用户请求模型（展示/筛选）
+	BillingModel     string // 计费模型（用于价格匹配与扣费）
 	Stream           bool
 	Duration         time.Duration
 	FirstTokenMs     *int // 首字时间（流式请求）
@@ -3393,7 +3394,8 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 	return &ForwardResult{
 		RequestID:        resp.Header.Get("x-request-id"),
 		Usage:            *usage,
-		Model:            originalModel, // 使用原始模型用于计费和日志
+		Model:            originalModel,
+		BillingModel:     reqModel,
 		Stream:           reqStream,
 		Duration:         time.Since(startTime),
 		FirstTokenMs:     firstTokenMs,
@@ -4631,6 +4633,10 @@ func (s *GatewayService) RecordUsage(ctx context.Context, input *RecordUsageInpu
 	}
 
 	var cost *CostBreakdown
+	billingModel := strings.TrimSpace(result.BillingModel)
+	if billingModel == "" {
+		billingModel = strings.TrimSpace(result.Model)
+	}
 
 	// 根据请求类型选择计费方式
 	if result.ImageCount > 0 {
@@ -4643,7 +4649,7 @@ func (s *GatewayService) RecordUsage(ctx context.Context, input *RecordUsageInpu
 				Price4K: apiKey.Group.ImagePrice4K,
 			}
 		}
-		cost = s.billingService.CalculateImageCost(result.Model, result.ImageSize, result.ImageCount, groupConfig, multiplier)
+		cost = s.billingService.CalculateImageCost(billingModel, result.ImageSize, result.ImageCount, groupConfig, multiplier)
 	} else {
 		// Token 计费
 		tokens := UsageTokens{
@@ -4653,11 +4659,17 @@ func (s *GatewayService) RecordUsage(ctx context.Context, input *RecordUsageInpu
 			CacheReadTokens:     result.Usage.CacheReadInputTokens,
 		}
 		var err error
-		cost, err = s.billingService.CalculateCost(result.Model, tokens, multiplier)
+		cost, err = s.billingService.CalculateCost(billingModel, tokens, multiplier)
 		if err != nil {
 			log.Printf("Calculate cost failed: %v", err)
-			cost = &CostBreakdown{ActualCost: 0}
+			cost = &CostBreakdown{ActualCost: 0, PriceVersion: s.billingService.CurrentPriceVersion(), PriceSource: "fallback"}
 		}
+	}
+	if strings.TrimSpace(cost.PriceVersion) == "" {
+		cost.PriceVersion = s.billingService.CurrentPriceVersion()
+	}
+	if strings.TrimSpace(cost.PriceSource) == "" {
+		cost.PriceSource = "fallback"
 	}
 
 	// 判断计费方式：订阅模式 vs 余额模式
@@ -4680,6 +4692,10 @@ func (s *GatewayService) RecordUsage(ctx context.Context, input *RecordUsageInpu
 		AccountID:             account.ID,
 		RequestID:             result.RequestID,
 		Model:                 result.Model,
+		Provider:              account.Platform,
+		BillingModel:          billingModel,
+		PriceVersion:          cost.PriceVersion,
+		PriceSource:           cost.PriceSource,
 		InputTokens:           result.Usage.InputTokens,
 		OutputTokens:          result.Usage.OutputTokens,
 		CacheCreationTokens:   result.Usage.CacheCreationInputTokens,
@@ -4802,6 +4818,10 @@ func (s *GatewayService) RecordUsageWithLongContext(ctx context.Context, input *
 	}
 
 	var cost *CostBreakdown
+	billingModel := strings.TrimSpace(result.BillingModel)
+	if billingModel == "" {
+		billingModel = strings.TrimSpace(result.Model)
+	}
 
 	// 根据请求类型选择计费方式
 	if result.ImageCount > 0 {
@@ -4814,7 +4834,7 @@ func (s *GatewayService) RecordUsageWithLongContext(ctx context.Context, input *
 				Price4K: apiKey.Group.ImagePrice4K,
 			}
 		}
-		cost = s.billingService.CalculateImageCost(result.Model, result.ImageSize, result.ImageCount, groupConfig, multiplier)
+		cost = s.billingService.CalculateImageCost(billingModel, result.ImageSize, result.ImageCount, groupConfig, multiplier)
 	} else {
 		// Token 计费（使用长上下文计费方法）
 		tokens := UsageTokens{
@@ -4824,11 +4844,17 @@ func (s *GatewayService) RecordUsageWithLongContext(ctx context.Context, input *
 			CacheReadTokens:     result.Usage.CacheReadInputTokens,
 		}
 		var err error
-		cost, err = s.billingService.CalculateCostWithLongContext(result.Model, tokens, multiplier, input.LongContextThreshold, input.LongContextMultiplier)
+		cost, err = s.billingService.CalculateCostWithLongContext(billingModel, tokens, multiplier, input.LongContextThreshold, input.LongContextMultiplier)
 		if err != nil {
 			log.Printf("Calculate cost failed: %v", err)
-			cost = &CostBreakdown{ActualCost: 0}
+			cost = &CostBreakdown{ActualCost: 0, PriceVersion: s.billingService.CurrentPriceVersion(), PriceSource: "fallback"}
 		}
+	}
+	if strings.TrimSpace(cost.PriceVersion) == "" {
+		cost.PriceVersion = s.billingService.CurrentPriceVersion()
+	}
+	if strings.TrimSpace(cost.PriceSource) == "" {
+		cost.PriceSource = "fallback"
 	}
 
 	// 判断计费方式：订阅模式 vs 余额模式
@@ -4851,6 +4877,10 @@ func (s *GatewayService) RecordUsageWithLongContext(ctx context.Context, input *
 		AccountID:             account.ID,
 		RequestID:             result.RequestID,
 		Model:                 result.Model,
+		Provider:              account.Platform,
+		BillingModel:          billingModel,
+		PriceVersion:          cost.PriceVersion,
+		PriceSource:           cost.PriceSource,
 		InputTokens:           result.Usage.InputTokens,
 		OutputTokens:          result.Usage.OutputTokens,
 		CacheCreationTokens:   result.Usage.CacheCreationInputTokens,
