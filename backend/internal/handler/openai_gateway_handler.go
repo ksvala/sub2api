@@ -432,7 +432,11 @@ func (h *OpenAIGatewayHandler) ChatCompletions(c *gin.Context) {
 				h.handleStreamingAwareError(c, http.StatusServiceUnavailable, "api_error", "No available accounts: "+err.Error(), streamStarted)
 				return
 			}
-			h.handleFailoverExhausted(c, lastFailoverStatus, streamStarted)
+			statusCode := lastFailoverStatus
+			if statusCode <= 0 {
+				statusCode = http.StatusBadGateway
+			}
+			h.handleFailoverExhaustedSimple(c, statusCode, streamStarted)
 			return
 		}
 		account := selection.Account
@@ -497,7 +501,7 @@ func (h *OpenAIGatewayHandler) ChatCompletions(c *gin.Context) {
 				failedAccountIDs[account.ID] = struct{}{}
 				if switchCount >= maxAccountSwitches {
 					lastFailoverStatus = failoverErr.StatusCode
-					h.handleFailoverExhausted(c, lastFailoverStatus, streamStarted)
+					h.handleFailoverExhausted(c, failoverErr, streamStarted)
 					return
 				}
 				lastFailoverStatus = failoverErr.StatusCode

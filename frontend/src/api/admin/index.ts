@@ -46,7 +46,6 @@ export const adminAPI = {
   userAttributes: userAttributesAPI,
   ops: opsAPI,
   invites: invitesAdminAPI,
-  invites: invitesAdminAPI,
   announcements: announcementsAPI,
   errorPassthrough: errorPassthroughAPI
 }
